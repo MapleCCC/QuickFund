@@ -4,9 +4,7 @@ from typing import Dict
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup as bs
-
-# TODO: remove BeautifulSoup dependency. Use solely lxml for parsing.
+from lxml import etree  # type: ignore
 
 
 API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
@@ -23,10 +21,9 @@ def get_info(code: str) -> Dict[str, str]:
         raise RuntimeError("Regex match fails")
     content = matchobj.group(1)
 
-    soup = bs(content, "lxml")
-    keys, values = soup.find_all("tr")
-    keys = [th.string for th in keys.find_all("th")]
-    values = [td.string for td in values.find_all("td")]
+    root = etree.XML(content)
+    keys = root.xpath("/table/thead/tr//th/text()")
+    values = root.xpath("/table/tbody/tr//td/text()")
 
     assert len(keys) == len(values)
 
