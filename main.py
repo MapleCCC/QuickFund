@@ -13,22 +13,22 @@ content_pattern = r"var apidata={ content:\"(.*)\""
 
 
 def get_info(code: str) -> Dict[str, str]:
-    response = requests.get(API + code)
-    response.encoding = "utf-8"
-    text = response.text
-    matchobj = re.match(content_pattern, text)
-    if not matchobj:
-        raise RuntimeError("Regex match fails")
-    content = matchobj.group(1)
+    try:
+        response = requests.get(API + code)
+        response.encoding = "utf-8"
+        text = response.text
+        content = re.match(content_pattern, text).group(1)
 
-    root = etree.XML(content)
-    keys = root.xpath("/table/thead/tr//th/text()")
-    tds = root.xpath("/table/tbody/tr//td")
-    values = [td.text for td in tds]
+        root = etree.XML(content)
+        keys = root.xpath("/table/thead/tr//th/text()")
+        tds = root.xpath("/table/tbody/tr//td")
+        values = [td.text for td in tds]
 
-    assert len(keys) == len(values)
+        assert len(keys) == len(values)
 
-    return dict(zip(keys, values))
+        return dict(zip(keys, values))
+    except:
+        raise RuntimeError(f"Error when attempting to get info of 基金代码: {code}")
 
 
 fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
