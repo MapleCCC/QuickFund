@@ -40,8 +40,8 @@ def main() -> None:
     with open("总结.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames, extrasaction="ignore")
 
+        writer.writeheader()
         for code in codes:
-            writer.writeheader()
             info = get_info(code)
             info["基金代码"] = code
             writer.writerow(info)
