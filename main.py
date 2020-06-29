@@ -23,7 +23,8 @@ def get_info(code: str) -> Dict[str, str]:
 
     root = etree.XML(content)
     keys = root.xpath("/table/thead/tr//th/text()")
-    values = root.xpath("/table/tbody/tr//td/text()")
+    tds = root.xpath("/table/tbody/tr//td")
+    values = [td.text for td in tds]
 
     assert len(keys) == len(values)
 
