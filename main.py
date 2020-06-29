@@ -1,12 +1,11 @@
-import re
 import csv
-from typing import Dict
+import re
 from pathlib import Path
+from typing import Dict
 
 import click
 import requests
 from lxml import etree  # type: ignore
-
 
 API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
 
@@ -45,10 +44,11 @@ def main(filename: str) -> None:
 
         writer.writeheader()
         for code in codes:
+            assert len(code) == 6
             info = get_info(code)
             info["基金代码"] = code
             writer.writerow(info)
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter
