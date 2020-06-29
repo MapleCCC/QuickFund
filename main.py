@@ -28,7 +28,7 @@ def get_info(code: str) -> Dict[str, str]:
 
         return dict(zip(keys, values))
     except:
-        raise RuntimeError(f"Error when attempting to get info of 基金代码: {code}")
+        raise RuntimeError(f"获取基金代码为{code}的基金相关信息时发生错误")
 
 
 fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
@@ -39,7 +39,7 @@ fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "�
 def main(filename: str) -> None:
     codes = Path(filename).read_text(encoding="utf-8").splitlines()
 
-    with open("总结.csv", "w", newline="", encoding="utf-8") as f:
+    with open("基金信息.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames, extrasaction="ignore")
 
         writer.writeheader()
