@@ -3,6 +3,7 @@ import csv
 from typing import Dict
 from pathlib import Path
 
+import click
 import requests
 from lxml import etree  # type: ignore
 
@@ -34,8 +35,10 @@ def get_info(code: str) -> Dict[str, str]:
 fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
 
 
-def main() -> None:
-    codes = Path("代码.txt").read_text(encoding="utf-8").splitlines()
+@click.command()
+@click.argument("filename")
+def main(filename: str) -> None:
+    codes = Path(filename).read_text(encoding="utf-8").splitlines()
 
     with open("总结.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames, extrasaction="ignore")
