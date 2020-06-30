@@ -1,4 +1,5 @@
 import csv
+import os
 import re
 from pathlib import Path
 from typing import Dict
@@ -42,6 +43,9 @@ fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "�
 def main(filename: str, output: str) -> None:
     in_filename = filename
     out_filename = output
+
+    if not os.path.exists(in_filename):
+        raise FileNotFoundError(f"文件{in_filename}不存在")
 
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
 
