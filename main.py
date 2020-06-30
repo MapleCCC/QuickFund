@@ -42,7 +42,7 @@ def write_to_xlsx(infos: Iterable[Dict[str, str]], xlsx_filename: str) -> None:
         header_format = workbook.add_format(
             {"bold": True, "align": "center", "valign": "top", "border": 1}
         )
-        date_format = workbook.add_format({"num_format": "yyyy-dd-mm"})
+        date_format = workbook.add_format({"num_format": "yyyy-mm-dd"})
 
         # Writer header
         print("写入文档头......")
