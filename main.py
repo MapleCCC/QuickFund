@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from enum import Enum, auto, unique
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Tuple
 
 import click
 import requests
@@ -18,6 +18,7 @@ net_value_api = (
 search_api = (
     "https://fundsuggest.eastmoney.com/FundSearch/api/FundSearchAPI.ashx?m=1&key="
 )
+fund_page_url = "http://fund.eastmoney.com/{code}.html"
 
 
 @unique
@@ -27,11 +28,13 @@ class ExcelCellDataType(Enum):
     number = auto()
 
 
-fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
+fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "净值估算日期", "净值估算", "日增长率", "分红送配"]
 fieldtypes = [
     ExcelCellDataType.string,
     ExcelCellDataType.string,
     ExcelCellDataType.date,
+    ExcelCellDataType.number,
+    ExcelCellDataType.string,
     ExcelCellDataType.number,
     ExcelCellDataType.string,
     ExcelCellDataType.string,
@@ -49,6 +52,15 @@ def get_name(code: str) -> str:
         raise RuntimeError(f"找到了不止一个基金的代码是 {code}")
 
     return candidates[0]["NAME"]
+
+
+def get_net_value_estimate(code: str) -> Tuple[str, str]:
+    response = requests.get(fund_page_url.format(code=code))
+    response.encoding = "utf-8-sig"
+    html = etree.HTML(response.text)
+    estimate_timestamp = html.xpath('//span[@id="gz_gztime"]/text()')[0]
+    estimate = html.xpath('//span[@id="gz_gsz"]/text()')[0]
+    return estimate_timestamp, estimate
 
 
 def get_info(code: str) -> Dict[str, str]:
@@ -74,6 +86,7 @@ def get_info(code: str) -> Dict[str, str]:
         info = dict(zip(keys, values))
         info["基金代码"] = code
         info["基金名称"] = get_name(code)
+        info["净值估算日期"], info["净值估算"] = get_net_value_estimate(code)
 
         return info
 
