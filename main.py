@@ -9,6 +9,7 @@ import click
 import requests
 import xlsxwriter
 from lxml import etree  # type: ignore
+from more_itertools import replace
 
 API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
 
@@ -45,6 +46,7 @@ def get_info(code: str) -> Dict[str, str]:
         # values. The XPath expression will omit empty text, causing erroneous result
         tds = root.xpath("/table/tbody/tr//td")
         values = [td.text for td in tds]
+        values = list(replace(values, lambda x: x == None, [""]))
 
         if len(keys) != len(values):
             raise RuntimeError("解析基金信息时键值对不匹配")
