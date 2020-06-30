@@ -6,7 +6,7 @@ all:
 	pyinstaller ${PYINSTALLER_FLAGS} main.py
 
 release:
-	./release.py
+	scripts/release.py
 
 format:
 	autopep8 --in-place --recursive --aggressive --aggressive --select E501 .
