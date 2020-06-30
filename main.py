@@ -27,11 +27,11 @@ def get_info(code: str) -> Dict[str, str]:
         values = [td.text for td in tds]
 
         if len(keys) != len(values):
-            raise RuntimeError()
+            raise RuntimeError("解析基金信息时键值对不匹配")
 
         return dict(zip(keys, values))
-    except:
-        raise RuntimeError(f"获取基金代码为{code}的基金相关信息时发生错误")
+    except Exception as exc:
+        raise RuntimeError(f"获取基金代码为{code}的基金相关信息时发生错误") from exc
 
 
 fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
