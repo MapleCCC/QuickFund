@@ -28,7 +28,7 @@ class ExcelCellDataType(Enum):
     number = auto()
 
 
-fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "估算日期", "估算值", "估算增长率", "日增长率", "分红送配"]
+fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "估算日期", "实时估算值", "估算增长率", "日增长率", "分红送配"]
 fieldtypes = [
     ExcelCellDataType.string,
     ExcelCellDataType.string,
@@ -94,7 +94,7 @@ def get_info(code: str) -> Dict[str, str]:
         info = dict(zip(keys, values))
         info["基金代码"] = code
         info["基金名称"] = get_name(code)
-        info["估算日期"], info["估算"], info["估算增长率"] = get_net_value_estimate(code)
+        info["估算日期"], info["实时估算值"], info["估算增长率"] = get_net_value_estimate(code)
 
         return info
 
