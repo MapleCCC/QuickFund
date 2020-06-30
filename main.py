@@ -3,8 +3,9 @@ import io
 import os
 import re
 from datetime import datetime
+from enum import Enum, auto, unique
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Iterable, Text
 
 import click
 import requests
@@ -17,6 +18,23 @@ content_pattern = r"var apidata={ content:\"(.*)\""
 code_pattern = r"\d{6}"
 
 
+@unique
+class FieldType(Enum):
+    string = auto()
+    date = auto()
+    number = auto()
+
+
+fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
+fieldtypes = [
+    FieldType.string,
+    FieldType.date,
+    FieldType.number,
+    FieldType.string,
+    FieldType.string,
+]
+
+
 def get_info(code: str) -> Dict[str, str]:
     try:
         response = requests.get(API + code)
@@ -26,6 +44,8 @@ def get_info(code: str) -> Dict[str, str]:
 
         root = etree.XML(content)
         keys = root.xpath("/table/thead/tr//th/text()")
+        # WARNING: don't use root.xpath("/table/tbody/tr//td/text()") to extract
+        # values. The XPath expression will omit empty text, causing erroneous result
         tds = root.xpath("/table/tbody/tr//td")
         values = [td.text for td in tds]
 
@@ -37,8 +57,39 @@ def get_info(code: str) -> Dict[str, str]:
         raise RuntimeError(f"获取基金代码为{code}的基金相关信息时发生错误") from exc
 
 
-fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
-fieldtypes = ["string", "date", "number", "string", "string"]
+def csv_to_xlsx(csvfile: Iterable[Text], xlsx_filename: str) -> None:
+    reader = csv.reader(csvfile)
+
+    workbook = xlsxwriter.Workbook(xlsx_filename)
+    worksheet = workbook.add_worksheet()
+
+    header_format = workbook.add_format(
+        {"bold": True, "align": "center", "valign": "top", "border": 1}
+    )
+    date_format = workbook.add_format({"num_format": "yyyy-dd-mm"})
+
+    for i, fieldname in enumerate(fieldnames):
+        worksheet.write(0, i, fieldname, header_format)
+
+    for i, fieldtype in enumerate(fieldtypes):
+        if fieldtype == FieldType.date:
+            worksheet.set_column(i, i, 15)
+
+    for row, record in enumerate(reader):
+        for col, data in enumerate(record):
+            fieldtype = fieldtypes[col]
+            if fieldtype == FieldType.string:
+                worksheet.write_string(row + 1, col, data)
+            elif fieldtype == FieldType.number:
+                num = float(data)
+                worksheet.write_number(row + 1, col, num)
+            elif fieldtype == FieldType.date:
+                date = datetime.strptime(data, "%Y-%m-%d")
+                worksheet.write_datetime(row + 1, col, date, date_format)
+            else:
+                raise RuntimeError("Unreachable")
+
+    workbook.close()
 
 
 @click.command()
@@ -83,38 +134,8 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
             print(f"第{i}行内容不是有效的基金代码: {code}，暂且跳过之")
 
     ss.seek(0)
-    reader = csv.reader(ss)
 
-    workbook = xlsxwriter.Workbook(out_filename)
-    worksheet = workbook.add_worksheet()
-
-    header_format = workbook.add_format(
-        {"bold": True, "align": "center", "valign": "top", "border": 1}
-    )
-    date_format = workbook.add_format({"num_format": "yyyy-dd-mm"})
-
-    for i, fieldname in enumerate(fieldnames):
-        worksheet.write(0, i, fieldname, header_format)
-
-    for i, fieldtype in enumerate(fieldtypes):
-        if fieldtype == "date":
-            worksheet.set_column(i, i, 15)
-
-    for row, record in enumerate(reader):
-        for col, data in enumerate(record):
-            fieldtype = fieldtypes[col]
-            if fieldtype == "string":
-                worksheet.write_string(row + 1, col, data)
-            elif fieldtype == "number":
-                num = float(data)
-                worksheet.write_number(row + 1, col, num)
-            elif fieldtype == "date":
-                date = datetime.strptime(data, "%Y-%m-%d")
-                worksheet.write_datetime(row + 1, col, date, date_format)
-            else:
-                raise RuntimeError("Unreachable")
-
-    workbook.close()
+    csv_to_xlsx(ss, out_filename)
 
 
 if __name__ == "__main__":
