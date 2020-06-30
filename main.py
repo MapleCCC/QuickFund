@@ -1,4 +1,5 @@
 import csv
+import io
 import os
 import re
 from pathlib import Path
@@ -65,20 +66,22 @@ def main(filename: str, output: str) -> None:
 
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
 
-    with open("temp.csv", "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames, extrasaction="ignore")
+    ss = io.StringIO(newline="")
 
-        writer.writeheader()
-        for i, code in enumerate(codes):
-            _code = code.strip()
-            if re.fullmatch(code_pattern, _code):
-                info = get_info(_code)
-                info["基金代码"] = _code
-                writer.writerow(info)
-            else:
-                print(f"第{i}行内容不是有效的基金代码: {code}，暂且跳过之")
+    writer = csv.DictWriter(ss, fieldnames, extrasaction="ignore")
+    writer.writeheader()
+    for i, code in enumerate(codes):
+        _code = code.strip()
+        if re.fullmatch(code_pattern, _code):
+            info = get_info(_code)
+            info["基金代码"] = _code
+            writer.writerow(info)
+        else:
+            print(f"第{i}行内容不是有效的基金代码: {code}，暂且跳过之")
 
-    pd.read_csv("temp.csv").to_excel(out_filename, index=None, header=True)  # type: ignore
+    ss.seek(0)
+
+    pd.read_csv(ss).to_excel(out_filename, index=None, header=True)  # type: ignore
 
 
 if __name__ == "__main__":
