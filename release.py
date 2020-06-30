@@ -4,8 +4,8 @@ import subprocess
 PYINSTALLER_FLAGS = [
     "--name",
     "基金信息生成器",
-    "--upx-dir",
-    "D:\\Apps\\upx-3.96-win64",
+    # "--upx-dir",
+    # "D:\\Apps\\upx-3.96-win64",
     "--onefile",
 ]
 
