@@ -19,7 +19,7 @@ code_pattern = r"\d{6}"
 
 
 @unique
-class FieldType(Enum):
+class ExcelCellDataType(Enum):
     string = auto()
     date = auto()
     number = auto()
@@ -27,11 +27,11 @@ class FieldType(Enum):
 
 fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
 fieldtypes = [
-    FieldType.string,
-    FieldType.date,
-    FieldType.number,
-    FieldType.string,
-    FieldType.string,
+    ExcelCellDataType.string,
+    ExcelCellDataType.date,
+    ExcelCellDataType.number,
+    ExcelCellDataType.string,
+    ExcelCellDataType.string,
 ]
 
 
@@ -72,18 +72,18 @@ def csv_to_xlsx(csvfile: Iterable[Text], xlsx_filename: str) -> None:
         worksheet.write(0, i, fieldname, header_format)
 
     for i, fieldtype in enumerate(fieldtypes):
-        if fieldtype == FieldType.date:
+        if fieldtype == ExcelCellDataType.date:
             worksheet.set_column(i, i, 15)
 
     for row, record in enumerate(reader):
         for col, data in enumerate(record):
             fieldtype = fieldtypes[col]
-            if fieldtype == FieldType.string:
+            if fieldtype == ExcelCellDataType.string:
                 worksheet.write_string(row + 1, col, data)
-            elif fieldtype == FieldType.number:
+            elif fieldtype == ExcelCellDataType.number:
                 num = float(data)
                 worksheet.write_number(row + 1, col, num)
-            elif fieldtype == FieldType.date:
+            elif fieldtype == ExcelCellDataType.date:
                 date = datetime.strptime(data, "%Y-%m-%d")
                 worksheet.write_datetime(row + 1, col, date, date_format)
             else:
