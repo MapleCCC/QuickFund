@@ -18,6 +18,7 @@ search_api = (
 fund_page_url = "http://fund.eastmoney.com/{code}.html"
 
 
+@lru_cache(maxsize=None)
 def get_fund_name(code: str) -> str:
     try:
         response = requests.get(search_api + code)
@@ -34,6 +35,7 @@ def get_fund_name(code: str) -> str:
         raise RuntimeError(f"获取基金代码为 {code} 的基金名称信息时发生错误") from exc
 
 
+@lru_cache(maxsize=None)
 def get_fund_net_value_estimate(code: str) -> Tuple[str, str, str]:
     try:
         response = requests.get(fund_page_url.format(code=code))
