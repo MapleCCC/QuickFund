@@ -44,7 +44,8 @@ fieldtypes = ["string", "date", "number", "string", "string"]
 @click.command()
 @click.argument("filename")
 @click.option("-o", "--output", default="基金信息.xlsx")
-def main(filename: str, output: str) -> None:
+@click.option("-y", "--yes-to-all", is_flag=True, default=False)
+def main(filename: str, output: str, yes_to_all: bool) -> None:
     in_filename = filename
     out_filename = output
 
@@ -54,7 +55,7 @@ def main(filename: str, output: str) -> None:
     if os.path.isdir(out_filename):
         raise RuntimeError(f"同名文件夹已存在，无法新建文件 {out_filename}")
 
-    if os.path.isfile(out_filename):
+    if os.path.isfile(out_filename) and not yes_to_all:
         while True:
             choice = input(
                 f"{out_filename} 同名文件已存在，是否覆盖之？【选择是请输入“是”，选择否请输入“否”】\n"
