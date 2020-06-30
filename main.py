@@ -10,6 +10,7 @@ from lxml import etree  # type: ignore
 API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
 
 content_pattern = r"var apidata={ content:\"(.*)\""
+code_pattern = r"\d{6}"
 
 
 def get_info(code: str) -> Dict[str, str]:
@@ -44,11 +45,14 @@ def main(filename: str) -> None:
         writer = csv.DictWriter(f, fieldnames, extrasaction="ignore")
 
         writer.writeheader()
-        for code in codes:
-            assert len(code) == 6
-            info = get_info(code)
-            info["基金代码"] = code
-            writer.writerow(info)
+        for i, code in enumerate(codes):
+            _code = code.strip()
+            if re.fullmatch(code_pattern, _code):
+                info = get_info(_code)
+                info["基金代码"] = _code
+                writer.writerow(info)
+            else:
+                print(f"第{i}行内容不是有效的基金代码: {code}，暂且跳过之")
 
 
 if __name__ == "__main__":
