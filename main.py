@@ -136,7 +136,7 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, 11)
 
         # Write body
-        print("写入文档身体......")
+        print("写入文档体......")
         for row, code in tqdm(list(enumerate(codes))):
             info = get_info(code)
 
@@ -196,6 +196,9 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
     codes = filter(lambda code: re.fullmatch(r"\d{6}", code), codes)
 
     fetch_to_xlsx(codes, out_filename)
+
+    # The emoji takes inspiration from the black (https://github.com/psf/black)
+    print("完满结束! ✨ �🍰✨✨")
 
 
 if __name__ == "__main__":
