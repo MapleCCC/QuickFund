@@ -45,7 +45,22 @@ def main(filename: str, output: str) -> None:
     out_filename = output
 
     if not os.path.exists(in_filename):
-        raise FileNotFoundError(f"文件{in_filename}不存在")
+        raise FileNotFoundError(f"文件 {in_filename} 不存在")
+
+    if os.path.isdir(out_filename):
+        raise RuntimeError(f"同名文件夹已存在，无法新建文件 {out_filename}")
+
+    if os.path.isfile(out_filename):
+        while True:
+            choice = input(
+                f"{out_filename} 同名文件已存在，是否覆盖之？【选择是请输入“是”，选择否请输入“否”】\n"
+            ).strip()
+            if choice == "是":
+                break
+            elif choice == "否":
+                exit()
+            else:
+                print("输入指令无效，请重新输入")
 
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
 
