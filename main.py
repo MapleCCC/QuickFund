@@ -1,9 +1,10 @@
+import json
 import os
 import re
 from datetime import datetime
 from enum import Enum, auto, unique
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List
 
 import click
 import requests
@@ -11,7 +12,12 @@ import xlsxwriter
 from lxml import etree  # type: ignore
 from more_itertools import replace
 
-API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
+net_value_api = (
+    "https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
+)
+search_api = (
+    "https://fundsuggest.eastmoney.com/FundSearch/api/FundSearchAPI.ashx?m=1&key="
+)
 
 
 @unique
@@ -21,8 +27,9 @@ class ExcelCellDataType(Enum):
     number = auto()
 
 
-fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
+fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
 fieldtypes = [
+    ExcelCellDataType.string,
     ExcelCellDataType.string,
     ExcelCellDataType.date,
     ExcelCellDataType.number,
@@ -31,9 +38,22 @@ fieldtypes = [
 ]
 
 
+def get_name(code: str) -> str:
+    response = requests.get(search_api + code)
+    response.encoding = "utf-8"
+    json_data = json.loads(response.text)
+    candidates = json_data["Datas"]
+    if len(candidates) == 0:
+        raise RuntimeError(f"没有找到代码为 {code} 的基金")
+    elif len(candidates) > 1:
+        raise RuntimeError(f"找到了不止一个基金的代码是 {code}")
+
+    return candidates[0]["NAME"]
+
+
 def get_info(code: str) -> Dict[str, str]:
     try:
-        response = requests.get(API + code)
+        response = requests.get(net_value_api + code)
         response.encoding = "utf-8"
         text = response.text
         content = re.match(r"var apidata={ content:\"(?P<content>.*)\"", text).group(
@@ -45,13 +65,18 @@ def get_info(code: str) -> Dict[str, str]:
         # WARNING: don't use root.xpath("/table/tbody/tr//td/text()") to extract
         # values. The XPath expression will omit empty text, causing erroneous result
         tds = root.xpath("/table/tbody/tr//td")
-        values = [td.text for td in tds]
+        values: List[str] = [td.text for td in tds]
         values = list(replace(values, lambda x: x == None, [""]))
 
         if len(keys) != len(values):
             raise RuntimeError("解析基金信息时键值对不匹配")
 
-        return dict(zip(keys, values))
+        info = dict(zip(keys, values))
+        info["基金代码"] = code
+        info["基金名称"] = get_name(code)
+
+        return info
+
     except Exception as exc:
         raise RuntimeError(f"获取基金代码为{code}的基金相关信息时发生错误") from exc
 
@@ -77,10 +102,11 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
     # Write body
     for row, code in enumerate(codes):
         info = get_info(code)
-        info["基金代码"] = code
+
         for col, fieldname in enumerate(fieldnames):
             fieldvalue = info[fieldname]
             fieldtype = fieldtypes[col]
+
             if fieldtype == ExcelCellDataType.string:
                 worksheet.write_string(row + 1, col, fieldvalue)
             elif fieldtype == ExcelCellDataType.number:
