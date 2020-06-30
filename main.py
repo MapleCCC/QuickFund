@@ -2,12 +2,13 @@ import csv
 import io
 import os
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
 import click
-import openpyxl
 import requests
+import xlsxwriter
 from lxml import etree  # type: ignore
 
 API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
@@ -37,6 +38,7 @@ def get_info(code: str) -> Dict[str, str]:
 
 
 fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "分红送配"]
+fieldtypes = ["string", "date", "number", "string", "string"]
 
 
 @click.command()
@@ -69,7 +71,7 @@ def main(filename: str, output: str) -> None:
     ss = io.StringIO(newline="")
 
     writer = csv.DictWriter(ss, fieldnames, extrasaction="ignore")
-    writer.writeheader()
+    # writer.writeheader()
     for i, code in enumerate(codes):
         _code = code.strip()
         if re.fullmatch(code_pattern, _code):
@@ -82,11 +84,36 @@ def main(filename: str, output: str) -> None:
     ss.seek(0)
     reader = csv.reader(ss)
 
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    for row in reader:
-        ws.append(row)
-    wb.save(out_filename)
+    workbook = xlsxwriter.Workbook(out_filename)
+    worksheet = workbook.add_worksheet()
+
+    header_format = workbook.add_format(
+        {"bold": True, "align": "center", "valign": "top", "border": 1}
+    )
+    date_format = workbook.add_format({"num_format": "yyyy-dd-mm"})
+
+    for i, fieldname in enumerate(fieldnames):
+        worksheet.write(0, i, fieldname, header_format)
+
+    for i, fieldtype in enumerate(fieldtypes):
+        if fieldtype == "date":
+            worksheet.set_column(i, i, 15)
+
+    for row, record in enumerate(reader):
+        for col, data in enumerate(record):
+            fieldtype = fieldtypes[col]
+            if fieldtype == "string":
+                worksheet.write_string(row + 1, col, data)
+            elif fieldtype == "number":
+                num = float(data)
+                worksheet.write_number(row + 1, col, num)
+            elif fieldtype == "date":
+                date = datetime.strptime(data, "%Y-%m-%d")
+                worksheet.write_datetime(row + 1, col, date, date_format)
+            else:
+                raise RuntimeError("Unreachable")
+
+    workbook.close()
 
 
 if __name__ == "__main__":
