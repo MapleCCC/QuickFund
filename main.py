@@ -158,14 +158,7 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
 
 
-@click.command()
-@click.argument("filename")
-@click.option("-o", "--output", default="基金信息.xlsx")
-@click.option("-y", "--yes-to-all", is_flag=True, default=False)
-def main(filename: str, output: str, yes_to_all: bool) -> None:
-    in_filename = filename
-    out_filename = output
-
+def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
     if not os.path.exists(in_filename):
         raise FileNotFoundError(f"文件 {in_filename} 不存在")
 
@@ -183,6 +176,17 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
                 exit()
             else:
                 print("输入指令无效，请重新输入")
+
+
+@click.command()
+@click.argument("filename")
+@click.option("-o", "--output", default="基金信息.xlsx")
+@click.option("-y", "--yes-to-all", is_flag=True, default=False)
+def main(filename: str, output: str, yes_to_all: bool) -> None:
+    in_filename = filename
+    out_filename = output
+
+    check_args(in_filename, out_filename, yes_to_all)
 
     print("获取基金代码列表......")
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
