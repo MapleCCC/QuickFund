@@ -110,12 +110,14 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
     # Widen column for date data
     for i, fieldtype in enumerate(fieldtypes):
         if fieldtype == ExcelCellDataType.date:
-            worksheet.set_column(i, i, 15)
+            worksheet.set_column(i, i, 13)
 
     # Widen column for fund name field
     for i, fieldname in enumerate(fieldnames):
         if fieldname == "基金名称":
             worksheet.set_column(i, i, 22)
+        elif fieldname == "净值估算日期":
+            worksheet.set_column(i, i, 17)
 
     # Write body
     for row, code in enumerate(codes):
