@@ -130,7 +130,7 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
             info = get_info(_code)
             info["基金代码"] = _code
             writer.writerow(info)
-        else:
+        elif _code != "":
             print(f"第{i}行内容不是有效的基金代码: {code}，暂且跳过之")
 
     ss.seek(0)
