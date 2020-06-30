@@ -9,6 +9,7 @@ release:
 	./release.py
 
 format:
+	autopep8 --in-place --recursive --aggressive --aggressive --select E501 .
 	isort --apply
 	black .
 
