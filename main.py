@@ -3,6 +3,7 @@ import os
 import re
 from datetime import datetime
 from enum import Enum, auto, unique
+from functools import lru_cache
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
@@ -72,6 +73,7 @@ def get_net_value_estimate(code: str) -> Tuple[str, str, str]:
         raise RuntimeError(f"获取基金代码为 {code} 的基金的估算值相关信息时发生错误") from exc
 
 
+@lru_cache(maxsize=None)
 def get_info(code: str) -> Dict[str, str]:
     try:
         response = requests.get(net_value_api + code)
