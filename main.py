@@ -28,7 +28,7 @@ class ExcelCellDataType(Enum):
     number = auto()
 
 
-fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "净值估算日期", "净值估算", "日增长率", "分红送配"]
+fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "估算日期", "估算值", "估算增长率", "日增长率", "分红送配"]
 fieldtypes = [
     ExcelCellDataType.string,
     ExcelCellDataType.string,
@@ -36,6 +36,7 @@ fieldtypes = [
     ExcelCellDataType.number,
     ExcelCellDataType.string,
     ExcelCellDataType.number,
+    ExcelCellDataType.string,
     ExcelCellDataType.string,
     ExcelCellDataType.string,
 ]
@@ -54,13 +55,14 @@ def get_name(code: str) -> str:
     return candidates[0]["NAME"]
 
 
-def get_net_value_estimate(code: str) -> Tuple[str, str]:
+def get_net_value_estimate(code: str) -> Tuple[str, str, str]:
     response = requests.get(fund_page_url.format(code=code))
     response.encoding = "utf-8-sig"
     html = etree.HTML(response.text)
     estimate_timestamp = html.xpath('//span[@id="gz_gztime"]/text()')[0]
     estimate = html.xpath('//span[@id="gz_gsz"]/text()')[0]
-    return estimate_timestamp, estimate
+    estimate_growth_rate = html.xpath('//span[@id="gz_gszzl"]/text()')[0]
+    return estimate_timestamp, estimate, estimate_growth_rate
 
 
 def get_info(code: str) -> Dict[str, str]:
@@ -86,7 +88,7 @@ def get_info(code: str) -> Dict[str, str]:
         info = dict(zip(keys, values))
         info["基金代码"] = code
         info["基金名称"] = get_name(code)
-        info["净值估算日期"], info["净值估算"] = get_net_value_estimate(code)
+        info["估算日期"], info["估算"], info["估算增长率"] = get_net_value_estimate(code)
 
         return info
 
@@ -116,7 +118,7 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
     for i, fieldname in enumerate(fieldnames):
         if fieldname == "基金名称":
             worksheet.set_column(i, i, 22)
-        elif fieldname == "净值估算日期":
+        elif fieldname == "估算日期":
             worksheet.set_column(i, i, 17)
 
     # Write body
