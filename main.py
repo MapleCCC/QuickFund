@@ -11,6 +11,7 @@ import requests
 import xlsxwriter
 from lxml import etree  # type: ignore
 from more_itertools import replace
+from tqdm import tqdm
 
 net_value_api = (
     "https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
@@ -131,7 +132,7 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, 11)
 
         # Write body
-        for row, code in enumerate(codes):
+        for row, code in tqdm(list(enumerate(codes))):
             info = get_info(code)
 
             for col, fieldname in enumerate(fieldnames):
