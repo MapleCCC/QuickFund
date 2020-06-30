@@ -12,9 +12,6 @@ from lxml import etree  # type: ignore
 
 API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
 
-content_pattern = r"var apidata={ content:\"(.*)\""
-code_pattern = r"\d{6}"
-
 
 @unique
 class ExcelCellDataType(Enum):
@@ -38,7 +35,9 @@ def get_info(code: str) -> Dict[str, str]:
         response = requests.get(API + code)
         response.encoding = "utf-8"
         text = response.text
-        content = re.match(content_pattern, text).group(1)
+        content = re.match(r"var apidata={ content:\"(?P<content>.*)\"", text).group(
+            "content"
+        )
 
         root = etree.XML(content)
         keys = root.xpath("/table/thead/tr//th/text()")
@@ -121,7 +120,7 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
                 print("输入指令无效，请重新输入")
 
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
-    codes = filter(lambda code: re.fullmatch(code_pattern, code), codes)
+    codes = filter(lambda code: re.fullmatch(r"\d{6}", code), codes)
 
     fetch_to_xlsx(codes, out_filename)
 
