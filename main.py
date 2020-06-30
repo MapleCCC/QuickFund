@@ -1,26 +1,15 @@
-import json
 import os
 import re
 from datetime import datetime
 from enum import Enum, auto, unique
-from functools import lru_cache
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable
 
 import click
-import requests
 import xlsxwriter
-from lxml import etree  # type: ignore
-from more_itertools import replace
 from tqdm import tqdm
 
-net_value_api = (
-    "https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
-)
-search_api = (
-    "https://fundsuggest.eastmoney.com/FundSearch/api/FundSearchAPI.ashx?m=1&key="
-)
-fund_page_url = "http://fund.eastmoney.com/{code}.html"
+from fetcher import get_fund_info
 
 
 @unique
@@ -44,68 +33,7 @@ fieldtypes = [
 ]
 
 
-def get_name(code: str) -> str:
-    try:
-        response = requests.get(search_api + code)
-        response.encoding = "utf-8"
-        json_data = json.loads(response.text)
-        candidates = json_data["Datas"]
-        if len(candidates) == 0:
-            raise RuntimeError(f"没有找到代码为 {code} 的基金")
-        elif len(candidates) > 1:
-            raise RuntimeError(f"找到了不止一个基金的代码是 {code}")
-
-        return candidates[0]["NAME"]
-    except Exception as exc:
-        raise RuntimeError(f"获取基金代码为 {code} 的基金名称信息时发生错误") from exc
-
-
-def get_net_value_estimate(code: str) -> Tuple[str, str, str]:
-    try:
-        response = requests.get(fund_page_url.format(code=code))
-        response.encoding = "utf-8-sig"
-        html = etree.HTML(response.text)
-        estimate_timestamp = html.xpath('//span[@id="gz_gztime"]/text()')[0]
-        estimate = html.xpath('//span[@id="gz_gsz"]/text()')[0]
-        estimate_growth_rate = html.xpath('//span[@id="gz_gszzl"]/text()')[0]
-        return estimate_timestamp, estimate, estimate_growth_rate
-    except Exception as exc:
-        raise RuntimeError(f"获取基金代码为 {code} 的基金的估算值相关信息时发生错误") from exc
-
-
-@lru_cache(maxsize=None)
-def get_info(code: str) -> Dict[str, str]:
-    try:
-        response = requests.get(net_value_api + code)
-        response.encoding = "utf-8"
-        text = response.text
-        content = re.match(r"var apidata={ content:\"(?P<content>.*)\"", text).group(
-            "content"
-        )
-
-        root = etree.XML(content)
-        keys = root.xpath("/table/thead/tr//th/text()")
-        # WARNING: don't use root.xpath("/table/tbody/tr//td/text()") to extract
-        # values. The XPath expression will omit empty text, causing erroneous result
-        tds = root.xpath("/table/tbody/tr//td")
-        values: List[str] = [td.text for td in tds]
-        values = list(replace(values, lambda x: x == None, [""]))
-
-        if len(keys) != len(values):
-            raise RuntimeError("解析基金信息时键值对不匹配")
-
-        info = dict(zip(keys, values))
-        info["基金代码"] = code
-        info["基金名称"] = get_name(code)
-        info["估算日期"], info["实时估算值"], info["估算增长率"] = get_net_value_estimate(code)
-
-        return info
-
-    except Exception as exc:
-        raise RuntimeError(f"获取基金代码为 {code} 的基金相关信息时发生错误") from exc
-
-
-def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
+def write_to_xlsx(infos: Iterable[Dict[str, str]], xlsx_filename: str) -> None:
     try:
         print("新建 Excel 文档......")
         workbook = xlsxwriter.Workbook(xlsx_filename)
@@ -137,8 +65,7 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
 
         # Write body
         print("写入文档体......")
-        for row, code in tqdm(list(enumerate(codes))):
-            info = get_info(code)
+        for row, info in tqdm(list(enumerate(infos))):
 
             for col, fieldname in enumerate(fieldnames):
                 fieldvalue = info[fieldname]
@@ -195,10 +122,14 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
     print("清洗基金代码列表......")
     codes = filter(lambda code: re.fullmatch(r"\d{6}", code), codes)
 
-    fetch_to_xlsx(codes, out_filename)
+    print("获取基金相关信息......")
+    infos = (get_fund_info(code) for code in tqdm(list(codes)))
+
+    print("将基金相关信息写入 Excel 文件......")
+    write_to_xlsx(infos, out_filename)
 
     # The emoji takes inspiration from the black (https://github.com/psf/black)
-    print("完满结束! ✨ �🍰✨✨")
+    print("完满结束! ✨ 🍰 ✨")
 
 
 if __name__ == "__main__":
