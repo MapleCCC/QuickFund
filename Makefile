@@ -6,7 +6,7 @@ all:
 	pyinstaller ${PYINSTALLER_FLAGS} main.py
 
 release:
-	python -OO -m PyInstaller ${PYINSTALLER_FLAGS} main.py
+	./release.py
 
 format:
 	isort --apply
