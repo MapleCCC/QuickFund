@@ -1,11 +1,9 @@
-import csv
-import io
 import os
 import re
 from datetime import datetime
 from enum import Enum, auto, unique
 from pathlib import Path
-from typing import Dict, Iterable, Text
+from typing import Dict, Iterable
 
 import click
 import requests
@@ -57,9 +55,7 @@ def get_info(code: str) -> Dict[str, str]:
         raise RuntimeError(f"获取基金代码为{code}的基金相关信息时发生错误") from exc
 
 
-def csv_to_xlsx(csvfile: Iterable[Text], xlsx_filename: str) -> None:
-    reader = csv.reader(csvfile)
-
+def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
     workbook = xlsxwriter.Workbook(xlsx_filename)
     worksheet = workbook.add_worksheet()
 
@@ -68,23 +64,29 @@ def csv_to_xlsx(csvfile: Iterable[Text], xlsx_filename: str) -> None:
     )
     date_format = workbook.add_format({"num_format": "yyyy-dd-mm"})
 
+    # Writer header
     for i, fieldname in enumerate(fieldnames):
         worksheet.write(0, i, fieldname, header_format)
 
+    # Widen column for date data
     for i, fieldtype in enumerate(fieldtypes):
         if fieldtype == ExcelCellDataType.date:
             worksheet.set_column(i, i, 15)
 
-    for row, record in enumerate(reader):
-        for col, data in enumerate(record):
+    # Write body
+    for row, code in enumerate(codes):
+        info = get_info(code)
+        info["基金代码"] = code
+        for col, fieldname in enumerate(fieldnames):
+            fieldvalue = info[fieldname]
             fieldtype = fieldtypes[col]
             if fieldtype == ExcelCellDataType.string:
-                worksheet.write_string(row + 1, col, data)
+                worksheet.write_string(row + 1, col, fieldvalue)
             elif fieldtype == ExcelCellDataType.number:
-                num = float(data)
+                num = float(fieldvalue)
                 worksheet.write_number(row + 1, col, num)
             elif fieldtype == ExcelCellDataType.date:
-                date = datetime.strptime(data, "%Y-%m-%d")
+                date = datetime.strptime(fieldvalue, "%Y-%m-%d")
                 worksheet.write_datetime(row + 1, col, date, date_format)
             else:
                 raise RuntimeError("Unreachable")
@@ -119,23 +121,9 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
                 print("输入指令无效，请重新输入")
 
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
+    codes = filter(lambda code: re.fullmatch(code_pattern, code), codes)
 
-    ss = io.StringIO(newline="")
-
-    writer = csv.DictWriter(ss, fieldnames, extrasaction="ignore")
-    # writer.writeheader()
-    for i, code in enumerate(codes):
-        _code = code.strip()
-        if re.fullmatch(code_pattern, _code):
-            info = get_info(_code)
-            info["基金代码"] = _code
-            writer.writerow(info)
-        elif _code != "":
-            print(f"第{i}行内容不是有效的基金代码: {code}，暂且跳过之")
-
-    ss.seek(0)
-
-    csv_to_xlsx(ss, out_filename)
+    fetch_to_xlsx(codes, out_filename)
 
 
 if __name__ == "__main__":
