@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Dict
 
 import click
+import openpyxl
 import requests
 from lxml import etree  # type: ignore
-from pandas import pandas as pd
 
 API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
 
@@ -80,8 +80,13 @@ def main(filename: str, output: str) -> None:
             print(f"第{i}行内容不是有效的基金代码: {code}，暂且跳过之")
 
     ss.seek(0)
+    reader = csv.reader(ss)
 
-    pd.read_csv(ss).to_excel(out_filename, index=None, header=True)  # type: ignore
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for row in reader:
+        ws.append(row)
+    wb.save(out_filename)
 
 
 if __name__ == "__main__":
