@@ -19,15 +19,15 @@ class ExcelCellDataType(Enum):
     number = auto()
 
 
-fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "估算日期", "实时估算值", "估算增长率", "日增长率", "分红送配"]
+fieldnames = ["基金名称", "基金代码", "净值日期", "单位净值", "日增长率", "估算日期", "实时估值", "估算增长率", "分红送配"]
 fieldtypes = [
     ExcelCellDataType.string,
     ExcelCellDataType.string,
     ExcelCellDataType.date,
     ExcelCellDataType.number,
     ExcelCellDataType.string,
-    ExcelCellDataType.number,
     ExcelCellDataType.string,
+    ExcelCellDataType.number,
     ExcelCellDataType.string,
     ExcelCellDataType.string,
 ]
@@ -60,7 +60,7 @@ def write_to_xlsx(infos: Iterable[Dict[str, str]], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, 22)
             elif fieldname == "估算日期":
                 worksheet.set_column(i, i, 17)
-            elif fieldname in ("实时估算值", "估算增长率"):
+            elif fieldname in ("实时估值", "估算增长率"):
                 worksheet.set_column(i, i, 11)
 
         # Write body
