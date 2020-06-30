@@ -105,6 +105,7 @@ def get_info(code: str) -> Dict[str, str]:
 
 def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
     try:
+        print("新建 Excel 文档......")
         workbook = xlsxwriter.Workbook(xlsx_filename)
         worksheet = workbook.add_worksheet()
 
@@ -114,6 +115,7 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
         date_format = workbook.add_format({"num_format": "yyyy-dd-mm"})
 
         # Writer header
+        print("写入文档头......")
         for i, fieldname in enumerate(fieldnames):
             worksheet.write(0, i, fieldname, header_format)
 
@@ -132,6 +134,7 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, 11)
 
         # Write body
+        print("写入文档身体......")
         for row, code in tqdm(list(enumerate(codes))):
             info = get_info(code)
 
@@ -181,7 +184,9 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
             else:
                 print("输入指令无效，请重新输入")
 
+    print("获取基金代码列表......")
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
+    print("清洗基金代码列表......")
     codes = filter(lambda code: re.fullmatch(r"\d{6}", code), codes)
 
     fetch_to_xlsx(codes, out_filename)
