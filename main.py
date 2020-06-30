@@ -7,6 +7,7 @@ from typing import Dict
 import click
 import requests
 from lxml import etree  # type: ignore
+from pandas import pandas as pd
 
 API = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
 
@@ -39,7 +40,7 @@ fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "�
 
 @click.command()
 @click.argument("filename")
-@click.option("-o", "--output", default="基金信息.csv")
+@click.option("-o", "--output", default="基金信息.xlsx")
 def main(filename: str, output: str) -> None:
     in_filename = filename
     out_filename = output
@@ -64,7 +65,7 @@ def main(filename: str, output: str) -> None:
 
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
 
-    with open(out_filename, "w", newline="", encoding="utf-8") as f:
+    with open("temp.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames, extrasaction="ignore")
 
         writer.writeheader()
@@ -76,6 +77,8 @@ def main(filename: str, output: str) -> None:
                 writer.writerow(info)
             else:
                 print(f"第{i}行内容不是有效的基金代码: {code}，暂且跳过之")
+
+    pd.read_csv("temp.csv").to_excel(out_filename, index=None, header=True)  # type: ignore
 
 
 if __name__ == "__main__":
