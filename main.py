@@ -38,10 +38,14 @@ fieldnames = ["基金代码", "净值日期", "单位净值", "日增长率", "�
 
 @click.command()
 @click.argument("filename")
-def main(filename: str) -> None:
-    codes = Path(filename).read_text(encoding="utf-8").splitlines()
+@click.option("-o", "--output", default="基金信息.csv")
+def main(filename: str, output: str) -> None:
+    in_filename = filename
+    out_filename = output
 
-    with open("基金信息.csv", "w", newline="", encoding="utf-8") as f:
+    codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
+
+    with open(out_filename, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames, extrasaction="ignore")
 
         writer.writeheader()
