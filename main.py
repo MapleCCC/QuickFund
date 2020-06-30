@@ -24,7 +24,8 @@ def get_info(code: str) -> Dict[str, str]:
         tds = root.xpath("/table/tbody/tr//td")
         values = [td.text for td in tds]
 
-        assert len(keys) == len(values)
+        if len(keys) != len(values):
+            raise RuntimeError()
 
         return dict(zip(keys, values))
     except:
