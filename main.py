@@ -127,6 +127,8 @@ def fetch_to_xlsx(codes: Iterable[str], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, 22)
             elif fieldname == "估算日期":
                 worksheet.set_column(i, i, 17)
+            elif fieldname in ("实时估算值", "估算增长率"):
+                worksheet.set_column(i, i, 11)
 
         # Write body
         for row, code in enumerate(codes):
