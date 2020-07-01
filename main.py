@@ -1,5 +1,4 @@
 import atexit
-import json
 import os
 import re
 import shutil
@@ -65,7 +64,7 @@ def get_latest_released_version() -> str:
         "https://api.github.com/repos/MapleCCC/fund-info-fetcher/releases/latest"
     )
     response.encoding = "utf-8"
-    json_data = json.loads(response.text)
+    json_data = response.json()
     tag_name = json_data["tag_name"]
     return tag_name
 
@@ -76,7 +75,7 @@ def get_latest_released_asset(name: str) -> bytes:
         "https://api.github.com/repos/MapleCCC/fund-info-fetcher/releases/latest"
     )
     response.encoding = "utf-8"
-    json_data = json.loads(response.text)
+    json_data = response.json()
     assets = json_data["assets"]
     candidates = list(filter(lambda asset: asset["name"] == name, assets))
     if len(candidates) == 00:

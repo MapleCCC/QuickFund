@@ -1,4 +1,3 @@
-import json
 import re
 from functools import lru_cache
 from typing import Dict, List, Tuple
@@ -23,7 +22,7 @@ def get_fund_name(code: str) -> str:
     try:
         response = requests.get(search_api + code)
         response.encoding = "utf-8"
-        json_data = json.loads(response.text)
+        json_data = response.json()
         candidates = json_data["Datas"]
         funds = list(filter(lambda x: x["CATEGORYDESC"] == "基金", candidates))
         if len(funds) == 0:
