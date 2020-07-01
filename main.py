@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum, auto, unique
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, List, NoReturn, Tuple
+from typing import Dict, List, Tuple
 from zipfile import ZipFile
 
 import click
@@ -179,7 +179,9 @@ def update(latest_version: str) -> None:
         # has a flawed implementation of decoding zip file member names.
         # Solution appeals to
         # https://stackoverflow.com/questions/41019624/python-zipfile-module-cant-extract-filenames-with-chinese-characters
-        transformed_executable_name = RELEASE_EXECUTABLE_NAME.encode("gbk").decode("cp437")
+        transformed_executable_name = RELEASE_EXECUTABLE_NAME.encode("gbk").decode(
+            "cp437"
+        )
         with ZipFile(p) as f:
             f.extract(transformed_executable_name, path=str(tempdir))
         basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)

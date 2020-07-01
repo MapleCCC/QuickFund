@@ -2,3 +2,4 @@
 - Add lightweight formatting to xlsx, widening cell to make text clear.
 - Output excel file instead of csv file.
 - Add progress indicator. Informative printing message.
+- When searching for fund name, distinguish between fund and stock.

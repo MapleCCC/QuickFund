@@ -41,6 +41,8 @@ def get_fund_name(code: str) -> str:
 def get_fund_net_value_estimate(code: str) -> Tuple[str, str, str]:
     try:
         response = requests.get(fund_page_url.format(code=code))
+        # WARNING: use utf-8-sig instead of utf-8 since the content contains
+        # BOM header
         response.encoding = "utf-8-sig"
         html = etree.HTML(response.text)
         estimate_timestamp = html.xpath('//span[@id="gz_gztime"]/text()')[0]

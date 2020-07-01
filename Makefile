@@ -13,7 +13,10 @@ format:
 	isort --apply
 	black .
 
+todo:
+	rg TODO
+
 clean:
-	rm -rf build/ dist/ __pycache__/
+	rm -rf build/ dist/ __pycache__/ *.spec
 
 .PHONY: all release format clean
