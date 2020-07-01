@@ -171,25 +171,28 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
 
 def update(latest_version: str) -> None:
     print("开始更新程序......")
-    with TemporaryDirectory() as d:
-        tempdir = Path(d)
-        p = tempdir / RELEASE_ASSET_NAME
-        p.write_bytes(get_latest_released_asset(RELEASE_ASSET_NAME))
-        # WARNING: A big pitfall here is that Python's builtin zipfile module
-        # has a flawed implementation of decoding zip file member names.
-        # Solution appeals to
-        # https://stackoverflow.com/questions/41019624/python-zipfile-module-cant-extract-filenames-with-chinese-characters
-        transformed_executable_name = RELEASE_EXECUTABLE_NAME.encode("gbk").decode(
-            "cp437"
-        )
-        with ZipFile(p) as f:
-            f.extract(transformed_executable_name, path=str(tempdir))
-        basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
-        versioned_executable_name = basename + latest_version + extension
-        shutil.move(
-            tempdir / transformed_executable_name,  # type: ignore
-            Path.cwd() / versioned_executable_name,
-        )
+    try:
+        with TemporaryDirectory() as d:
+            tempdir = Path(d)
+            p = tempdir / RELEASE_ASSET_NAME
+            p.write_bytes(get_latest_released_asset(RELEASE_ASSET_NAME))
+            # WARNING: A big pitfall here is that Python's builtin zipfile module
+            # has a flawed implementation of decoding zip file member names.
+            # Solution appeals to
+            # https://stackoverflow.com/questions/41019624/python-zipfile-module-cant-extract-filenames-with-chinese-characters
+            transformed_executable_name = RELEASE_EXECUTABLE_NAME.encode("gbk").decode(
+                "cp437"
+            )
+            with ZipFile(p) as f:
+                f.extract(transformed_executable_name, path=str(tempdir))
+            basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
+            versioned_executable_name = basename + latest_version + extension
+            shutil.move(
+                tempdir / transformed_executable_name,  # type: ignore
+                Path.cwd() / versioned_executable_name,
+            )
+    except Exception as exc:
+        raise RuntimeError(f"更新程序的时候发生错误") from exc
     print("程序更新完毕")
 
 
