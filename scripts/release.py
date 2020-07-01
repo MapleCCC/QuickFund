@@ -24,7 +24,9 @@ PYINSTALLER_FLAGS = [
 ]
 
 subprocess.run(
-    ["python", "-OO", "-m", "PyInstaller"] + PYINSTALLER_FLAGS + ["fetcher/__main__.py"]
+    ["python", "-OO", "-m", "PyInstaller"]
+    + PYINSTALLER_FLAGS
+    + ["pyinstaller_entry.py"]
 ).check_returncode()
 
 with ZipFile(os.path.join(PYINSTALLER_DISTPATH, RELEASE_ASSET_NAME), "w") as f:
