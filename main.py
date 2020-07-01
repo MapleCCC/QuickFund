@@ -1,3 +1,4 @@
+import atexit
 import json
 import os
 import re
@@ -6,7 +7,7 @@ from datetime import datetime
 from enum import Enum, auto, unique
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Tuple
+from typing import Dict, List, NoReturn, Tuple
 from zipfile import ZipFile
 
 import click
@@ -45,6 +46,12 @@ fieldtypes = [
     ExcelCellDataType.string,
     ExcelCellDataType.string,
 ]
+
+
+@atexit.register
+def pause_wait_enter() -> None:
+    # input("Press ENTER to exit")
+    input("按下回车键以退出")
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
@@ -211,7 +218,7 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
     print("获取基金代码列表......")
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
     print("清洗基金代码列表......")
-    codes = list(filter(lambda code: re.fullmatch(r"\d{6}", code), codes))
+    codes = list(filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(codes)))
 
     print("获取基金相关信息......")
     infos = [get_fund_info(code) for code in tqdm(codes)]
@@ -221,9 +228,6 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
 
     # The emoji takes inspiration from the black (https://github.com/psf/black)
     print("完满结束! ✨ 🍰 ✨")
-
-    # input("Press ENTER to exit")
-    input("按下回车键以退出")
 
 
 if __name__ == "__main__":
