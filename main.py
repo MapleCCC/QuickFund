@@ -1,11 +1,16 @@
+import json
 import os
 import re
+import shutil
 from datetime import datetime
 from enum import Enum, auto, unique
 from pathlib import Path
-from typing import Dict, Iterable
+from tempfile import TemporaryDirectory
+from typing import Dict, Iterable, Tuple
+from zipfile import ZipFile
 
 import click
+import requests
 import xlsxwriter
 from tqdm import tqdm
 
@@ -13,6 +18,9 @@ from fetcher import get_fund_info
 from utils import green, red
 
 __version__ = "0.2.0"
+
+release_asset_name = "fund-info-fetcher-win64.zip"
+executable_name = "基金信息生成器.exe"
 
 
 @unique
@@ -37,6 +45,46 @@ fieldtypes = [
     ExcelCellDataType.string,
     ExcelCellDataType.string,
 ]
+
+
+def parse_version_number(s: str) -> Tuple[int, int, int]:
+    version_pattern = r"v(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)"
+    major, minor, patch = re.fullmatch(version_pattern, s).group(
+        "major", "minor", "patch"
+    )
+    return int(major), int(minor), int(patch)
+
+
+def get_latest_released_version() -> str:
+    response = requests.get(
+        "https://api.github.com/repos/MapleCCC/fund-info-fetcher/releases/latest"
+    )
+    response.encoding = "utf-8"
+    json_data = json.loads(response.text)
+    tag_name = json_data["tag_name"]
+    return tag_name
+
+
+def get_latest_released_asset(name: str) -> bytes:
+    response = requests.get(
+        "https://api.github.com/repos/MapleCCC/fund-info-fetcher/releases/latest"
+    )
+    response.encoding = "utf-8"
+    json_data = json.loads(response.text)
+    assets = json_data["assets"]
+    candidates = list(filter(lambda asset: asset["name"] == name, assets))
+    if len(candidates) == 00:
+        raise RuntimeError(
+            f"No asset with name {name} can be found in the latest release"
+        )
+    elif len(candidates) > 1:
+        raise RuntimeError(
+            f"More than one assets with name {name} are found in the latest release"
+        )
+    asset = candidates[0]
+    return requests.get(
+        asset["url"], headers={"Accept": "application/octet-stream"}
+    ).content
 
 
 def write_to_xlsx(infos: Iterable[Dict[str, str]], xlsx_filename: str) -> None:
@@ -113,12 +161,50 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
                 print("输入指令无效，请重新输入")
 
 
+def update(latest_version: str) -> None:
+    with TemporaryDirectory() as d:
+        tempdir = Path(d)
+        p = tempdir / release_asset_name
+        p.write_bytes(get_latest_released_asset(release_asset_name))
+        # WARNING: A big pitfall here is that Python's builtin zipfile module
+        # has a flawed implementation of decoding zip file member names.
+        # Solution appeals to
+        # https://stackoverflow.com/questions/41019624/python-zipfile-module-cant-extract-filenames-with-chinese-characters
+        transformed_executable_name = executable_name.encode("gbk").decode("cp437")
+        with ZipFile(p) as f:
+            f.extract(transformed_executable_name, path=str(tempdir))
+        basename, extension = os.path.splitext(executable_name)
+        versioned_executable_name = basename + latest_version + extension
+        shutil.move(
+            tempdir / transformed_executable_name,  # type: ignore
+            Path.cwd() / versioned_executable_name,
+        )
+
+
+def check_update() -> None:
+    latest_version = get_latest_released_version()
+    if parse_version_number(latest_version) > parse_version_number(__version__):
+        while True:
+            choice = input(
+                f"检测到更新版本 {latest_version}，是否更新？【选择是请输入“{green('是')}”，选择否请输入“{red('否')}”】\n"
+            ).strip()
+            if choice == "是":
+                update(latest_version)
+                exit()
+            elif choice == "否":
+                return
+            else:
+                print("输入指令无效，请重新输入")
+
+
 @click.command()
 @click.argument("filename")
 @click.option("-o", "--output", default="基金信息.xlsx")
 @click.option("-y", "--yes-to-all", is_flag=True, default=False)
 @click.version_option(version=__version__)
 def main(filename: str, output: str, yes_to_all: bool) -> None:
+    check_update()
+
     in_filename = filename
     out_filename = output
 
