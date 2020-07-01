@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum, auto, unique
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, Iterable, Tuple
+from typing import Dict, List, Tuple
 from zipfile import ZipFile
 
 import click
@@ -85,7 +85,7 @@ def get_latest_released_asset(name: str) -> bytes:
     ).content
 
 
-def write_to_xlsx(infos: Iterable[Dict[str, str]], xlsx_filename: str) -> None:
+def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
     try:
         print("新建 Excel 文档......")
         workbook = xlsxwriter.Workbook(xlsx_filename)
@@ -117,7 +117,7 @@ def write_to_xlsx(infos: Iterable[Dict[str, str]], xlsx_filename: str) -> None:
 
         # Write body
         print("写入文档体......")
-        for row, info in tqdm(list(enumerate(infos))):
+        for row, info in tqdm(enumerate(infos)):
 
             for col, fieldname in enumerate(fieldnames):
                 fieldvalue = info[fieldname]
@@ -211,10 +211,10 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
     print("获取基金代码列表......")
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
     print("清洗基金代码列表......")
-    codes = filter(lambda code: re.fullmatch(r"\d{6}", code), codes)
+    codes = list(filter(lambda code: re.fullmatch(r"\d{6}", code), codes))
 
     print("获取基金相关信息......")
-    infos = (get_fund_info(code) for code in tqdm(list(codes)))
+    infos = [get_fund_info(code) for code in tqdm(codes)]
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(infos, out_filename)
