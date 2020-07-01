@@ -1,12 +1,12 @@
 from warnings import warn
 
 from .std import TqdmDeprecationWarning
+from .utils import Comparable  # NOQA
 from .utils import (
     CUR_OS,
     IS_NIX,
     IS_WIN,
     RE_ANSI,
-    Comparable,  # NOQA
     FormatReplace,
     SimpleTextIOWrapper,
     WeakSet,

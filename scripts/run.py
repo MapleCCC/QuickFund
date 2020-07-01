@@ -2,4 +2,6 @@
 
 import subprocess
 
-subprocess.run(["python", "main.py", "样例基金代码.txt", "-y"]).check_returncode()
+# TODO install package locally so that we can run the console script.
+
+subprocess.run(["python", "-m", "fetcher", "样例基金代码.txt", "-y"]).check_returncode()

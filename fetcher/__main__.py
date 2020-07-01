@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import atexit
 import os
 import re
