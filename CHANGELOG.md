@@ -3,3 +3,4 @@
 - Output excel file instead of csv file.
 - Add progress indicator. Informative printing message.
 - When searching for fund name, distinguish between fund and stock.
+- Strip tqdm to minimal and copy to this repo.

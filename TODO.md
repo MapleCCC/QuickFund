@@ -37,7 +37,6 @@
   - click.Path
   - click.version_option()
 - Arrange TODO entries into groups with respectively different priority. Streamline workflow.
-- Strip tqdm to minimal and copy to this repo.
 - Vim movement, jumping, jump back, mark.
 - Try to use more modernized python project dependency management tools, like poetry, pyproject. Instead of using the naive requirements.txt method.
 - Use requests' response.json() sugar shortcut.

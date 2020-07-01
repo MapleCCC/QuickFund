@@ -18,9 +18,6 @@ PYINSTALLER_FLAGS = [
     "--onefile",
 ]
 
-# TODO do some manipulation to tqdm library to remove unnecessary heavyweight
-# dependencies and hence reduce size of the generated executable.
-
 subprocess.run(
     ["python", "-OO", "-m", "PyInstaller"] + PYINSTALLER_FLAGS + ["main.py"]
 ).check_returncode()
