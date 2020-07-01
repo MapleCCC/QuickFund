@@ -44,6 +44,8 @@
 - exit() vs sys.exit() vs quit(). What's the difference? Which should we use?
   - atexit module
 - standard library's `atexit` module.
+- rg TODO
+- Specify minimal supported Python version.
 
 
 ## Archive

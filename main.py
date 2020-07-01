@@ -62,6 +62,7 @@ def parse_version_number(s: str) -> Tuple[int, int, int]:
 
 
 def get_latest_released_version() -> str:
+    # TODO Handle the case when the lastest release's tag name is not semantic version.
     response = requests.get(
         "https://api.github.com/repos/MapleCCC/fund-info-fetcher/releases/latest"
     )
@@ -90,6 +91,7 @@ def get_latest_released_asset(name: str) -> bytes:
         )
     asset = candidates[0]
     print("下载最新版本......")
+    # TODO: add display progress bar when downloading latest asset
     return requests.get(
         asset["url"], headers={"Accept": "application/octet-stream"}
     ).content

@@ -1,12 +1,16 @@
 import re
 from functools import lru_cache
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from lxml import etree  # type: ignore
 from more_itertools import replace
 
 __all__ = ["get_fund_info"]
+
+# Unfortunately current state of lxml type stub is far from complete.
+# https://github.com/python/typeshed/issues/525
+ETree = Any
 
 net_value_api = (
     "https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
@@ -15,6 +19,13 @@ search_api = (
     "https://fundsuggest.eastmoney.com/FundSearch/api/FundSearchAPI.ashx?m=1&key="
 )
 fund_page_url = "http://fund.eastmoney.com/{code}.html"
+
+
+def get_etree_from_url(url: str) -> ETree:
+    response = requests.get(url)
+    response.encoding = "utf-8-sig"
+    html = etree.HTML(response.text)
+    return html
 
 
 @lru_cache(maxsize=None)
