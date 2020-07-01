@@ -12,10 +12,11 @@ from zipfile import ZipFile
 import click
 import xlsxwriter
 
-from fetcher import get_fund_info
-from github_utils import get_latest_released_asset, get_latest_released_version
 from tqdm_minimal import tqdm
-from utils import green, red
+
+from .fetcher import get_fund_info
+from .github_utils import get_latest_released_asset, get_latest_released_version
+from .utils import green, red
 
 __version__ = "0.2.0"
 
