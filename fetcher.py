@@ -25,10 +25,13 @@ def get_fund_name(code: str) -> str:
         response.encoding = "utf-8"
         json_data = json.loads(response.text)
         candidates = json_data["Datas"]
-        if len(candidates) == 0:
+        funds = list(filter(lambda x: x["CATEGORYDESC"] == "基金", candidates))
+        if len(funds) == 0:
             raise RuntimeError(f"没有找到代码为 {code} 的基金")
-        elif len(candidates) > 1:
-            raise RuntimeError(f"找到了不止一个基金的代码是 {code}")
+        elif len(funds) > 1:
+            names = [fund["NAME"] for fund in funds]
+            names_str = ", ".join(names)
+            raise RuntimeError(f"找到了不止一个基金的代码是 {code}: {names_str}")
 
         return candidates[0]["NAME"]
     except Exception as exc:
