@@ -47,10 +47,12 @@ fieldtypes = [
 ]
 
 
-@atexit.register
 def pause_wait_enter() -> None:
     # input("Press ENTER to exit")
     input("按下回车键以退出")
+
+
+atexit.register(pause_wait_enter)
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
