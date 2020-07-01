@@ -222,6 +222,9 @@ def main(filename: str, output: str, yes_to_all: bool) -> None:
     # The emoji takes inspiration from the black (https://github.com/psf/black)
     print("完满结束! ✨ 🍰 ✨")
 
+    # input("Press ENTER to exit")
+    input("按下回车键以退出")
+
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
