@@ -20,7 +20,7 @@ from .fetcher import get_fund_info
 from .github_utils import get_latest_released_asset, get_latest_released_version
 from .utils import green, red
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 RELEASE_ASSET_NAME = "fund-info-fetcher-win64.zip"
 RELEASE_EXECUTABLE_NAME = "基金信息生成器.exe"
