@@ -17,14 +17,14 @@ PYINSTALLER_FLAGS = [
     # WARNING: using PyInstaller with upx enabled causes corrupted executable. Don't know why.
     # "--upx-dir",
     # "D:\\Apps\\upx-3.96-win64",
-    "--dispath",
+    "--distpath",
     PYINSTALLER_DISTPATH,
     "--clean",
     "--onefile",
 ]
 
 subprocess.run(
-    ["python", "-OO", "-m", "PyInstaller"] + PYINSTALLER_FLAGS + ["main.py"]
+    ["python", "-OO", "-m", "PyInstaller"] + PYINSTALLER_FLAGS + ["fetcher/__main__.py"]
 ).check_returncode()
 
 with ZipFile(os.path.join(PYINSTALLER_DISTPATH, RELEASE_ASSET_NAME), "w") as f:
