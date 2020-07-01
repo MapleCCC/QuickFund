@@ -22,6 +22,9 @@ __version__ = "0.2.0"
 RELEASE_ASSET_NAME = "fund-info-fetcher-win64.zip"
 RELEASE_EXECUTABLE_NAME = "基金信息生成器.exe"
 
+REPO_URL_USER = "MapleCCC"
+REPO_URL_REPO = "Fund-Info-Fetcher"
+
 
 @unique
 class ExcelCellDataType(Enum):
@@ -61,10 +64,10 @@ def parse_version_number(s: str) -> Tuple[int, int, int]:
     return int(major), int(minor), int(patch)
 
 
-def get_latest_released_version() -> str:
+def get_latest_released_version(user: str, repo: str) -> str:
     # TODO Handle the case when the lastest release's tag name is not semantic version.
     response = requests.get(
-        "https://api.github.com/repos/MapleCCC/fund-info-fetcher/releases/latest"
+        f"https://api.github.com/repos/{user}/{repo}/releases/latest"
     )
     response.encoding = "utf-8"
     json_data = response.json()
@@ -72,22 +75,22 @@ def get_latest_released_version() -> str:
     return tag_name
 
 
-def get_latest_released_asset(name: str) -> bytes:
+def get_latest_released_asset(user: str, repo: str, asset_name: str) -> bytes:
     print("获取最新分发版本......")
     response = requests.get(
-        "https://api.github.com/repos/MapleCCC/fund-info-fetcher/releases/latest"
+        f"https://api.github.com/repos/{user}/{repo}/releases/latest"
     )
     response.encoding = "utf-8"
     json_data = response.json()
     assets = json_data["assets"]
-    candidates = list(filter(lambda asset: asset["name"] == name, assets))
+    candidates = list(filter(lambda asset: asset["name"] == asset_name, assets))
     if len(candidates) == 00:
         raise RuntimeError(
-            f"No asset with name {name} can be found in the latest release"
+            f"No asset with name {asset_name} can be found in the latest release"
         )
     elif len(candidates) > 1:
         raise RuntimeError(
-            f"More than one assets with name {name} are found in the latest release"
+            f"More than one assets with name {asset_name} are found in the latest release"
         )
     asset = candidates[0]
     print("下载最新版本......")
@@ -179,7 +182,11 @@ def update(latest_version: str) -> None:
         with TemporaryDirectory() as d:
             tempdir = Path(d)
             p = tempdir / RELEASE_ASSET_NAME
-            p.write_bytes(get_latest_released_asset(RELEASE_ASSET_NAME))
+            p.write_bytes(
+                get_latest_released_asset(
+                    REPO_URL_USER, REPO_URL_REPO, RELEASE_ASSET_NAME
+                )
+            )
             # WARNING: A big pitfall here is that Python's builtin zipfile module
             # has a flawed implementation of decoding zip file member names.
             # Solution appeals to
@@ -201,7 +208,7 @@ def update(latest_version: str) -> None:
 
 
 def check_update() -> None:
-    latest_version = get_latest_released_version()
+    latest_version = get_latest_released_version(REPO_URL_USER, REPO_URL_REPO)
     if parse_version_number(latest_version) > parse_version_number(__version__):
         while True:
             choice = input(
