@@ -10,6 +10,7 @@ import xlsxwriter
 from tqdm import tqdm
 
 from fetcher import get_fund_info
+from utils import green, red
 
 
 @unique
@@ -100,7 +101,7 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
     if os.path.isfile(out_filename) and not yes_to_all:
         while True:
             choice = input(
-                f"{out_filename} 同名文件已存在，是否覆盖之？【选择是请输入“是”，选择否请输入“否”】\n"
+                f"{out_filename} 同名文件已存在，是否覆盖之？【选择是请输入“{green('是')}”，选择否请输入“{red('否')}”】\n"
             ).strip()
             if choice == "是":
                 break
