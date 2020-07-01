@@ -74,7 +74,7 @@ def get_fund_info(code: str) -> Dict[str, str]:
         info = dict(zip(keys, values))
         info["基金代码"] = code
         info["基金名称"] = get_fund_name(code)
-        info["估算日期"], info["实时估算值"], info["估算增长率"] = get_fund_net_value_estimate(code)
+        info["估算日期"], info["实时估值"], info["估算增长率"] = get_fund_net_value_estimate(code)
 
         return info
 
