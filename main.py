@@ -71,6 +71,7 @@ def get_latest_released_version() -> str:
 
 
 def get_latest_released_asset(name: str) -> bytes:
+    print("获取最新分发版本......")
     response = requests.get(
         "https://api.github.com/repos/MapleCCC/fund-info-fetcher/releases/latest"
     )
@@ -87,6 +88,7 @@ def get_latest_released_asset(name: str) -> bytes:
             f"More than one assets with name {name} are found in the latest release"
         )
     asset = candidates[0]
+    print("下载最新版本......")
     return requests.get(
         asset["url"], headers={"Accept": "application/octet-stream"}
     ).content
@@ -147,6 +149,8 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
 
 
 def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
+    print("检查参数......")
+
     if not os.path.exists(in_filename):
         raise FileNotFoundError(f"文件 {in_filename} 不存在")
 
@@ -167,6 +171,7 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
 
 
 def update(latest_version: str) -> None:
+    print("开始更新程序......")
     with TemporaryDirectory() as d:
         tempdir = Path(d)
         p = tempdir / RELEASE_ASSET_NAME
@@ -184,6 +189,7 @@ def update(latest_version: str) -> None:
             tempdir / transformed_executable_name,  # type: ignore
             Path.cwd() / versioned_executable_name,
         )
+    print("程序更新完毕")
 
 
 def check_update() -> None:
