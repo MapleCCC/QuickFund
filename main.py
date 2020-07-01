@@ -12,6 +12,8 @@ from tqdm import tqdm
 from fetcher import get_fund_info
 from utils import green, red
 
+__version__ = "0.2.0"
+
 
 @unique
 class ExcelCellDataType(Enum):
@@ -115,6 +117,7 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
 @click.argument("filename")
 @click.option("-o", "--output", default="基金信息.xlsx")
 @click.option("-y", "--yes-to-all", is_flag=True, default=False)
+@click.version_option(version=__version__)
 def main(filename: str, output: str, yes_to_all: bool) -> None:
     in_filename = filename
     out_filename = output
