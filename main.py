@@ -59,9 +59,14 @@ atexit.register(pause_wait_enter)
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
-    version_pattern = r"v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)"
-    major, minor, patch = re.match(version_pattern, s).group("major", "minor", "patch")
-    return int(major), int(minor), int(patch)
+    try:
+        version_pattern = r"v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)"
+        major, minor, patch = re.match(version_pattern, s).group(
+            "major", "minor", "patch"
+        )
+        return int(major), int(minor), int(patch)
+    except Exception as exc:
+        raise RuntimeError("解析版本号是出现错误") from exc
 
 
 def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
@@ -119,8 +124,6 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
 
 
 def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
-    print("检查参数......")
-
     if not os.path.exists(in_filename):
         raise FileNotFoundError(f"文件 {in_filename} 不存在")
 
@@ -141,8 +144,8 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
 
 
 def update(latest_version: str) -> None:
-    print("开始更新程序......")
     try:
+        print("开始更新程序......")
         with TemporaryDirectory() as d:
             tempdir = Path(d)
             p = tempdir / RELEASE_ASSET_NAME
@@ -166,12 +169,13 @@ def update(latest_version: str) -> None:
                 tempdir / transformed_executable_name,  # type: ignore
                 Path.cwd() / versioned_executable_name,
             )
+        print("程序更新完毕")
     except Exception as exc:
         raise RuntimeError(f"更新程序的时候发生错误") from exc
-    print("程序更新完毕")
 
 
 def check_update() -> None:
+    print("获取最新分发版本......")
     latest_version = get_latest_released_version(REPO_URL_USER, REPO_URL_REPO)
     if parse_version_number(latest_version) > parse_version_number(__version__):
         while True:
@@ -185,19 +189,28 @@ def check_update() -> None:
                 return
             else:
                 print("输入指令无效，请重新输入")
+    else:
+        print("当前已是最新版本")
 
 
 @click.command()
 @click.argument("filename")
 @click.option("-o", "--output", default="基金信息.xlsx")
 @click.option("-y", "--yes-to-all", is_flag=True, default=False)
+@click.option("--disable-check-update", is_flag=True, default=False)
+# TODO: @click.option("--update")
 @click.version_option(version=__version__)
-def main(filename: str, output: str, yes_to_all: bool) -> None:
-    check_update()
+def main(
+    filename: str, output: str, yes_to_all: bool, disable_check_update: bool
+) -> None:
+    if not disable_check_update:
+        print("检查更新......")
+        check_update()
 
     in_filename = filename
     out_filename = output
 
+    print("检查参数......")
     check_args(in_filename, out_filename, yes_to_all)
 
     print("获取基金代码列表......")
