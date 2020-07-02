@@ -54,6 +54,11 @@
   - When program successfully finishes.
   - When program terminates due to uncaught exception.
   - When program terminates due to call to exit()/sys.exit()/quit().
+- Use setup.py to install console script.
+- Adopt `conventional commit` conventions.
+- Auto workflow to calculate SHA256 hash signature of the released zip file and the released executable file.
+- Polish the `--help` generated message.
+- Search on the internet about existing project that make async possible with requests library.
 
 
 ## Archive

@@ -23,11 +23,17 @@ PYINSTALLER_FLAGS = [
     "--onefile",
 ]
 
+print("将 Python 脚本打包成可执行文件......")
+
 subprocess.run(
     ["python", "-OO", "-m", "PyInstaller"]
     + PYINSTALLER_FLAGS
     + ["pyinstaller_entry.py"]
 ).check_returncode()
 
+print("将可执行文件打包成压缩文件包......")
+
+# We don't compress, only package. Because the generated executable
+# doesn't have much to squeeze.
 with ZipFile(os.path.join(PYINSTALLER_DISTPATH, RELEASE_ASSET_NAME), "w") as f:
     f.write(os.path.join(PYINSTALLER_DISTPATH, RELEASE_EXECUTABLE_NAME))

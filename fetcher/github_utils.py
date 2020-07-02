@@ -4,8 +4,6 @@ __all__ = ["get_latest_released_version", "get_latest_released_asset"]
 
 
 def get_latest_released_version(user: str, repo: str) -> str:
-    # TODO Handle the case when the lastest release's tag name is not semantic
-    # version.
     response = requests.get(
         f"https://api.github.com/repos/{user}/{repo}/releases/latest"
     )

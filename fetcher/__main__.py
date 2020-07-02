@@ -38,7 +38,8 @@ class ExcelCellDataType(Enum):
 
 
 # TODO use language construct to make sure fieldnames consistent with
-# their occurrences in other places across the code repository.
+# their occurrences in other places across the code repository. As
+# manually syncing them is both tedious and error-prone.
 
 fieldnames = [
     "基金名称",
@@ -79,7 +80,7 @@ def parse_version_number(s: str) -> Tuple[int, int, int]:
         )
         return int(major), int(minor), int(patch)
     except Exception as exc:
-        raise RuntimeError("解析版本号是出现错误") from exc
+        raise RuntimeError("解析版本号时出现错误") from exc
 
 
 def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
@@ -158,12 +159,11 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
 
 def update(latest_version: str) -> None:
     try:
-        print("开始更新程序......")
         with TemporaryDirectory() as d:
             tempdir = Path(d)
             p = tempdir / RELEASE_ASSET_NAME
             p.write_bytes(
-                get_latest_released_asset(
+                get_latest_release_asset(
                     REPO_URL_USER, REPO_URL_REPO, RELEASE_ASSET_NAME
                 )
             )
@@ -182,21 +182,24 @@ def update(latest_version: str) -> None:
                 tempdir / transformed_executable_name,  # type: ignore
                 Path.cwd() / versioned_executable_name,
             )
-        print("程序更新完毕")
     except Exception as exc:
         raise RuntimeError(f"更新程序的时候发生错误") from exc
 
 
 def check_update() -> None:
-    print("获取最新分发版本......")
-    latest_version = get_latest_released_version(REPO_URL_USER, REPO_URL_REPO)
+    print("获取最新分发版本号......")
+    # TODO Handle the case when the lastest release's tag name is not semantic
+    # version.
+    latest_version = get_latest_release_version(REPO_URL_USER, REPO_URL_REPO)
     if parse_version_number(latest_version) > parse_version_number(__version__):
         while True:
             choice = input(
                 f"检测到更新版本 {latest_version}，是否更新？【选择是请输入“{green('是')}”，选择否请输入“{red('否')}”】\n"
             ).strip()
             if choice == "是":
+                print("开始更新程序......")
                 update(latest_version)
+                print("程序更新完毕")
                 exit()
             elif choice == "否":
                 return
@@ -228,6 +231,7 @@ def main(
 
     print("获取基金代码列表......")
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
+
     print("清洗基金代码列表......")
     codes = list(filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(codes)))
 
