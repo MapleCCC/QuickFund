@@ -17,6 +17,7 @@ PYINSTALLER_FLAGS = [
     # WARNING: using PyInstaller with upx enabled causes corrupted executable. Don't know why.
     # "--upx-dir",
     # "D:\\Apps\\upx-3.96-win64",
+    "--noupx",
     "--distpath",
     PYINSTALLER_DISTPATH,
     "--clean",
