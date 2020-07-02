@@ -152,7 +152,7 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
     if os.path.isfile(out_filename) and not yes_to_all:
         while True:
             choice = input(
-                f"{out_filename} 同名文件已存在，是否覆盖之？【选择是请输入“{green('是')}”，选择否请输入“{red('否')}”】\n"
+                f"{out_filename} 同名文件已存在，是否覆盖之？【选择是请输入“{green('覆盖')}”，选择否请输入“{red('不覆盖并退出')}”】\n"
             ).strip()
             if choice == "是":
                 break
@@ -199,7 +199,7 @@ def check_update() -> None:
     else:
         while True:
             choice = input(
-                f"检测到更新版本 {latest_version}，是否更新？【选择是请输入“{green('是')}”，选择否请输入“{red('否')}”】\n"
+                f"检测到更新版本 {latest_version}，是否更新？【选择是请输入“{green('更新')}”，选择否请输入“{red('暂不更新')}”】\n"
             ).strip()
             if choice == "是":
                 print("开始更新程序......")
