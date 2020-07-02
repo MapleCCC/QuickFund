@@ -5,15 +5,16 @@ import subprocess
 import sys
 from zipfile import ZipFile
 
+from github import Github
+
 sys.path.append(os.getcwd())
 from fetcher.config import (
-    __version__,
     RELEASE_ASSET_NAME,
     RELEASE_EXECUTABLE_NAME,
-    REPO_OWNER,
     REPO_NAME,
+    REPO_OWNER,
+    __version__,
 )
-from fetcher.github_utils import create_release, get_latest_release_id, upload_asset
 
 
 pyinstaller_distpath = "dist"
@@ -52,15 +53,12 @@ with ZipFile(asset_filepath, "w") as f:
 print("在 GitHub 仓库创建 Release")
 
 # Create release in GitHub. Upload the zip archive as release asset.
-create_release(REPO_OWNER, REPO_NAME, __version__)
+g = Github("MapleCCC", "im5Pos$sible")
+repo = g.get_repo(f"{REPO_OWNER}/{REPO_NAME}")
+git_release = repo.create_git_release(
+    tag=__version__, name=__version__, message="Update"
+)
 
 print("上传打包好的可执行文件......")
 
-latest_release_id = get_latest_release_id(REPO_OWNER, REPO_NAME)
-upload_asset(
-    REPO_OWNER,
-    REPO_NAME,
-    latest_release_id,
-    asset_filepath,
-    content_type="application/zip",
-)
+git_release.upload_asset(asset_filepath)
