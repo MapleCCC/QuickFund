@@ -50,7 +50,7 @@ def main(component: str) -> None:
     print("Pushing tag to remote......")
     subprocess.run(["git", "push", "origin", new_version]).check_returncode()
 
-    release_main()
+    release_main(new_version)
 
 
 if __name__ == "__main__":

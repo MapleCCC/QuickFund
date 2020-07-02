@@ -7,7 +7,6 @@ from zipfile import ZipFile
 from github import Github
 
 sys.path.append(os.getcwd())
-from fetcher.__version__ import __version__
 from fetcher.config import (
     RELEASE_ASSET_NAME,
     RELEASE_EXECUTABLE_NAME,
@@ -18,7 +17,7 @@ from scripts.build import PYINSTALLER_DISTPATH
 from scripts.build import main as build_main
 
 
-def main():
+def main(new_version: str) -> None:
     build_main()
 
     print("将可执行文件打包成压缩文件包......")
@@ -38,18 +37,16 @@ def main():
 
     # Create release in GitHub. Upload the zip archive as release asset.
     user_name = input("Please enter GitHub account username: ").strip()
-    password = input(f"Please input password for the GitHub account {user_name}: ").strip()
+    password = input(
+        f"Please input password for the GitHub account {user_name}: "
+    ).strip()
     g = Github(user_name, password)
     repo = g.get_repo(f"{REPO_OWNER}/{REPO_NAME}")
     git_release = repo.create_git_release(
-        tag=__version__, name=__version__, message="Update"
+        tag=new_version, name=new_version, message="Update"
     )
 
     print("上传打包好的可执行文件......")
 
     # TODO display upload progress (such as a progress bar)
     git_release.upload_asset(asset_filepath)
-
-
-if __name__ == "__main__":
-    main()
