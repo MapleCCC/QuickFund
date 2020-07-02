@@ -49,7 +49,7 @@ def get_fund_name(code: str) -> str:
 
 
 @lru_cache(maxsize=None)
-def get_fund_net_value_estimate(code: str) -> Tuple[str, str, str]:
+def get_fund_estimate_stat(code: str) -> Tuple[str, str, str, str]:
     try:
         response = requests.get(fund_page_url.format(code=code))
         # WARNING: use utf-8-sig instead of utf-8 since the content contains
@@ -57,9 +57,15 @@ def get_fund_net_value_estimate(code: str) -> Tuple[str, str, str]:
         response.encoding = "utf-8-sig"
         html = etree.HTML(response.text)
         estimate_timestamp = html.xpath('//span[@id="gz_gztime"]/text()')[0]
-        estimate = html.xpath('//span[@id="gz_gsz"]/text()')[0]
+        estimate_net_value = html.xpath('//span[@id="gz_gsz"]/text()')[0]
         estimate_growth_rate = html.xpath('//span[@id="gz_gszzl"]/text()')[0]
-        return estimate_timestamp, estimate, estimate_growth_rate
+        estimate_growth_value = html.xpath('//span[@id="gz_gszze"]/text()')[0]
+        return (
+            estimate_timestamp,
+            estimate_net_value,
+            estimate_growth_rate,
+            estimate_growth_value,
+        )
     except Exception as exc:
         raise RuntimeError(f"获取基金代码为 {code} 的基金的估算值相关信息时发生错误") from exc
 
@@ -89,7 +95,12 @@ def get_fund_info(code: str) -> Dict[str, str]:
         info = dict(zip(keys, values))
         info["基金代码"] = code
         info["基金名称"] = get_fund_name(code)
-        info["估算日期"], info["实时估值"], info["估算增长率"] = get_fund_net_value_estimate(code)
+        (
+            info["估算日期"],
+            info["实时估值"],
+            info["估算增长率"],
+            info["估算增长额"],
+        ) = get_fund_estimate_stat(code)
 
         return info
 
