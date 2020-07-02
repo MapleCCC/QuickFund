@@ -131,7 +131,13 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                 else:
                     raise RuntimeError("Unreachable")
 
-        workbook.close()
+        try:
+            workbook.close()
+        except PermissionError:
+            raise RuntimeError(
+                f"将信息写入 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
+                f"有可能是 {xlsx_filename} 已经被 Excel 打开"
+            )
     except Exception as exc:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
 
