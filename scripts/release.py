@@ -52,6 +52,9 @@ with ZipFile(asset_filepath, "w") as f:
 
 print("在 GitHub 仓库创建 Release")
 
+# TODO when releasing, put in the message about what's updated, what's fixed,
+# and the hash signature of the assets.
+
 # Create release in GitHub. Upload the zip archive as release asset.
 g = Github("MapleCCC", "im5Pos$sible")
 repo = g.get_repo(f"{REPO_OWNER}/{REPO_NAME}")

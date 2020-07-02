@@ -59,6 +59,11 @@
 - Auto workflow to calculate SHA256 hash signature of the released zip file and the released executable file.
 - Polish the `--help` generated message.
 - Search on the internet about existing project that make async possible with requests library.
+- Script to auto check update daily.
+- User experience design: when doing long time processing, create some animated UI to let user understand that something is going on and the process is not dead.
+- Find way to quick unit test, integrate test, regression test. No need to stand up with the startup time overhead of the super heavyweight Excel program anymore.
+- Use requests session to leverage connection pool.
+- Use requests body content flow stream.
 
 
 ## Archive
