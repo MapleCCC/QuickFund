@@ -26,7 +26,7 @@ from .config import (
 )
 from .fetcher import get_fund_info
 from .github_utils import get_latest_release_asset, get_latest_release_version
-from .utils import green, red
+from .utils import green, parse_version_number, red
 
 
 @unique
@@ -69,17 +69,6 @@ fieldtypes = [
 def pause_wait_enter() -> None:
     # input("Press ENTER to exit")
     input("按下回车键以退出")
-
-
-def parse_version_number(s: str) -> Tuple[int, int, int]:
-    try:
-        version_pattern = r"v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)"
-        major, minor, patch = re.match(version_pattern, s).group(
-            "major", "minor", "patch"
-        )
-        return int(major), int(minor), int(patch)
-    except Exception as exc:
-        raise RuntimeError("解析版本号时出现错误") from exc
 
 
 def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
