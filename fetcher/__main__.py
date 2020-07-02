@@ -107,7 +107,12 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                 if fieldtype == ExcelCellDataType.string:
                     worksheet.write_string(row + 1, col, fieldvalue)
                 elif fieldtype == ExcelCellDataType.number:
-                    num = float(fieldvalue)
+                    try:
+                        num = float(fieldvalue)
+                    except ValueError:
+                        raise RuntimeError(
+                            f'基金代码为 {info["基金代码"]} 的基金"{info["基金名称"]}"的"{fieldname}"数据无法转换成浮点数格式：{fieldvalue}'
+                        )
                     worksheet.write_number(row + 1, col, num)
                 elif fieldtype == ExcelCellDataType.date:
                     date = datetime.strptime(fieldvalue, "%Y-%m-%d")
