@@ -193,7 +193,11 @@ def check_update() -> None:
     print("获取最新分发版本号......")
     # TODO Handle the case when the lastest release's tag name is not semantic
     # version.
-    latest_version = get_latest_release_version(REPO_OWNER, REPO_NAME)
+    try:
+        latest_version = get_latest_release_version(REPO_OWNER, REPO_NAME)
+    except:
+        print("获取最新分发版本号的时候发生错误，暂时跳过。可以通过 --update 命令来手动触发更新检查")
+        return
     if not (parse_version_number(latest_version) > parse_version_number(__version__)):
         print("当前已是最新版本")
     else:
