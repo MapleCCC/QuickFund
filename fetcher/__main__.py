@@ -138,9 +138,9 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
             choice = input(
                 f"{out_filename} 同名文件已存在，是否覆盖之？【选择是请输入“{green('覆盖')}”，选择否请输入“{red('不覆盖并退出')}”】\n"
             ).strip()
-            if choice == "是":
+            if choice == "覆盖":
                 break
-            elif choice == "否":
+            elif choice == "不覆盖并退出":
                 exit()
             else:
                 print("输入指令无效，请重新输入")
@@ -189,12 +189,12 @@ def check_update() -> None:
             choice = input(
                 f"检测到更新版本 {latest_version}，是否更新？【选择是请输入“{green('更新')}”，选择否请输入“{red('暂不更新')}”】\n"
             ).strip()
-            if choice == "是":
+            if choice == "更新":
                 print("开始更新程序......")
                 update(latest_version)
                 print("程序更新完毕")
                 exit()
-            elif choice == "否":
+            elif choice == "暂不更新":
                 return
             else:
                 print("输入指令无效，请重新输入")
