@@ -1,1 +1,1 @@
-from .__main__ import __version__
+from .config import __version__

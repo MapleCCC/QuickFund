@@ -17,17 +17,16 @@ import xlsxwriter
 
 from tqdm_minimal import tqdm
 
+from .config import (
+    RELEASE_ASSET_NAME,
+    RELEASE_EXECUTABLE_NAME,
+    REPO_URL_REPO,
+    REPO_URL_USER,
+    __version__,
+)
 from .fetcher import get_fund_info
 from .github_utils import get_latest_released_asset, get_latest_released_version
 from .utils import green, red
-
-__version__ = "0.3.0"
-
-RELEASE_ASSET_NAME = "fund-info-fetcher-win64.zip"
-RELEASE_EXECUTABLE_NAME = "基金信息生成器.exe"
-
-REPO_URL_USER = "MapleCCC"
-REPO_URL_REPO = "Fund-Info-Fetcher"
 
 
 @unique

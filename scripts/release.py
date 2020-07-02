@@ -6,7 +6,7 @@ import sys
 from zipfile import ZipFile
 
 sys.path.append(os.getcwd())
-from fetcher.__main__ import RELEASE_ASSET_NAME, RELEASE_EXECUTABLE_NAME
+from fetcher.config import RELEASE_ASSET_NAME, RELEASE_EXECUTABLE_NAME
 
 
 PYINSTALLER_DISTPATH = "dist"
