@@ -96,7 +96,7 @@ def create_release(
 
 
 def upload_asset(
-    owner: str, repo: str, release_id: str, filename: str, content_type: str
+    owner: str, repo: str, release_id: int, filename: str, content_type: str
 ) -> None:
     headers = {"accept": "application/vnd.github.v3+json"}
     file_tuple = (filename, open(filename, "rb"))
