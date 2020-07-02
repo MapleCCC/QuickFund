@@ -6,6 +6,7 @@ import re
 import shutil
 from datetime import datetime
 from enum import Enum, auto, unique
+from functools import lru_cache
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Dict, List, Tuple
@@ -231,7 +232,8 @@ def main(
     codes = list(filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(codes)))
 
     print("获取基金相关信息......")
-    infos = [get_fund_info(code) for code in tqdm(codes)]
+    cached_get_fund_info = lru_cache(maxsize=None)(get_fund_info)
+    infos = [cached_get_fund_info(code) for code in tqdm(codes)]
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(infos, out_filename)

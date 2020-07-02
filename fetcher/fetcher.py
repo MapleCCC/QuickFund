@@ -48,7 +48,6 @@ def get_fund_name(code: str) -> str:
         raise RuntimeError(f"获取基金代码为 {code} 的基金名称信息时发生错误") from exc
 
 
-@lru_cache(maxsize=None)
 def get_fund_estimate_stat(code: str) -> Tuple[str, str, str, str]:
     try:
         response = requests.get(fund_page_url.format(code=code))
@@ -70,7 +69,6 @@ def get_fund_estimate_stat(code: str) -> Tuple[str, str, str, str]:
         raise RuntimeError(f"获取基金代码为 {code} 的基金的估算值相关信息时发生错误") from exc
 
 
-@lru_cache(maxsize=None)
 def get_fund_info(code: str) -> Dict[str, str]:
     try:
         response = requests.get(net_value_api + code)
