@@ -168,9 +168,7 @@ def update(latest_version: str) -> None:
             tempdir = Path(d)
             p = tempdir / RELEASE_ASSET_NAME
             p.write_bytes(
-                get_latest_release_asset(
-                    REPO_OWNER, REPO_NAME, RELEASE_ASSET_NAME
-                )
+                get_latest_release_asset(REPO_OWNER, REPO_NAME, RELEASE_ASSET_NAME)
             )
             # WARNING: A big pitfall here is that Python's builtin zipfile module
             # has a flawed implementation of decoding zip file member names.
@@ -196,7 +194,9 @@ def check_update() -> None:
     # TODO Handle the case when the lastest release's tag name is not semantic
     # version.
     latest_version = get_latest_release_version(REPO_OWNER, REPO_NAME)
-    if parse_version_number(latest_version) > parse_version_number(__version__):
+    if not (parse_version_number(latest_version) > parse_version_number(__version__)):
+        print("当前已是最新版本")
+    else:
         while True:
             choice = input(
                 f"检测到更新版本 {latest_version}，是否更新？【选择是请输入“{green('是')}”，选择否请输入“{red('否')}”】\n"
@@ -210,8 +210,6 @@ def check_update() -> None:
                 return
             else:
                 print("输入指令无效，请重新输入")
-    else:
-        print("当前已是最新版本")
 
 
 @click.command()
