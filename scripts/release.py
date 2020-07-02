@@ -31,15 +31,15 @@ def main():
     with ZipFile(asset_filepath, "w") as f:
         f.write(executable_filepath)
 
-    print("在 GitHub 仓库创建 Release")
+    print("在 GitHub 仓库创建 Release......")
 
     # TODO when releasing, put in the message about what's updated, what's fixed,
     # and the hash signature of the assets.
 
     # Create release in GitHub. Upload the zip archive as release asset.
-    g = Github(
-        "MapleCCC", input("Please input password for the GitHub account MapleCCC: ")
-    )
+    user_name = input("Please enter GitHub account username: ").strip()
+    password = input(f"Please input password for the GitHub account {user_name}: ").strip()
+    g = Github(user_name, password)
     repo = g.get_repo(f"{REPO_OWNER}/{REPO_NAME}")
     git_release = repo.create_git_release(
         tag=__version__, name=__version__, message="Update"

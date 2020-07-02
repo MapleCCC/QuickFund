@@ -9,7 +9,7 @@ from enum import Enum, auto, unique
 from functools import lru_cache
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from zipfile import ZipFile
 
 import click

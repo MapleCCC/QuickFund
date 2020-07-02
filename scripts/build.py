@@ -26,6 +26,7 @@ pyinstaller_flags = [
 def main():
     print("将 Python 脚本打包成可执行文件......")
 
+    subprocess.run(["make", "clean"]).check_returncode()
     subprocess.run(
         ["python", "-OO", "-m", "PyInstaller"]
         + pyinstaller_flags

@@ -23,7 +23,7 @@ unused-imports:
 	find ${SRC_DIR} ${TEST_DIR} -type f -name "*.py" | xargs pylint --disable=all --enable=W0611
 
 todo:
-	rg TODO
+	rg "# TODO" --glob !Makefile
 
 clean:
 	rm -rf build/ dist/ __pycache__/ *.spec

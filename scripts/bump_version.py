@@ -19,6 +19,8 @@ from scripts.release import main as release_main
 @click.command()
 @click.argument("component")
 def main(component: str) -> None:
+    print("Calculating new version......")
+
     major, minor, patch = parse_version_number(current_version)
 
     if component == "major":
@@ -30,7 +32,7 @@ def main(component: str) -> None:
     else:
         raise RuntimeError("Invalid argument")
 
-    # Bump the __version__ variable in __version__.py
+    print("Bump the __version__ variable in __version__.py ......")
     p = Path("fetcher/__version__.py")
     old_content = p.read_text(encoding="utf-8")
     new_content = re.sub(
@@ -39,10 +41,13 @@ def main(component: str) -> None:
     p.write_text(new_content, encoding="utf-8")
 
     subprocess.run(["git", "add", "fetcher/__version__.py"]).check_returncode()
+    print("Commiting the special commit for bumping version......")
     subprocess.run(
         ["git", "commit", "-m", f"Bump version to {new_version}"]
     ).check_returncode()
+    print("Creating tag for new version......")
     subprocess.run(["git", "tag", new_version]).check_returncode()
+    print("Pushing tag to remote......")
     subprocess.run(["git", "push", "origin", new_version]).check_returncode()
 
     release_main()
