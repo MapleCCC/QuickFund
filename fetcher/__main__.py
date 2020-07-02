@@ -58,9 +58,6 @@ def pause_wait_enter() -> None:
     input("按下回车键以退出")
 
 
-atexit.register(pause_wait_enter)
-
-
 def parse_version_number(s: str) -> Tuple[int, int, int]:
     try:
         version_pattern = r"v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)"
@@ -232,4 +229,5 @@ def main(
 
 
 if __name__ == "__main__":
+    atexit.register(pause_wait_enter)
     main()  # pylint: disable=no-value-for-parameter
