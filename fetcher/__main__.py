@@ -17,13 +17,8 @@ import xlsxwriter
 
 from tqdm_minimal import tqdm
 
-from .config import (
-    RELEASE_ASSET_NAME,
-    RELEASE_EXECUTABLE_NAME,
-    REPO_NAME,
-    REPO_OWNER,
-    __version__,
-)
+from .__version__ import __version__
+from .config import RELEASE_ASSET_NAME, RELEASE_EXECUTABLE_NAME, REPO_NAME, REPO_OWNER
 from .fetcher import get_fund_info
 from .github_utils import get_latest_release_asset, get_latest_release_version
 from .utils import green, parse_version_number, red
