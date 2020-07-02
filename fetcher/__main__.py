@@ -20,8 +20,8 @@ from tqdm_minimal import tqdm
 from .config import (
     RELEASE_ASSET_NAME,
     RELEASE_EXECUTABLE_NAME,
-    REPO_URL_REPO,
-    REPO_URL_USER,
+    REPO_NAME,
+    REPO_OWNER,
     __version__,
 )
 from .fetcher import get_fund_info
@@ -163,7 +163,7 @@ def update(latest_version: str) -> None:
             p = tempdir / RELEASE_ASSET_NAME
             p.write_bytes(
                 get_latest_release_asset(
-                    REPO_URL_USER, REPO_URL_REPO, RELEASE_ASSET_NAME
+                    REPO_OWNER, REPO_NAME, RELEASE_ASSET_NAME
                 )
             )
             # WARNING: A big pitfall here is that Python's builtin zipfile module
@@ -189,7 +189,7 @@ def check_update() -> None:
     print("获取最新分发版本号......")
     # TODO Handle the case when the lastest release's tag name is not semantic
     # version.
-    latest_version = get_latest_release_version(REPO_URL_USER, REPO_URL_REPO)
+    latest_version = get_latest_release_version(REPO_OWNER, REPO_NAME)
     if parse_version_number(latest_version) > parse_version_number(__version__):
         while True:
             choice = input(
