@@ -25,7 +25,7 @@ from .config import (
     __version__,
 )
 from .fetcher import get_fund_info
-from .github_utils import get_latest_released_asset, get_latest_released_version
+from .github_utils import get_latest_release_asset, get_latest_release_version
 from .utils import green, red
 
 
