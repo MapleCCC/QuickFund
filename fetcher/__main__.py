@@ -151,36 +151,36 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
                 print("输入指令无效，请重新输入")
 
 
-def update(latest_version: str) -> None:
-    try:
-        with TemporaryDirectory() as d:
-            basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
-            release_executable_name = basename + " " + latest_version + extension
-            basename, extension = os.path.splitext(RELEASE_ASSET_NAME)
-            release_asset_name = basename + " " + latest_version + extension
+# def update(latest_version: str) -> None:
+#     try:
+#         with TemporaryDirectory() as d:
+#             basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
+#             release_executable_name = basename + " " + latest_version + extension
+#             basename, extension = os.path.splitext(RELEASE_ASSET_NAME)
+#             release_asset_name = basename + " " + latest_version + extension
 
-            tempdir = Path(d)
-            p = tempdir / RELEASE_ASSET_NAME
-            p.write_bytes(
-                get_latest_release_asset(REPO_OWNER, REPO_NAME, release_asset_name)
-            )
-            # WARNING: A big pitfall here is that Python's builtin zipfile module
-            # has a flawed implementation of decoding zip file member names.
-            # Solution appeals to
-            # https://stackoverflow.com/questions/41019624/python-zipfile-module-cant-extract-filenames-with-chinese-characters
-            transformed_executable_name = release_executable_name.encode("gbk").decode(
-                "cp437"
-            )
-            with ZipFile(p) as f:
-                f.extract(transformed_executable_name, path=str(tempdir))
-            basename, extension = os.path.splitext(release_executable_name)
-            versioned_executable_name = basename + latest_version + extension
-            shutil.move(
-                tempdir / transformed_executable_name,  # type: ignore
-                Path.cwd() / versioned_executable_name,
-            )
-    except Exception as exc:
-        raise RuntimeError(f"更新程序的时候发生错误") from exc
+#             tempdir = Path(d)
+#             p = tempdir / RELEASE_ASSET_NAME
+#             p.write_bytes(
+#                 get_latest_release_asset(REPO_OWNER, REPO_NAME, release_asset_name)
+#             )
+#             # WARNING: A big pitfall here is that Python's builtin zipfile module
+#             # has a flawed implementation of decoding zip file member names.
+#             # Solution appeals to
+#             # https://stackoverflow.com/questions/41019624/python-zipfile-module-cant-extract-filenames-with-chinese-characters
+#             transformed_executable_name = release_executable_name.encode("gbk").decode(
+#                 "cp437"
+#             )
+#             with ZipFile(p) as f:
+#                 f.extract(transformed_executable_name, path=str(tempdir))
+#             basename, extension = os.path.splitext(release_executable_name)
+#             versioned_executable_name = basename + latest_version + extension
+#             shutil.move(
+#                 tempdir / transformed_executable_name,  # type: ignore
+#                 Path.cwd() / versioned_executable_name,
+#             )
+#     except Exception as exc:
+#         raise RuntimeError(f"更新程序的时候发生错误") from exc
 
 
 def check_update() -> None:
@@ -192,22 +192,27 @@ def check_update() -> None:
     except:
         print("获取最新分发版本号的时候发生错误，暂时跳过。可以通过 --update 命令来手动触发更新检查")
         return
-    if not (parse_version_number(latest_version) > parse_version_number(__version__)):
-        print("当前已是最新版本")
+    # if not (parse_version_number(latest_version) > parse_version_number(__version__)):
+    #     print("当前已是最新版本")
+    # else:
+    #     while True:
+    #         choice = input(
+    #             f"检测到更新版本 {latest_version}，是否更新？【选择是请输入“{green('更新')}”，选择否请输入“{red('暂不更新')}”】\n"
+    #         ).strip()
+    #         if choice == "更新":
+    #             print("开始更新程序......")
+    #             update(latest_version)
+    #             print("程序更新完毕")
+    #             exit()
+    #         elif choice == "暂不更新":
+    #             return
+    #         else:
+    #             print("输入指令无效，请重新输入")
+    if parse_version_number(latest_version) > parse_version_number(__version__):
+        print(f"检测到更新版本 {latest_version}，请手动更新")
+        exit()
     else:
-        while True:
-            choice = input(
-                f"检测到更新版本 {latest_version}，是否更新？【选择是请输入“{green('更新')}”，选择否请输入“{red('暂不更新')}”】\n"
-            ).strip()
-            if choice == "更新":
-                print("开始更新程序......")
-                update(latest_version)
-                print("程序更新完毕")
-                exit()
-            elif choice == "暂不更新":
-                return
-            else:
-                print("输入指令无效，请重新输入")
+        print("当前已是最新版本")
 
 
 @click.command()
