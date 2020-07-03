@@ -18,7 +18,7 @@ from scripts.release import main as release_main
 
 @click.command()
 @click.argument("component")
-@click.option("--release", is_flag=True, default=False)
+@click.option("--release", is_flag=True, default=True)
 def main(component: str, release: bool) -> None:
     print("Calculating new version......")
 

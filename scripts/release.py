@@ -13,45 +13,47 @@ from fetcher.config import (
     REPO_NAME,
     REPO_OWNER,
 )
+from scripts._local_credentials import github_account_access_token
 from scripts.build import PYINSTALLER_DISTPATH
 from scripts.build import main as build_main
 
 
-def main(new_version: str) -> None:
-    build_main(new_version)
-
-    print("将可执行文件打包成压缩文件包......")
-
-    basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
-    release_executable_name = basename + " " + new_version + extension
-    basename, extension = os.path.splitext(RELEASE_ASSET_NAME)
-    release_asset_name = basename + " " + new_version + extension
-
-    asset_filepath = os.path.join(PYINSTALLER_DISTPATH, release_asset_name)
-    executable_filepath = os.path.join(PYINSTALLER_DISTPATH, release_executable_name)
-
-    # We don't compress, only package. Because the generated executable
-    # doesn't have much to squeeze.
-    with ZipFile(asset_filepath, "w") as f:
-        f.write(executable_filepath)
-
+def main(new_version: str, upload_executable: bool = False) -> None:
     print("在 GitHub 仓库创建 Release......")
 
     # TODO when releasing, put in the message about what's updated, what's fixed,
     # and the hash signature of the assets.
 
     # Create release in GitHub. Upload the zip archive as release asset.
-    user_name = input("Please enter GitHub account username: ").strip()
-    password = input(
-        f"Please input password for the GitHub account {user_name}: "
-    ).strip()
-    g = Github(user_name, password)
+    g = Github(github_account_access_token)
     repo = g.get_repo(f"{REPO_OWNER}/{REPO_NAME}")
     git_release = repo.create_git_release(
         tag=new_version, name=new_version, message="Update"
     )
 
-    print("上传打包好的可执行文件......")
+    if upload_executable:
+        print("将 Python 脚本打包成可执行文件......")
+        build_main(new_version)
 
-    # TODO display upload progress (such as a progress bar)
-    git_release.upload_asset(asset_filepath)
+        print("将可执行文件打包成压缩文件包......")
+
+        basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
+        release_executable_name = basename + " " + new_version + extension
+        basename, extension = os.path.splitext(RELEASE_ASSET_NAME)
+        release_asset_name = basename + " " + new_version + extension
+
+        asset_filepath = os.path.join(PYINSTALLER_DISTPATH, release_asset_name)
+        executable_filepath = os.path.join(
+            PYINSTALLER_DISTPATH, release_executable_name
+        )
+
+        # We don't compress, only package. Because the generated executable
+        # doesn't have much to squeeze.
+        with ZipFile(asset_filepath, "w") as f:
+            f.write(executable_filepath)
+
+        print("上传打包好的可执行文件......")
+
+        # TODO display upload progress (such as a progress bar)
+        # TODO open issue or PR in PyGithub repository
+        git_release.upload_asset(asset_filepath)

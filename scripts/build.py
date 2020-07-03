@@ -23,8 +23,6 @@ pyinstaller_flags = [
 
 
 def main(build_version: str = None) -> None:
-    print("将 Python 脚本打包成可执行文件......")
-
     if not build_version:
         build_version = __version__
 
