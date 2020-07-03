@@ -3,6 +3,7 @@
 import atexit
 import os
 import re
+import shutil
 from datetime import datetime
 from enum import Enum, auto, unique
 from functools import lru_cache
@@ -134,16 +135,9 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
         raise RuntimeError(f"同名文件夹已存在，无法新建文件 {out_filename}")
 
     if os.path.isfile(out_filename) and not yes_to_all:
-        while True:
-            choice = input(
-                f"{out_filename} 同名文件已存在，是否覆盖之？【选择是请输入“{green('覆盖')}”，选择否请输入“{red('不覆盖并退出')}”】\n"
-            ).strip()
-            if choice == "覆盖":
-                break
-            elif choice == "不覆盖并退出":
-                exit()
-            else:
-                print("输入指令无效，请重新输入")
+        backup_filename = out_filename + ".bak"
+        shutil.move(out_filename, backup_filename)
+        print("{out_filename} 同名文件已存在，备份至 {backup_filename}")
 
 
 # def update(latest_version: str) -> None:
