@@ -18,12 +18,17 @@ from scripts.build import main as build_main
 
 
 def main(new_version: str) -> None:
-    build_main()
+    build_main(new_version)
 
     print("将可执行文件打包成压缩文件包......")
 
-    asset_filepath = os.path.join(PYINSTALLER_DISTPATH, RELEASE_ASSET_NAME)
-    executable_filepath = os.path.join(PYINSTALLER_DISTPATH, RELEASE_EXECUTABLE_NAME)
+    basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
+    release_executable_name = basename + " " + new_version + extension
+    basename, extension = os.path.splitext(RELEASE_ASSET_NAME)
+    release_asset_name = basename + " " + new_version + extension
+
+    asset_filepath = os.path.join(PYINSTALLER_DISTPATH, release_asset_name)
+    executable_filepath = os.path.join(PYINSTALLER_DISTPATH, release_executable_name)
 
     # We don't compress, only package. Because the generated executable
     # doesn't have much to squeeze.

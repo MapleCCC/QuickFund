@@ -10,8 +10,6 @@ from fetcher.config import RELEASE_EXECUTABLE_NAME
 PYINSTALLER_DISTPATH = "dist"
 
 pyinstaller_flags = [
-    "--name",
-    RELEASE_EXECUTABLE_NAME,
     # WARNING: using PyInstaller with upx enabled causes corrupted executable. Don't know why.
     # "--upx-dir",
     # "D:\\Apps\\upx-3.96-win64",
@@ -23,13 +21,20 @@ pyinstaller_flags = [
 ]
 
 
-def main():
+def main(build_version: str = None) -> None:
     print("将 Python 脚本打包成可执行文件......")
+
+    if build_version:
+        basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
+        release_executable_name = basename + " " + build_version + extension
+    else:
+        release_executable_name = RELEASE_EXECUTABLE_NAME
 
     subprocess.run(["make", "clean"]).check_returncode()
     subprocess.run(
         ["python", "-OO", "-m", "PyInstaller"]
         + pyinstaller_flags
+        + ["--name", release_executable_name]
         + ["pyinstaller_entry.py"]
     ).check_returncode()
 
