@@ -51,7 +51,11 @@ def get_estimate(fund_code: str) -> Dict[str, str]:
     fund_info["基金名称"] = json_data["name"]
     fund_info["估算日期"] = json_data["gztime"]
     fund_info["实时估值"] = json_data["gsz"]
-    fund_info["估算增长率"] = json_data["gszzl"]
+    estimate_growth_rate = json_data["gszzl"]
+    if "%" in estimate_growth_rate:
+        fund_info["估算增长率"] = estimate_growth_rate
+    else:
+        fund_info["估算增长率"] = estimate_growth_rate + "%"
 
     return fund_info
 
