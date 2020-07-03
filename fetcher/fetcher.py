@@ -40,10 +40,10 @@ def get_fund_info(fund_code: str) -> Dict[str, str]:
 
         fund_info = dict(zip(keys, values))
 
-        response = requests.get(estimate_api.format(code=fund_code))
+        response = requests.get(estimate_api.format(fund_code=fund_code))
         response.encoding = "utf-8"
         text = response.text
-        content = re.match(r"jsongpz\(?P<content>.*\);", text).group("content")
+        content = re.match(r"jsonpgz\((?P<content>.*)\);", text).group("content")
         json_data = json.loads(content)
         fund_info["基金代码"] = fund_code
         fund_info["基金名称"] = json_data["name"]
