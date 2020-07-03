@@ -14,7 +14,7 @@ ETree = Any
 
 
 def get_net_value(fund_code: str) -> Dict[str, str]:
-    params = {"type": "lsjz", "page": 1, "per": 1, "code": fund_code}
+    params = {"type": "lsjz", "page": 1, "per": 2, "code": fund_code}
     net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
     response = requests.get(net_value_api, params=params)
     response.encoding = "utf-8"
@@ -24,11 +24,11 @@ def get_net_value(fund_code: str) -> Dict[str, str]:
     )
 
     root = etree.XML(content)
-    keys = root.xpath("/table/thead/tr//th/text()")
+    keys = root.xpath("/table/thead/tr[1]/th/text()")
     # WARNING: don't use root.xpath("/table/tbody/tr//td/text()") to extract
     # values. The XPath expression will omit empty text, causing erroneous
     # result
-    tds = root.xpath("/table/tbody/tr//td")
+    tds = root.xpath("/table/tbody/tr[1]/td")
     values: List[str] = [td.text for td in tds]
     values = list(replace(values, lambda x: x == None, [""]))
 
@@ -36,6 +36,18 @@ def get_net_value(fund_code: str) -> Dict[str, str]:
         raise RuntimeError("解析基金信息时键值对不匹配")
 
     fund_info = dict(zip(keys, values))
+
+    last_time_tds = root.xpath("/table/tbody/tr[2]/td")
+    last_time_values = [td.text for td in last_time_tds]
+    last_time_values = list(replace(last_time_values, lambda x: x == None, [""]))
+
+    if len(keys) != len(values):
+        raise RuntimeError("解析基金信息时键值对不匹配")
+
+    last_time_info = dict(zip(keys, last_time_values))
+
+    fund_info["上一天净值"] = last_time_info["单位净值"]
+    fund_info["上一天净值日期"] = last_time_info["净值日期"]
 
     return fund_info
 
@@ -69,3 +81,7 @@ def get_fund_info(fund_code: str) -> Dict[str, str]:
         return fund_info
     except Exception as exc:
         raise RuntimeError(f"获取基金代码为 {fund_code} 的基金相关信息时发生错误") from exc
+
+
+if __name__ == "__main__":
+    print(get_net_value("000478"))

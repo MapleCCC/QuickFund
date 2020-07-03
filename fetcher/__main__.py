@@ -36,6 +36,8 @@ class ExcelCellDataType(Enum):
 fieldnames = [
     "基金名称",
     "基金代码",
+    "上一天净值日期",
+    "上一天净值",
     "净值日期",
     "单位净值",
     "日增长率",
@@ -47,6 +49,8 @@ fieldnames = [
 fieldtypes = [
     ExcelCellDataType.string,
     ExcelCellDataType.string,
+    ExcelCellDataType.date,
+    ExcelCellDataType.number,
     ExcelCellDataType.date,
     ExcelCellDataType.number,
     ExcelCellDataType.string,
@@ -91,6 +95,10 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, 17)
             elif fieldname in ("实时估值", "估算增长率"):
                 worksheet.set_column(i, i, 11)
+            elif fieldname == "上一天净值":
+                worksheet.set_column(i, i, 10)
+            elif fieldname == "上一天净值日期":
+                worksheet.set_column(i, i, 14)
 
         # Write body
         print("写入文档体......")
