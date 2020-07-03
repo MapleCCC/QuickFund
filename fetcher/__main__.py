@@ -77,7 +77,8 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
             {"bold": True, "align": "center", "valign": "top", "border": 1}
         )
         date_format = workbook.add_format({"num_format": "yyyy-mm-dd"})
-        highlight_format = workbook.add_format({"bg_color": "yellow"})
+        yellow_highlight_format = workbook.add_format({"bg_color": "yellow"})
+        blue_highlight_format = workbook.add_format({"bg_colo": "blue"})
 
         # Writer header
         print("写入文档头......")
@@ -120,7 +121,11 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                             f'基金代码为 {info["基金代码"]} 的基金"{info["基金名称"]}"的"{fieldname}"数据无法转换成浮点数格式：{fieldvalue}'
                         )
                     if fieldname in ("上一天净值", "单位净值"):
-                        worksheet.write_number(row + 1, col, num, highlight_format)
+                        worksheet.write_number(
+                            row + 1, col, num, yellow_highlight_format
+                        )
+                    elif fieldname == "实时估值":
+                        worksheet.write_number(row + 1, col, num, blue_highlight_format)
                     else:
                         worksheet.write_number(row + 1, col, num)
                 elif fieldtype == ExcelCellDataType.date:
