@@ -63,7 +63,7 @@ def get_estimate(fund_code: str) -> Dict[str, str]:
 def get_fund_info(fund_code: str) -> Dict[str, str]:
     try:
         fund_info = {}
-        fund_info["基金名称"] = fund_code
+        fund_info["基金代码"] = fund_code
         fund_info.update(get_net_value(fund_code))
         fund_info.update(get_estimate(fund_code))
         return fund_info
