@@ -12,12 +12,10 @@ __all__ = ["get_fund_info"]
 # https://github.com/python/typeshed/issues/525
 ETree = Any
 
-net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
-estimate_api = "http://fundgz.1234567.com.cn/js/{fund_code}.js"
-
 
 def get_net_value(fund_code: str) -> Dict[str, str]:
     params = {"type": "lsjz", "page": 1, "per": 1, "code": fund_code}
+    net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
     response = requests.get(net_value_api, params=params)
     response.encoding = "utf-8"
     text = response.text
@@ -43,6 +41,7 @@ def get_net_value(fund_code: str) -> Dict[str, str]:
 
 
 def get_estimate(fund_code: str) -> Dict[str, str]:
+    estimate_api = "http://fundgz.1234567.com.cn/js/{fund_code}.js"
     response = requests.get(estimate_api.format(fund_code=fund_code))
     response.encoding = "utf-8"
     text = response.text
