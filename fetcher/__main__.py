@@ -78,7 +78,7 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
         )
         date_format = workbook.add_format({"num_format": "yyyy-mm-dd"})
         yellow_highlight_format = workbook.add_format({"bg_color": "yellow"})
-        blue_highlight_format = workbook.add_format({"bg_colo": "blue"})
+        blue_highlight_format = workbook.add_format({"bg_color": "blue"})
 
         # Writer header
         print("写入文档头......")
