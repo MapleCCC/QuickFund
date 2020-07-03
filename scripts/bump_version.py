@@ -25,9 +25,9 @@ def main(component: str, release: bool) -> None:
     major, minor, patch = parse_version_number(current_version)
 
     if component == "major":
-        new_version = "v" + ".".join(map(str, (major + 1, minor, patch)))
+        new_version = "v" + ".".join(map(str, (major + 1, 0, 0)))
     elif component == "minor":
-        new_version = "v" + ".".join(map(str, (major, minor + 1, patch)))
+        new_version = "v" + ".".join(map(str, (major, minor + 1, 0)))
     elif component == "patch":
         new_version = "v" + ".".join(map(str, (major, minor, patch + 1)))
     else:
