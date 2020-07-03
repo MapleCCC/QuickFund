@@ -155,7 +155,7 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
     if os.path.isfile(out_filename) and not yes_to_all:
         backup_filename = out_filename + ".bak"
         shutil.move(out_filename, backup_filename)
-        print("{out_filename} 同名文件已存在，备份至 {backup_filename}")
+        print(f"{out_filename} 同名文件已存在，备份至 {backup_filename}")
 
 
 # def update(latest_version: str) -> None:
