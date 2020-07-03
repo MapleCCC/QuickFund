@@ -84,10 +84,10 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
         for i, fieldname in enumerate(fieldnames):
             worksheet.write(0, i, fieldname, header_format)
 
-        # Widen column for date data
+        # Widen column and set format for date data
         for i, fieldtype in enumerate(fieldtypes):
             if fieldtype == ExcelCellDataType.date:
-                worksheet.set_column(i, i, 13)
+                worksheet.set_column(i, i, 13, date_format)
 
         # Widen column for fund name field
         for i, fieldname in enumerate(fieldnames):
@@ -125,7 +125,7 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                         worksheet.write_number(row + 1, col, num)
                 elif fieldtype == ExcelCellDataType.date:
                     date = datetime.strptime(fieldvalue, "%Y-%m-%d")
-                    worksheet.write_datetime(row + 1, col, date, date_format)
+                    worksheet.write_datetime(row + 1, col, date)
                 else:
                     raise RuntimeError("Unreachable")
 
