@@ -1,3 +1,4 @@
+import json
 import re
 from functools import lru_cache
 from typing import Any, Dict, List, Tuple
@@ -12,66 +13,13 @@ __all__ = ["get_fund_info"]
 # https://github.com/python/typeshed/issues/525
 ETree = Any
 
-net_value_api = (
-    "https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code="
-)
-search_api = (
-    "https://fundsuggest.eastmoney.com/FundSearch/api/FundSearchAPI.ashx?m=1&key="
-)
-fund_page_url = "http://fund.eastmoney.com/{code}.html"
+net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&page=1&per=1&code={fund_code}"
+estimate_api = "http://fundgz.1234567.com.cn/js/{fund_code}.js"
 
 
-def get_etree_from_url(url: str) -> ETree:
-    response = requests.get(url)
-    response.encoding = "utf-8-sig"
-    html = etree.HTML(response.text)
-    return html
-
-
-@lru_cache(maxsize=None)
-def get_fund_name(code: str) -> str:
+def get_fund_info(fund_code: str) -> Dict[str, str]:
     try:
-        response = requests.get(search_api + code)
-        response.encoding = "utf-8"
-        json_data = response.json()
-        candidates = json_data["Datas"]
-        funds = list(filter(lambda x: x["CATEGORYDESC"] == "基金", candidates))
-        if len(funds) == 0:
-            raise RuntimeError(f"没有找到代码为 {code} 的基金")
-        elif len(funds) > 1:
-            names = [fund["NAME"] for fund in funds]
-            names_str = ", ".join(names)
-            raise RuntimeError(f"找到了不止一个基金的代码是 {code}: {names_str}")
-
-        return candidates[0]["NAME"]
-    except Exception as exc:
-        raise RuntimeError(f"获取基金代码为 {code} 的基金名称信息时发生错误") from exc
-
-
-def get_fund_estimate_stat(code: str) -> Tuple[str, str, str, str]:
-    try:
-        response = requests.get(fund_page_url.format(code=code))
-        # WARNING: use utf-8-sig instead of utf-8 since the content contains
-        # BOM header
-        response.encoding = "utf-8-sig"
-        html = etree.HTML(response.text)
-        estimate_timestamp = html.xpath('//span[@id="gz_gztime"]/text()')[0]
-        estimate_net_value = html.xpath('//span[@id="gz_gsz"]/text()')[0]
-        estimate_growth_rate = html.xpath('//span[@id="gz_gszzl"]/text()')[0]
-        estimate_growth_value = html.xpath('//span[@id="gz_gszze"]/text()')[0]
-        return (
-            estimate_timestamp,
-            estimate_net_value,
-            estimate_growth_rate,
-            estimate_growth_value,
-        )
-    except Exception as exc:
-        raise RuntimeError(f"获取基金代码为 {code} 的基金的估算值相关信息时发生错误") from exc
-
-
-def get_fund_info(code: str) -> Dict[str, str]:
-    try:
-        response = requests.get(net_value_api + code)
+        response = requests.get(net_value_api.format(fund_code))
         response.encoding = "utf-8"
         text = response.text
         content = re.match(r"var apidata={ content:\"(?P<content>.*)\"", text).group(
@@ -90,17 +38,20 @@ def get_fund_info(code: str) -> Dict[str, str]:
         if len(keys) != len(values):
             raise RuntimeError("解析基金信息时键值对不匹配")
 
-        info = dict(zip(keys, values))
-        info["基金代码"] = code
-        info["基金名称"] = get_fund_name(code)
-        (
-            info["估算日期"],
-            info["实时估值"],
-            info["估算增长率"],
-            info["估算增长额"],
-        ) = get_fund_estimate_stat(code)
+        fund_info = dict(zip(keys, values))
 
-        return info
+        response = requests.get(estimate_api.format(code=fund_code))
+        response.encoding = "utf-8"
+        text = response.text
+        content = re.match(r"jsongpz\(?P<content>.*\);", text).group("content")
+        json_data = json.loads(content)
+        fund_info["基金代码"] = fund_code
+        fund_info["基金名称"] = json_data["name"]
+        fund_info["估算日期"] = json_data["gztime"]
+        fund_info["实时估值"] = json_data["gsz"]
+        fund_info["估算增长率"] = json_data["gszzl"]
+
+        return fund_info
 
     except Exception as exc:
-        raise RuntimeError(f"获取基金代码为 {code} 的基金相关信息时发生错误") from exc
+        raise RuntimeError(f"获取基金代码为 {fund_code} 的基金相关信息时发生错误") from exc

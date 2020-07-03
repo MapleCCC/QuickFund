@@ -44,7 +44,6 @@ fieldnames = [
     "估算日期",
     "实时估值",
     "估算增长率",
-    "估算增长额",
     "分红送配",
 ]
 fieldtypes = [
@@ -56,7 +55,6 @@ fieldtypes = [
     ExcelCellDataType.string,
     ExcelCellDataType.number,
     ExcelCellDataType.string,
-    ExcelCellDataType.number,
     ExcelCellDataType.string,
 ]
 
@@ -93,7 +91,7 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, 22)
             elif fieldname == "估算日期":
                 worksheet.set_column(i, i, 17)
-            elif fieldname in ("实时估值", "估算增长率", "估算增长额"):
+            elif fieldname in ("实时估值", "估算增长率"):
                 worksheet.set_column(i, i, 11)
 
         # Write body
