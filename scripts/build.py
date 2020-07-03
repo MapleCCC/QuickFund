@@ -5,6 +5,7 @@ import subprocess
 import sys
 
 sys.path.append(os.getcwd())
+from fetcher.__version__ import __version__
 from fetcher.config import RELEASE_EXECUTABLE_NAME
 
 PYINSTALLER_DISTPATH = "dist"
@@ -24,11 +25,11 @@ pyinstaller_flags = [
 def main(build_version: str = None) -> None:
     print("将 Python 脚本打包成可执行文件......")
 
-    if build_version:
-        basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
-        release_executable_name = basename + " " + build_version + extension
-    else:
-        release_executable_name = RELEASE_EXECUTABLE_NAME
+    if not build_version:
+        build_version = __version__
+
+    basename, extension = os.path.splitext(RELEASE_EXECUTABLE_NAME)
+    release_executable_name = basename + " " + build_version + extension
 
     subprocess.run(["make", "clean"]).check_returncode()
     subprocess.run(
