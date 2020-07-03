@@ -18,7 +18,8 @@ from scripts.release import main as release_main
 
 @click.command()
 @click.argument("component")
-def main(component: str) -> None:
+@click.option("--release", is_flag=True, default=False)
+def main(component: str, release: bool) -> None:
     print("Calculating new version......")
 
     major, minor, patch = parse_version_number(current_version)
@@ -50,7 +51,8 @@ def main(component: str) -> None:
     print("Pushing tag to remote......")
     subprocess.run(["git", "push", "origin", new_version]).check_returncode()
 
-    release_main(new_version)
+    if release:
+        release_main(new_version)
 
 
 if __name__ == "__main__":
