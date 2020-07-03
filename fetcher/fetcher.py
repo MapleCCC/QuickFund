@@ -1,7 +1,6 @@
 import json
 import re
-from functools import lru_cache
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import requests
 from lxml import etree  # type: ignore

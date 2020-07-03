@@ -3,14 +3,11 @@
 import atexit
 import os
 import re
-import shutil
 from datetime import datetime
 from enum import Enum, auto, unique
 from functools import lru_cache
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import Dict, List
-from zipfile import ZipFile
 
 import click
 import xlsxwriter
@@ -18,9 +15,9 @@ import xlsxwriter
 from tqdm_minimal import tqdm
 
 from .__version__ import __version__
-from .config import RELEASE_ASSET_NAME, RELEASE_EXECUTABLE_NAME, REPO_NAME, REPO_OWNER
+from .config import REPO_NAME, REPO_OWNER
 from .fetcher import get_fund_info
-from .github_utils import get_latest_release_asset, get_latest_release_version
+from .github_utils import get_latest_release_version
 from .utils import green, parse_version_number, red
 
 
