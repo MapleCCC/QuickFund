@@ -12,6 +12,7 @@ from typing import Dict, List
 
 import click
 import xlsxwriter
+from xlsxwriter.exceptions import FileCreateError
 
 from tqdm_minimal import tqdm
 
@@ -126,7 +127,7 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
 
         try:
             workbook.close()
-        except PermissionError:
+        except FileCreateError:
             raise RuntimeError(
                 f"将信息写入 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
                 f"有可能是 {xlsx_filename} 已经被 Excel 打开"
