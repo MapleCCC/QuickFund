@@ -215,6 +215,8 @@ def check_update() -> None:
 def main(
     filename: str, output: str, yes_to_all: bool, disable_check_update: bool
 ) -> None:
+    atexit.register(pause_wait_enter)
+
     if not disable_check_update:
         print("检查更新......")
         check_update()
@@ -243,5 +245,4 @@ def main(
 
 
 if __name__ == "__main__":
-    atexit.register(pause_wait_enter)
     main()  # pylint: disable=no-value-for-parameter
