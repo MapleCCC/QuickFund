@@ -62,11 +62,6 @@ fieldtypes = [
 ]
 
 
-def pause_wait_enter() -> None:
-    # input("Press ENTER to exit")
-    input("按下回车键以退出")
-
-
 def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
     try:
         print("新建 Excel 文档......")
@@ -232,7 +227,8 @@ def check_update() -> None:
 def main(
     filename: str, output: str, yes_to_all: bool, disable_check_update: bool
 ) -> None:
-    atexit.register(pause_wait_enter)
+    # atexit.register(lambda _: input("Press ENTER to exit"))
+    atexit.register(lambda: input("按下回车键以退出"))
 
     if not disable_check_update:
         print("检查更新......")
