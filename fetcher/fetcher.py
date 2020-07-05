@@ -1,5 +1,7 @@
 import json
+import random
 import re
+import string
 from typing import Any, Dict, List
 
 import requests
@@ -14,7 +16,16 @@ ETree = Any
 
 
 def get_net_value(fund_code: str) -> Dict[str, str]:
-    params = {"type": "lsjz", "page": 1, "per": 2, "code": fund_code}
+    # Add random parameter to the URL to break any cache mechanism of
+    # the server or the network or the requests library.
+    garbage = "".join(random.sample(string.ascii_lowercase, 10))
+    params = {
+        "type": "lsjz",
+        "page": 1,
+        "per": 2,
+        "code": fund_code,
+        "garbage": garbage,
+    }
     net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
     response = requests.get(net_value_api, params=params)
     response.encoding = "utf-8"
@@ -53,8 +64,12 @@ def get_net_value(fund_code: str) -> Dict[str, str]:
 
 
 def get_estimate(fund_code: str) -> Dict[str, str]:
+    # Add random parameter to the URL to break potential cache mechanism of
+    # the server or the network or the requests library.
+    garbage = "".join(random.sample(string.ascii_lowercase, 10))
+    params = {"garbage": garbage}
     estimate_api = "http://fundgz.1234567.com.cn/js/{fund_code}.js"
-    response = requests.get(estimate_api.format(fund_code=fund_code))
+    response = requests.get(estimate_api.format(fund_code=fund_code), params=params)
     response.encoding = "utf-8"
     text = response.text
     content = re.match(r"jsonpgz\((?P<content>.*)\);", text).group("content")
