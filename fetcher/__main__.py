@@ -4,6 +4,7 @@ import atexit
 import os
 import re
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from enum import Enum, auto, unique
 from functools import lru_cache
@@ -248,7 +249,8 @@ def main(
 
     print("获取基金相关信息......")
     cached_get_fund_info = lru_cache(maxsize=None)(get_fund_info)
-    infos = [cached_get_fund_info(code) for code in tqdm(codes)]
+    with ThreadPoolExecutor() as executor:
+        infos = list(tqdm(executor.map(cached_get_fund_info, codes)))
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(infos, out_filename)
