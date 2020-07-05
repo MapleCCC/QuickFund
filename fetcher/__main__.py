@@ -63,7 +63,7 @@ fieldtypes = [
 ]
 
 
-def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
+def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
     try:
         print("新建 Excel 文档......")
         workbook = xlsxwriter.Workbook(xlsx_filename)
@@ -101,7 +101,7 @@ def write_to_xlsx(infos: List[Dict[str, str]], xlsx_filename: str) -> None:
 
         # Write body
         print("写入文档体......")
-        for row, info in tqdm(enumerate(infos)):
+        for row, info in tqdm(enumerate(fund_infos)):
 
             for col, fieldname in enumerate(fieldnames):
                 fieldvalue = info[fieldname]
@@ -250,13 +250,13 @@ def main(
     print("获取基金相关信息......")
     cached_get_fund_info = lru_cache(maxsize=None)(get_fund_info)
     if len(codes) < 3:
-        infos = [cached_get_fund_info(code) for code in tqdm(codes)]
+        fund_infos = [cached_get_fund_info(code) for code in tqdm(codes)]
     else:
         with ThreadPoolExecutor() as executor:
-            infos = list(tqdm(executor.map(cached_get_fund_info, codes)))
+            fund_infos = list(tqdm(executor.map(cached_get_fund_info, codes)))
 
     print("将基金相关信息写入 Excel 文件......")
-    write_to_xlsx(infos, out_filename)
+    write_to_xlsx(fund_infos, out_filename)
 
     # The emoji takes inspiration from the black (https://github.com/psf/black)
     print("完满结束! ✨ 🍰 ✨")
