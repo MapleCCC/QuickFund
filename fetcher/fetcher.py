@@ -46,7 +46,13 @@ def get_net_value(fund_code: str) -> Dict[str, str]:
     if len(keys) != len(values):
         raise RuntimeError("解析基金信息时键值对不匹配")
 
-    fund_info = dict(zip(keys, values))
+    responded_data = dict(zip(keys, values))
+
+    fund_info = {}
+    fund_info["净值日期"] = responded_data["净值日期"]
+    fund_info["单位净值"] = responded_data["单位净值"]
+    fund_info["日增长率"] = responded_data["日增长率"]
+    fund_info["分红送配"] = responded_data["分红送配"]
 
     last_time_tds = root.xpath("/table/tbody/tr[2]/td")
     last_time_values = [td.text for td in last_time_tds]
