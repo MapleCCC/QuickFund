@@ -8,14 +8,14 @@ import requests
 from lxml import etree  # type: ignore
 from more_itertools import replace
 
-__all__ = ["get_fund_info"]
+__all__ = ["fetch_fund_info"]
 
 # Unfortunately current state of lxml type stub is far from complete.
 # https://github.com/python/typeshed/issues/525
 ETree = Any
 
 
-def get_net_value(fund_code: str) -> Dict[str, str]:
+def fetch_net_value(fund_code: str) -> Dict[str, str]:
     # Add random parameter to the URL to break any cache mechanism of
     # the server or the network or the requests library.
     garbage = "".join(random.sample(string.ascii_lowercase, 10))
@@ -69,7 +69,7 @@ def get_net_value(fund_code: str) -> Dict[str, str]:
     return fund_info
 
 
-def get_estimate(fund_code: str) -> Dict[str, str]:
+def fetch_estimate(fund_code: str) -> Dict[str, str]:
     # Add random parameter to the URL to break potential cache mechanism of
     # the server or the network or the requests library.
     garbage = "".join(random.sample(string.ascii_lowercase, 10))
@@ -93,16 +93,16 @@ def get_estimate(fund_code: str) -> Dict[str, str]:
     return fund_info
 
 
-def get_fund_info(fund_code: str) -> Dict[str, str]:
+def fetch_fund_info(fund_code: str) -> Dict[str, str]:
     try:
         fund_info = {}
         fund_info["基金代码"] = fund_code
-        fund_info.update(get_net_value(fund_code))
-        fund_info.update(get_estimate(fund_code))
+        fund_info.update(fetch_net_value(fund_code))
+        fund_info.update(fetch_estimate(fund_code))
         return fund_info
     except Exception as exc:
         raise RuntimeError(f"获取基金代码为 {fund_code} 的基金相关信息时发生错误") from exc
 
 
 if __name__ == "__main__":
-    print(get_net_value("000478"))
+    print(fetch_net_value("000478"))

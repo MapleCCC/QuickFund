@@ -19,7 +19,7 @@ from tqdm_minimal import tqdm
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
-from .fetcher import get_fund_info
+from .fetcher import fetch_fund_info
 from .github_utils import get_latest_release_version
 from .utils import green, parse_version_number, red
 
@@ -248,12 +248,12 @@ def main(
     codes = list(filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(codes)))
 
     print("获取基金相关信息......")
-    cached_get_fund_info = lru_cache(maxsize=None)(get_fund_info)
+    cached_fetch_fund_info = lru_cache(maxsize=None)(fetch_fund_info)
     if len(codes) < 3:
-        fund_infos = [cached_get_fund_info(code) for code in tqdm(codes)]
+        fund_infos = [cached_fetch_fund_info(code) for code in tqdm(codes)]
     else:
         with ThreadPoolExecutor() as executor:
-            fund_infos = list(tqdm(executor.map(cached_get_fund_info, codes)))
+            fund_infos = list(tqdm(executor.map(cached_fetch_fund_info, codes)))
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(fund_infos, out_filename)
