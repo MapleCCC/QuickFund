@@ -243,6 +243,9 @@ def main(
 
     print("获取基金代码列表......")
     codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
+    if not codes:
+        print("没有发现基金代码")
+        exit()
 
     print("清洗基金代码列表......")
     codes = list(filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(codes)))
