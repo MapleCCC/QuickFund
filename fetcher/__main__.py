@@ -249,8 +249,11 @@ def main(
 
     print("获取基金相关信息......")
     cached_get_fund_info = lru_cache(maxsize=None)(get_fund_info)
-    with ThreadPoolExecutor() as executor:
-        infos = list(tqdm(executor.map(cached_get_fund_info, codes)))
+    if len(codes) < 3:
+        infos = [cached_get_fund_info(code) for code in tqdm(codes)]
+    else:
+        with ThreadPoolExecutor() as executor:
+            infos = list(tqdm(executor.map(cached_get_fund_info, codes)))
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(infos, out_filename)
