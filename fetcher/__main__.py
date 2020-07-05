@@ -242,21 +242,23 @@ def main(
     check_args(in_filename, out_filename, yes_to_all)
 
     print("获取基金代码列表......")
-    codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
-    if not codes:
+    fund_codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
+    if not fund_codes:
         print("没有发现基金代码")
         exit()
 
     print("清洗基金代码列表......")
-    codes = list(filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(codes)))
+    fund_codes = list(
+        filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(fund_codes))
+    )
 
     print("获取基金相关信息......")
     cached_fetch_fund_info = lru_cache(maxsize=None)(fetch_fund_info)
-    if len(codes) < 3:
-        fund_infos = [cached_fetch_fund_info(code) for code in tqdm(codes)]
+    if len(fund_codes) < 3:
+        fund_infos = [cached_fetch_fund_info(code) for code in tqdm(fund_codes)]
     else:
         with ThreadPoolExecutor() as executor:
-            fund_infos = list(tqdm(executor.map(cached_fetch_fund_info, codes)))
+            fund_infos = list(tqdm(executor.map(cached_fetch_fund_info, fund_codes)))
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(fund_infos, out_filename)
