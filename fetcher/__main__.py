@@ -4,6 +4,7 @@ import atexit
 import locale
 import os
 import re
+import shelve
 import shutil
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -23,6 +24,9 @@ from .config import REPO_NAME, REPO_OWNER
 from .fetcher import fetch_fund_info
 from .github_utils import get_latest_release_version
 from .utils import parse_version_number
+
+PERSISTENT_CACHE_FILE_BASENAME = ".cache/cache"
+DB_MAX_RECORD_NUM = 1000
 
 
 @unique
@@ -222,6 +226,18 @@ def check_update() -> None:
         print("当前已是最新版本")
 
 
+def read_from_db() -> Dict[str, Dict[str, str]]:
+    # TODO remove out-dated cache entries
+    with shelve.open(PERSISTENT_CACHE_FILE_BASENAME) as db:
+        pass
+    return indexed_fund_infos
+
+
+def write_to_db(fund_infos: Dict[str, str]) -> None:
+    indexed_fund_infos = {fund_info["基金名称"]: fund_info for fund_info in fund_infos}
+    pass
+
+
 @click.command()
 @click.argument("filename")
 @click.option("-o", "--output", default="基金信息.xlsx")
@@ -258,15 +274,24 @@ def main(
 
     print("获取基金相关信息......")
     cached_fetch_fund_info = lru_cache(maxsize=None)(fetch_fund_info)
+
+    indexed_fund_infos = read_from_db()
+
+    def get_fund_info(fund_code: str) -> Dict[str, str]:
+        return indexed_fund_infos.get(fund_code) or cached_fetch_fund_info(fund_code)
+
     if len(fund_codes) < 3:
-        fund_infos = [cached_fetch_fund_info(code) for code in tqdm(fund_codes)]
+        fund_infos = [get_fund_info(code) for code in tqdm(fund_codes)]
     else:
         with ThreadPoolExecutor() as executor:
-            async_mapped = executor.map(cached_fetch_fund_info, fund_codes)
+            async_mapped = executor.map(get_fund_info, fund_codes)
             fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(fund_infos, out_filename)
+
+    print("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
+    write_to_db(fund_infos)
 
     # The emoji takes inspiration from the black (https://github.com/psf/black)
     print("完满结束! ✨ 🍰 ✨")
