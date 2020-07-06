@@ -1,6 +1,6 @@
 # TODO: pin the version of dependencies. Use semantic versioning.
 
-# tqdm
+tqdm
 click
 lxml
 xlsxwriter

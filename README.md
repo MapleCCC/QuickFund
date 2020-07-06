@@ -4,6 +4,4 @@ A script to fetch various fund information from `https://fund.eastmoney.com`, an
 
 ## License
 
-The `tqdm_minimal/` directory contains code that are adapted from `tqdm` (https://github.com/tqdm/tqdm). The code inside `tqdm_minimal/` directory follows `tqdm`'s license (https://github.com/tqdm/tqdm/blob/master/LICENCE).
-
-Other parts of the code follow MIT license.
+[MIT](./LICENSE)

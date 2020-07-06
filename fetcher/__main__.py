@@ -15,7 +15,7 @@ import click
 import xlsxwriter
 from xlsxwriter.exceptions import FileCreateError
 
-from tqdm_minimal import tqdm
+from tqdm import tqdm
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
