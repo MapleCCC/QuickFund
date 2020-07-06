@@ -4,3 +4,7 @@
 - Add progress indicator. Informative printing message.
 - When searching for fund name, distinguish between fund and stock.
 - Strip tqdm to minimal and copy to this repo.
+- Try to use RESET api as much as possible. Avoid fetching web content which could be outdated or up to JavaScript modification. And it would be super tedious and engineering-wise difficult to up a whole JS engine to run JavaScript code.
+- Add version as suffix to release assets and/or release executable.
+- Instead of asking for override confirmation, just backup the old file and create the new file in-place.
+- Add LICENSE

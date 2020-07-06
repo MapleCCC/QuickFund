@@ -11,13 +11,12 @@ from datetime import date, datetime, timedelta
 from enum import Enum, auto, unique
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List
+from typing import Callable, Dict, Iterable, Iterator, List, TypeVar, cast
 
 import click
 import xlsxwriter
-from xlsxwriter.exceptions import FileCreateError
-
 from tqdm import tqdm
+from xlsxwriter.exceptions import FileCreateError
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
@@ -30,6 +29,12 @@ PERSISTENT_CACHE_DB_DIRECTORY = ".cache"
 # Instead of using full filename, we use basename, because shelve requires so.
 PERSISTENT_CACHE_DB_FILE_BASENAME = "cache"
 DB_MAX_RECORD_NUM = 1000
+
+
+# FIXME The problem is that there is no officially supported way to type annotate a
+# function with optional argument.
+T = TypeVar("T")
+tqdm = cast(Callable[[Iterable[T]], Iterator[T]], tqdm)
 
 
 @unique
@@ -71,6 +76,8 @@ fieldtypes = [
 ]
 
 
+# TODO refactor write_to_xlsx. Such a long function is prone to error and grows
+# harder to maintain.
 def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
     try:
         print("新建 Excel 文档......")
@@ -286,7 +293,7 @@ def main(
     # atexit.register(lambda _: input("Press ENTER to exit"))
     atexit.register(lambda: input("按下回车键以退出"))
 
-    if not disable_check_update:
+    # TODO Remove update check logic after switching architecture to
     if not disable_update_check:
         print("检查更新......")
         check_update()

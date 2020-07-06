@@ -4,3 +4,4 @@ tqdm
 click
 lxml
 xlsxwriter
+more_itertools
