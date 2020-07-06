@@ -266,9 +266,7 @@ def main(
     fund_codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
 
     print("清洗基金代码列表......")
-    fund_codes = list(
-        filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(fund_codes))
-    )
+    fund_codes = [code for code in tqdm(fund_codes) if re.fullmatch(r"\d{6}", code)]
     if not fund_codes:
         print("没有发现基金代码")
         exit()
