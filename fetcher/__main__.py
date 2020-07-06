@@ -7,7 +7,7 @@ import re
 import shelve
 import shutil
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from enum import Enum, auto, unique
 from functools import lru_cache
 from pathlib import Path
@@ -25,7 +25,10 @@ from .fetcher import fetch_fund_info
 from .github_utils import get_latest_release_version
 from .utils import parse_version_number
 
-PERSISTENT_CACHE_FILE_BASENAME = ".cache/cache"
+# TODO rename `cache` to 缓存, more Chinese-user-friendly
+PERSISTENT_CACHE_DB_DIRECTORY = ".cache"
+# Instead of using full filename, we use basename, because shelve requires so.
+PERSISTENT_CACHE_DB_FILE_BASENAME = "cache"
 DB_MAX_RECORD_NUM = 1000
 
 
@@ -226,16 +229,48 @@ def check_update() -> None:
         print("当前已是最新版本")
 
 
-def read_from_db() -> Dict[str, Dict[str, str]]:
-    # TODO remove out-dated cache entries
-    with shelve.open(PERSISTENT_CACHE_FILE_BASENAME) as db:
-        pass
-    return indexed_fund_infos
+def net_value_date_is_latest(raw_date: str) -> bool:
+    net_value_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
+    now = datetime.now()
+    today = date.today()
+    if 0 <= now.hour < 20:
+        return net_value_date + timedelta(days=1) == today
+    else:
+        return net_value_date == today
 
 
-def write_to_db(fund_infos: Dict[str, str]) -> None:
-    indexed_fund_infos = {fund_info["基金名称"]: fund_info for fund_info in fund_infos}
-    pass
+def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
+    if not os.path.isdir(PERSISTENT_CACHE_DB_DIRECTORY):
+        os.makedirs(PERSISTENT_CACHE_DB_DIRECTORY)
+
+    shelf_path = os.path.join(
+        PERSISTENT_CACHE_DB_DIRECTORY, PERSISTENT_CACHE_DB_FILE_BASENAME
+    )
+
+    with shelve.open(shelf_path) as fund_info_cache_db:
+
+        @lru_cache(maxsize=None)
+        def get_fund_info(fund_code: str) -> Dict[str, str]:
+            old_fund_info = fund_info_cache_db.get(fund_code)
+            if old_fund_info and net_value_date_is_latest(old_fund_info["净值日期"]):
+                return old_fund_info
+            else:
+                new_fund_info = fetch_fund_info(fund_code)
+                # 将基金相关信息写入数据库，留备下次使用，加速下次查询......
+                fund_info_cache_db[fund_code] = new_fund_info
+                return new_fund_info
+
+        # TODO experiment to find a suitable number as threshold between sync and
+        # async code
+        if len(fund_codes) < 3:
+            return [get_fund_info(code) for code in tqdm(fund_codes)]
+        else:
+            with ThreadPoolExecutor() as executor:
+                async_mapped = executor.map(get_fund_info, fund_codes)
+                return list(tqdm(async_mapped, total=len(fund_codes)))
+
+        # TODO remove out-dated cache entries
+        # TODO remove old-aged cache entries when DB_MAX_RECORD_NUM is reached
 
 
 @click.command()
@@ -272,25 +307,10 @@ def main(
         exit()
 
     print("获取基金相关信息......")
-    cached_fetch_fund_info = lru_cache(maxsize=None)(fetch_fund_info)
-
-    indexed_fund_infos = read_from_db()
-
-    def get_fund_info(fund_code: str) -> Dict[str, str]:
-        return indexed_fund_infos.get(fund_code) or cached_fetch_fund_info(fund_code)
-
-    if len(fund_codes) < 3:
-        fund_infos = [get_fund_info(code) for code in tqdm(fund_codes)]
-    else:
-        with ThreadPoolExecutor() as executor:
-            async_mapped = executor.map(get_fund_info, fund_codes)
-            fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))
+    fund_infos = get_fund_infos(fund_codes)
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(fund_infos, out_filename)
-
-    print("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
-    write_to_db(fund_infos)
 
     # The emoji takes inspiration from the black (https://github.com/psf/black)
     print("完满结束! ✨ 🍰 ✨")
