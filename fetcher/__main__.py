@@ -258,7 +258,8 @@ def main(
         fund_infos = [cached_fetch_fund_info(code) for code in tqdm(fund_codes)]
     else:
         with ThreadPoolExecutor() as executor:
-            fund_infos = list(tqdm(executor.map(cached_fetch_fund_info, fund_codes)))
+            async_mapped = executor.map(cached_fetch_fund_info, fund_codes)
+            fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))
 
     print("将基金相关信息写入 Excel 文件......")
     write_to_xlsx(fund_infos, out_filename)
