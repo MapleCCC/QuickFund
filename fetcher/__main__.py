@@ -242,16 +242,17 @@ def write_to_db(fund_infos: Dict[str, str]) -> None:
 @click.argument("filename")
 @click.option("-o", "--output", default="基金信息.xlsx")
 @click.option("-y", "--yes-to-all", is_flag=True, default=False)
-@click.option("--disable-check-update", is_flag=True, default=False)
+@click.option("--disable-update-check", is_flag=True, default=False)
 # TODO: @click.option("--update")
 @click.version_option(version=__version__)
 def main(
-    filename: str, output: str, yes_to_all: bool, disable_check_update: bool
+    filename: str, output: str, yes_to_all: bool, disable_update_check: bool
 ) -> None:
     # atexit.register(lambda _: input("Press ENTER to exit"))
     atexit.register(lambda: input("按下回车键以退出"))
 
     if not disable_check_update:
+    if not disable_update_check:
         print("检查更新......")
         check_update()
 
