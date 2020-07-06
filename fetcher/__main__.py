@@ -24,8 +24,11 @@ from .fetcher import fetch_fund_info
 from .github_utils import get_latest_release_version
 from .utils import parse_version_number
 
-# TODO rename `cache` to 缓存, more Chinese-user-friendly
-PERSISTENT_CACHE_DB_DIRECTORY = ".cache"
+
+if locale.getdefaultlocale()[0] == "zh-CN":
+    PERSISTENT_CACHE_DB_DIRECTORY = ".缓存"
+else:
+    PERSISTENT_CACHE_DB_DIRECTORY = ".cache"
 # Instead of using full filename, we use basename, because shelve requires so.
 PERSISTENT_CACHE_DB_FILE_BASENAME = "cache"
 DB_MAX_RECORD_NUM = 1000
