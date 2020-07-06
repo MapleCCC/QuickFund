@@ -22,7 +22,7 @@ from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
 from .fetcher import fetch_fund_info
 from .github_utils import get_latest_release_version
-from .utils import green, parse_version_number, red
+from .utils import parse_version_number
 
 
 @unique
