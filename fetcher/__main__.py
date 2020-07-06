@@ -243,14 +243,14 @@ def main(
 
     print("获取基金代码列表......")
     fund_codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
-    if not fund_codes:
-        print("没有发现基金代码")
-        exit()
 
     print("清洗基金代码列表......")
     fund_codes = list(
         filter(lambda code: re.fullmatch(r"\d{6}", code), tqdm(fund_codes))
     )
+    if not fund_codes:
+        print("没有发现基金代码")
+        exit()
 
     print("获取基金相关信息......")
     cached_fetch_fund_info = lru_cache(maxsize=None)(fetch_fund_info)
