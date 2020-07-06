@@ -34,7 +34,7 @@ DB_MAX_RECORD_NUM = 1000
 # FIXME The problem is that there is no officially supported way to type annotate a
 # function with optional argument.
 T = TypeVar("T")
-tqdm = cast(Callable[[Iterable[T]], Iterator[T]], tqdm)
+tqdm: Callable[[Iterable[T]], Iterator[T]]
 
 
 @unique
