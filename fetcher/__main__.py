@@ -17,7 +17,6 @@ from typing import Callable, Dict, Iterable, Iterator, List, TypeVar
 import click
 import xlsxwriter
 from tqdm import tqdm, trange
-from xlsxwriter.exceptions import FileCreateError
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
@@ -150,13 +149,7 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                 else:
                     raise RuntimeError("Unreachable")
 
-        try:
-            workbook.close()
-        except FileCreateError:
-            raise RuntimeError(
-                f"将信息写入 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
-                f"有可能是 {xlsx_filename} 已经被 Excel 打开"
-            )
+        workbook.close()
     except Exception as exc:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
 
@@ -173,7 +166,13 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
             backup_filename = "[备份] " + out_filename
         else:
             backup_filename = out_filename + ".bak"
-        shutil.move(out_filename, backup_filename)
+        try:
+            shutil.move(out_filename, backup_filename)
+        except PermissionError:
+            raise RuntimeError(
+                f"备份 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
+                f"有可能是 {out_filename} 已经被 Excel 打开"
+            )
         print(f"{out_filename} 同名文件已存在，备份至 {backup_filename}")
 
 
