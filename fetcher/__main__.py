@@ -211,6 +211,8 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
     )
 
     with shelve.open(shelf_path) as fund_info_cache_db:
+        renewed_variable_access_lock = threading.Lock()
+        renewed = {}
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> Dict[str, str]:
@@ -218,7 +220,11 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
             if old_fund_info and net_value_date_is_latest(old_fund_info["净值日期"]):
                 return old_fund_info
             else:
-                return fetch_fund_info(fund_code)
+                new_fund_info = fetch_fund_info(fund_code)
+                renewed_variable_access_lock.acquire()
+                renewed[fund_code] = new_fund_info
+                renewed_variable_access_lock.release()
+                return new_fund_info
 
         # TODO experiment to find a suitable number as threshold between sync and
         # async code
@@ -230,9 +236,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
                 fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))  # type: ignore
 
         print("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
-        for fund_info in fund_infos:
-            fund_code = fund_info["基金代码"]
-            fund_info_cache_db[fund_code] = fund_info
+        fund_info_cache_db.update(renewed)
 
         return fund_infos
 
