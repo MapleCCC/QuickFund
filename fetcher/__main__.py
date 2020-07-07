@@ -23,6 +23,7 @@ from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
 from .fetcher import fetch_fund_info
 from .github_utils import get_latest_release_version
+from .lru import LRU
 from .utils import parse_version_number
 
 
@@ -32,7 +33,7 @@ else:
     PERSISTENT_CACHE_DB_DIRECTORY = ".cache"
 # Instead of using full filename, we use basename, because shelve requires so.
 PERSISTENT_CACHE_DB_FILE_BASENAME = "cache"
-DB_MAX_RECORD_NUM = 1000
+DB_MAX_RECORD_NUM = 2000
 
 
 # FIXME The problem is that there is no officially supported way to type annotate a
@@ -216,6 +217,24 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> Dict[str, str]:
+            if "lru_record" in fund_info_cache_db:
+                # Instead of directly in-place updating the "lru_record" entry in
+                # fund_info_cache_db, we copy it to a new variable and update the
+                # new variable and then copy back. This is because directly in-place
+                # updating shelve dict entry requires opening shelve with the `writeback`
+                # parameter set to True, which could lead to increased memory cost
+                # and IO cost and slow down the program.
+                lru: LRU = fund_info_cache_db["lru_record"]
+                lru.update(fund_code)
+                if len(lru) > DB_MAX_RECORD_NUM:
+                    to_delete = lru.evict()
+                    del fund_info_cache_db[to_delete]
+                fund_info_cache_db["lru_record"] = lru
+            else:
+                lru = LRU()
+                lru.update(fund_code)
+                fund_info_cache_db["lru_record"] = lru
+
             old_fund_info = fund_info_cache_db.get(fund_code)
             if old_fund_info and net_value_date_is_latest(old_fund_info["净值日期"]):
                 return old_fund_info
