@@ -16,7 +16,7 @@ from typing import Callable, Dict, Iterable, Iterator, List, TypeVar, cast
 
 import click
 import xlsxwriter
-from tqdm import tqdm
+from tqdm import tqdm, trange
 from xlsxwriter.exceptions import FileCreateError
 
 from .__version__ import __version__
@@ -33,7 +33,7 @@ else:
     PERSISTENT_CACHE_DB_DIRECTORY = ".cache"
 # Instead of using full filename, we use basename, because shelve requires so.
 PERSISTENT_CACHE_DB_FILE_BASENAME = "cache"
-DB_MAX_RECORD_NUM = 2000
+PERSISTENT_CACHE_DB_RECORD_MAX_NUM = 2000
 
 
 # FIXME The problem is that there is no officially supported way to type annotate a
@@ -217,24 +217,6 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> Dict[str, str]:
-            if "lru_record" in fund_info_cache_db:
-                # Instead of directly in-place updating the "lru_record" entry in
-                # fund_info_cache_db, we copy it to a new variable and update the
-                # new variable and then copy back. This is because directly in-place
-                # updating shelve dict entry requires opening shelve with the `writeback`
-                # parameter set to True, which could lead to increased memory cost
-                # and IO cost and slow down the program.
-                lru: LRU = fund_info_cache_db["lru_record"]
-                lru.update(fund_code)
-                if len(lru) > DB_MAX_RECORD_NUM:
-                    to_delete = lru.evict()
-                    del fund_info_cache_db[to_delete]
-                fund_info_cache_db["lru_record"] = lru
-            else:
-                lru = LRU()
-                lru.update(fund_code)
-                fund_info_cache_db["lru_record"] = lru
-
             old_fund_info = fund_info_cache_db.get(fund_code)
             if old_fund_info and net_value_date_is_latest(old_fund_info["净值日期"]):
                 return old_fund_info
@@ -257,10 +239,26 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
         print("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)
 
+        # Instead of directly in-place updating the "lru_record" entry in
+        # fund_info_cache_db, we copy it to a new variable and update the
+        # new variable and then copy back. This is because directly in-place
+        # updating shelve dict entry requires opening shelve with the `writeback`
+        # parameter set to True, which could lead to increased memory cost
+        # and IO cost and slow down the program.
+        lru = fund_info_cache_db.setdefault("lru_record", LRU())
+        for fund_code in fund_codes:
+            lru.update(fund_code)
+        if len(lru) > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
+            print("检测到缓存较大，清理缓存......")
+            to_evict_num = PERSISTENT_CACHE_DB_RECORD_MAX_NUM - len(lru)
+            for _ in trange(to_evict_num):
+                evicted_fund_code = lru.evict()
+                del fund_info_cache_db[evicted_fund_code]
+        fund_info_cache_db["lru_record"] = lru
+
         return fund_infos
 
         # TODO remove out-dated cache entries
-        # TODO remove old-aged cache entries when DB_MAX_RECORD_NUM is reached
 
 
 @click.command()
