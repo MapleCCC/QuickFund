@@ -8,3 +8,4 @@
 - Add version as suffix to release assets and/or release executable.
 - Instead of asking for override confirmation, just backup the old file and create the new file in-place.
 - Add LICENSE
+- Take advantage of the knowledge that fund info stays the same within 0:00 to 20:00. Implement persistent cache mechanism to acclerate following queries. Possible implementation schemes are SQLite3, pickle, shelve, dbm, marshal, copyreg, json.

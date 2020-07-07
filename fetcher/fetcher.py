@@ -2,7 +2,7 @@ import json
 import random
 import re
 import string
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import requests
 from lxml import etree  # type: ignore

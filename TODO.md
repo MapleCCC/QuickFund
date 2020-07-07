@@ -61,7 +61,7 @@
 - User experience design: when doing long time processing, create some animated UI to let user understand that something is going on and the process is not dead.
 - Find way to quick unit test, integrate test, regression test. No need to stand up with the startup time overhead of the super heavyweight Excel program anymore.
 - Use requests session to leverage connection pool.
-- Use requests body content flow stream.
+- Use requests body content flow stream. So we can display progress bar when downloading or uploading large files.
 - Install to context menu, so that the user only needs to open the context menu of a file and then click our program. The UX is more intuitive and straightforward.
 - Try to search on the internet and find some other fund APIs.
 - Careful about the web request cache. This could lead to outdated information. How to disable web request cache?
@@ -74,10 +74,11 @@
 - Too many issues and feature requests. Consider using GitHub's issue system.
 - Try PyPy to accelerate the script.
 - After switching to client/server architecture, we don't need to embed the auto update detection logic any more. Remove the additional network IO overhead.
-- Take advantage of the knowledge that fund info stays the same within 0:00 to 20:00. Implement persistent cache mechanism to acclerate following queries. Possible implementation schemes are SQLite3, pickle, shelve, dbm, marshal, copyreg, json.
 - See content of snippets.py
 - Issue: tqdm progress bar is not displayed correctly in some console environment.
 - Issue: color code output is not displayed correctly in some console environment.
+- Try to use Nuikta to compile into performant standalone executable.
+- Fill more details and instructions to README.
 
 
 ## Archive

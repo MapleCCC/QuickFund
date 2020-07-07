@@ -193,6 +193,8 @@ def check_update() -> None:
 
 
 def net_value_date_is_latest(raw_date: str) -> bool:
+    # Take advantage of the knowledge that fund info stays the same
+    # within 0:00 to 20:00.
     net_value_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
     now = datetime.now()
     today = date.today()
@@ -221,6 +223,8 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
                 return old_fund_info
             else:
                 new_fund_info = fetch_fund_info(fund_code)
+                # TIPS: Uncomment following line to profile lock congestion.
+                # print(renewed_variable_access_lock.locked())
                 renewed_variable_access_lock.acquire()
                 renewed[fund_code] = new_fund_info
                 renewed_variable_access_lock.release()
@@ -238,6 +242,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
         print("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)
 
+        print("更新缓存 LRU 信息......")
         # Instead of directly in-place updating the "lru_record" entry in
         # fund_info_cache_db, we copy it to a new variable and update the
         # new variable and then copy back. This is because directly in-place
