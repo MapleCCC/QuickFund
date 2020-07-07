@@ -12,7 +12,7 @@ from datetime import date, datetime, timedelta
 from enum import Enum, auto, unique
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Iterator, List, TypeVar, cast
+from typing import Callable, Dict, Iterable, Iterator, List, TypeVar
 
 import click
 import xlsxwriter

@@ -1,5 +1,5 @@
 # from collections import deque
-from typing import TypeVar, List, Dict
+from typing import Dict, List, TypeVar
 
 __all__ = ["LRU"]
 
@@ -81,4 +81,5 @@ if __name__ == "__main__":
     l.evict()
     l.evict()
     l.evict()
-    # Temporarily set LRU_MAX_DUMMY_CELL_NUM to 2, so as to test on reconstruct logic.
+    # Temporarily set LRU_MAX_DUMMY_CELL_NUM to 2, so as to test on
+    # reconstruct logic.

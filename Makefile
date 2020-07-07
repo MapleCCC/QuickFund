@@ -26,6 +26,6 @@ todo:
 	rg "# TODO" --glob !Makefile
 
 clean:
-	rm -rf build/ dist/ __pycache__/ *.spec
+	rm -rf build/ dist/ __pycache__/ *.spec .cache/
 
 .PHONY: all run release format lint unused-imports todo clean
