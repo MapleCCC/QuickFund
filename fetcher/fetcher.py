@@ -10,10 +10,6 @@ from more_itertools import replace
 
 __all__ = ["fetch_fund_info"]
 
-# Unfortunately current state of lxml type stub is far from complete.
-# https://github.com/python/typeshed/issues/525
-ETree = Any
-
 
 def fetch_net_value(fund_code: str) -> Dict[str, str]:
     # Add random parameter to the URL to break any cache mechanism of
