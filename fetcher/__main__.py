@@ -120,7 +120,7 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
 
         # Write body
         print("写入文档体......")
-        for row, info in tqdm(enumerate(fund_infos)):
+        for row, info in enumerate(tqdm(fund_infos)):
 
             for col, fieldname in enumerate(fieldnames):
                 fieldvalue = info[fieldname]
