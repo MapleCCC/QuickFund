@@ -27,7 +27,7 @@ from .lru import LRU
 from .utils import parse_version_number
 
 
-if locale.getdefaultlocale()[0] == "zh-CN":
+if locale.getdefaultlocale()[0] == "zh_CN":
     PERSISTENT_CACHE_DB_DIRECTORY = ".缓存"
 else:
     PERSISTENT_CACHE_DB_DIRECTORY = ".cache"
@@ -169,7 +169,7 @@ def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
         raise RuntimeError(f"同名文件夹已存在，无法新建文件 {out_filename}")
 
     if os.path.isfile(out_filename) and not yes_to_all:
-        if locale.getdefaultlocale()[0] == "zh-CN":
+        if locale.getdefaultlocale()[0] == "zh_CN":
             backup_filename = "[备份] " + out_filename
         else:
             backup_filename = out_filename + ".bak"
