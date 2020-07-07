@@ -211,31 +211,30 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
     )
 
     with shelve.open(shelf_path) as fund_info_cache_db:
-        fund_info_cache_db_lock = threading.Lock()
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> Dict[str, str]:
-            fund_info_cache_db_lock.acquire()
             old_fund_info = fund_info_cache_db.get(fund_code)
-            fund_info_cache_db_lock.release()
             if old_fund_info and net_value_date_is_latest(old_fund_info["净值日期"]):
                 return old_fund_info
             else:
-                new_fund_info = fetch_fund_info(fund_code)
-                # 将基金相关信息写入数据库，留备下次使用，加速下次查询......
-                fund_info_cache_db_lock.acquire()
-                fund_info_cache_db[fund_code] = new_fund_info
-                fund_info_cache_db_lock.release()
-                return new_fund_info
+                return fetch_fund_info(fund_code)
 
         # TODO experiment to find a suitable number as threshold between sync and
         # async code
         if len(fund_codes) < 3:
-            return [get_fund_info(code) for code in tqdm(fund_codes)]
+            fund_infos = [get_fund_info(code) for code in tqdm(fund_codes)]
         else:
             with ThreadPoolExecutor() as executor:
                 async_mapped = executor.map(get_fund_info, fund_codes)
-                return list(tqdm(async_mapped, total=len(fund_codes)))
+                fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))  # type: ignore
+
+        print("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
+        for fund_info in fund_infos:
+            fund_code = fund_info["基金代码"]
+            fund_info_cache_db[fund_code] = fund_info
+
+        return fund_infos
 
         # TODO remove out-dated cache entries
         # TODO remove old-aged cache entries when DB_MAX_RECORD_NUM is reached
