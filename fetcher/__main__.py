@@ -6,6 +6,7 @@ import os
 import re
 import shelve
 import shutil
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from enum import Enum, auto, unique
@@ -258,16 +259,21 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
     )
 
     with shelve.open(shelf_path) as fund_info_cache_db:
+        fund_info_cache_db_lock = threading.Lock()
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> Dict[str, str]:
+            fund_info_cache_db_lock.acquire()
             old_fund_info = fund_info_cache_db.get(fund_code)
+            fund_info_cache_db_lock.release()
             if old_fund_info and net_value_date_is_latest(old_fund_info["净值日期"]):
                 return old_fund_info
             else:
                 new_fund_info = fetch_fund_info(fund_code)
                 # 将基金相关信息写入数据库，留备下次使用，加速下次查询......
+                fund_info_cache_db_lock.acquire()
                 fund_info_cache_db[fund_code] = new_fund_info
+                fund_info_cache_db_lock.release()
                 return new_fund_info
 
         # TODO experiment to find a suitable number as threshold between sync and
