@@ -8,7 +8,7 @@ import requests
 from lxml import etree  # type: ignore
 from more_itertools import replace
 
-__all__ = ["fetch_fund_info"]
+__all__ = ["fetch_net_value", "fetch_estimate", "fetch_fund_info"]
 
 
 def fetch_net_value(fund_code: str) -> Dict[str, str]:
@@ -45,6 +45,7 @@ def fetch_net_value(fund_code: str) -> Dict[str, str]:
     responded_data = dict(zip(keys, values))
 
     fund_info = {}
+    fund_info["基金代码"] = fund_code
     fund_info["净值日期"] = responded_data["净值日期"]
     fund_info["单位净值"] = responded_data["单位净值"]
     fund_info["日增长率"] = responded_data["日增长率"]
@@ -77,6 +78,8 @@ def fetch_estimate(fund_code: str) -> Dict[str, str]:
     content = re.match(r"jsonpgz\((?P<content>.*)\);", text).group("content")
     json_data = json.loads(content)
     fund_info = {}
+    assert fund_code == json_data["fundcode"]
+    fund_info["基金代码"] = fund_code
     fund_info["基金名称"] = json_data["name"]
     fund_info["估算日期"] = json_data["gztime"]
     fund_info["实时估值"] = json_data["gsz"]
@@ -92,7 +95,6 @@ def fetch_estimate(fund_code: str) -> Dict[str, str]:
 def fetch_fund_info(fund_code: str) -> Dict[str, str]:
     try:
         fund_info = {}
-        fund_info["基金代码"] = fund_code
         fund_info.update(fetch_net_value(fund_code))
         fund_info.update(fetch_estimate(fund_code))
         return fund_info
