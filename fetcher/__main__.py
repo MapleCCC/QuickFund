@@ -8,7 +8,7 @@ import shelve
 import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from enum import Enum, auto, unique
 from functools import lru_cache
 from pathlib import Path
@@ -20,7 +20,7 @@ from tqdm import tqdm, trange
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
-from .fetcher import fetch_fund_info
+from .fetcher import fetch_estimate, fetch_fund_info, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
 from .utils import parse_version_number
@@ -192,16 +192,55 @@ def check_update() -> None:
         print("当前已是最新版本")
 
 
+def is_yesterday(d: date) -> bool:
+    return d + timedelta(days=1) == date.today()
+
+
 def net_value_date_is_latest(raw_date: str) -> bool:
     # Take advantage of the knowledge that fund info stays the same
     # within 0:00 to 20:00.
+
+    # WARNING: it's true that most of time the market is not opened
+    # in weekends. But we can't use this knowledge in our logic. Because
+    # sometimes holiday policy will make this irregular. We had better
+    # fall back to use the most robust way to check.
+
     net_value_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
     now = datetime.now()
     today = date.today()
     if 0 <= now.hour < 20:
-        return net_value_date + timedelta(days=1) == today
+        return is_yesterday(net_value_date)
     else:
         return net_value_date == today
+
+
+def estimate_net_value_date_is_latest(raw_date: str) -> bool:
+    # Take advantage of the knowledge that estimate info stays the same
+    # within 15:00 to next day 15:00.
+
+    # WARNING: it's true that most of time the market is not opened
+    # in weekends. But we can't use this knowledge in our logic. Because
+    # sometimes holiday policy will make this irregular. We had better
+    # fall back to use the most robust way to check.
+
+    estimate_net_value_datetime = datetime.strptime(raw_date, "%Y-%m-%d %H:%M")
+
+    open_market_time = time(9, 30)
+    close_market_time = time(15)
+    now_time = datetime.now().time()
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+    today_close_market_datetime = datetime.combine(today, close_market_time)
+    yesterday_close_market_datetime = datetime.combine(yesterday, close_market_time)
+
+    if open_market_time <= now_time <= close_market_time:
+        return False
+    elif time.min <= now_time < open_market_time:
+        return estimate_net_value_datetime == yesterday_close_market_datetime
+    elif close_market_time < now_time <= time.max:
+        return estimate_net_value_datetime == today_close_market_datetime
+    else:
+        raise RuntimeError("Unreachable")
 
 
 def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
@@ -218,17 +257,27 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> Dict[str, str]:
-            old_fund_info = fund_info_cache_db.get(fund_code)
-            if old_fund_info and net_value_date_is_latest(old_fund_info["净值日期"]):
-                return old_fund_info
-            else:
-                new_fund_info = fetch_fund_info(fund_code)
+            need_renew = False
+            fund_info = fund_info_cache_db.get(fund_code)
+            if not fund_info:
+                need_renew = True
+                fund_info = {}
+
+            if not net_value_date_is_latest(fund_info["净值日期"]):
+                need_renew = True
+                fund_info.update(fetch_net_value(fund_code))
+            if not estimate_net_value_date_is_latest(fund_info["估算日期"]):
+                need_renew = True
+                fund_info.update(fetch_estimate(fund_code))
+
+            if need_renew:
                 # TIPS: Uncomment following line to profile lock congestion.
                 # print(renewed_variable_access_lock.locked())
                 renewed_variable_access_lock.acquire()
-                renewed[fund_code] = new_fund_info
+                renewed[fund_code] = fund_info
                 renewed_variable_access_lock.release()
-                return new_fund_info
+
+            return fund_info
 
         # TODO experiment to find a suitable number as threshold between sync and
         # async code
