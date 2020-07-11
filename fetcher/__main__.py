@@ -73,7 +73,7 @@ fieldtypes = [
     ExcelCellDataType.date,
     ExcelCellDataType.number,
     ExcelCellDataType.string,
-    ExcelCellDataType.string,
+    ExcelCellDataType.date,
     ExcelCellDataType.number,
     ExcelCellDataType.string,
     ExcelCellDataType.string,
@@ -92,6 +92,7 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
             {"bold": True, "align": "center", "valign": "top", "border": 1}
         )
         date_format = workbook.add_format({"num_format": "yyyy-mm-dd"})
+        datetime_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm"})
         yellow_highlight_format = workbook.add_format({"bg_color": "yellow"})
         blue_highlight_format = workbook.add_format({"bg_color": "B4D6E4"})
 
@@ -99,11 +100,6 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
         print("写入文档头......")
         for i, fieldname in enumerate(fieldnames):
             worksheet.write(0, i, fieldname, header_format)
-
-        # Widen column and set format for date data
-        for i, fieldtype in enumerate(fieldtypes):
-            if fieldtype == ExcelCellDataType.date:
-                worksheet.set_column(i, i, 13, date_format)
 
         # Widen column for fund name field
         for i, fieldname in enumerate(fieldnames):
@@ -117,6 +113,8 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, 10)
             elif fieldname == "上一天净值日期":
                 worksheet.set_column(i, i, 14)
+            elif fieldname == "净值日期":
+                worksheet.set_column(i, i, 13)
 
         # Write body
         print("写入文档体......")
@@ -144,8 +142,22 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                     else:
                         worksheet.write_number(row + 1, col, num)
                 elif fieldtype == ExcelCellDataType.date:
-                    date = datetime.strptime(fieldvalue, "%Y-%m-%d")
-                    worksheet.write_datetime(row + 1, col, date)
+                    if fieldname in ("净值日期", "上一天净值日期"):
+                        net_value_date = datetime.strptime(
+                            fieldvalue, "%Y-%m-%d"
+                        ).date()
+                        worksheet.write_datetime(
+                            row + 1, col, net_value_date, date_format
+                        )
+                    elif fieldname == "估算日期":
+                        estimate_datetime = datetime.strptime(
+                            fieldvalue, "%Y-%m-%d %H:%M"
+                        )
+                        worksheet.write_datetime(
+                            row + 1, col, estimate_datetime, datetime_format
+                        )
+                    else:
+                        raise RuntimeError("Unreachable")
                 else:
                     raise RuntimeError("Unreachable")
 
@@ -211,7 +223,7 @@ def net_value_date_is_latest(raw_date: str) -> bool:
         return net_value_date == today
 
 
-def estimate_net_value_date_is_latest(raw_date: str) -> bool:
+def estimate_datetime_is_latest(raw_datetime: str) -> bool:
     # Take advantage of the knowledge that estimate info stays the same
     # within 15:00 to next day 15:00.
 
@@ -220,7 +232,7 @@ def estimate_net_value_date_is_latest(raw_date: str) -> bool:
     # sometimes holiday policy will make this irregular. We had better
     # fall back to use the most robust way to check.
 
-    estimate_net_value_datetime = datetime.strptime(raw_date, "%Y-%m-%d %H:%M")
+    estimate_datetime = datetime.strptime(raw_datetime, "%Y-%m-%d %H:%M")
 
     open_market_time = time(9, 30)
     close_market_time = time(15)
@@ -233,9 +245,9 @@ def estimate_net_value_date_is_latest(raw_date: str) -> bool:
     if open_market_time <= now_time <= close_market_time:
         return False
     elif time.min <= now_time < open_market_time:
-        return estimate_net_value_datetime == yesterday_close_market_datetime
+        return estimate_datetime == yesterday_close_market_datetime
     elif close_market_time < now_time <= time.max:
-        return estimate_net_value_datetime == today_close_market_datetime
+        return estimate_datetime == today_close_market_datetime
     else:
         raise RuntimeError("Unreachable")
 
@@ -262,9 +274,9 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
                 need_renew = True
                 fund_info.update(fetch_net_value(fund_code))
 
-            estimate_net_value_date = fund_info.get("估算日期")
-            if not estimate_net_value_date or not estimate_net_value_date_is_latest(
-                estimate_net_value_date
+            estiamte_datetime = fund_info.get("估算日期")
+            if not estiamte_datetime or not estimate_datetime_is_latest(
+                estiamte_datetime
             ):
                 need_renew = True
                 fund_info.update(fetch_estimate(fund_code))
