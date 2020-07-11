@@ -258,10 +258,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> Dict[str, str]:
             need_renew = False
-            fund_info = fund_info_cache_db.get(fund_code)
-            if not fund_info:
-                need_renew = True
-                fund_info = {}
+            fund_info = fund_info_cache_db.get(fund_code, {})
 
             net_value_date = fund_info.get("净值日期")
             if not net_value_date or not net_value_date_is_latest(net_value_date):
