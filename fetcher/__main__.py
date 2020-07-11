@@ -154,14 +154,14 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
 
 
-def check_args(in_filename: str, out_filename: str, yes_to_all: bool) -> None:
+def check_args(in_filename: str, out_filename: str) -> None:
     if not os.path.exists(in_filename):
         raise FileNotFoundError(f"文件 {in_filename} 不存在")
 
     if os.path.isdir(out_filename):
         raise RuntimeError(f"同名文件夹已存在，无法新建文件 {out_filename}")
 
-    if os.path.isfile(out_filename) and not yes_to_all:
+    if os.path.isfile(out_filename):
         if locale.getdefaultlocale()[0] == "zh_CN":
             backup_filename = "[备份] " + out_filename
         else:
@@ -316,13 +316,10 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
 @click.command()
 @click.argument("filename")
 @click.option("-o", "--output", default="基金信息.xlsx")
-@click.option("-y", "--yes-to-all", is_flag=True, default=False)
 @click.option("--disable-update-check", is_flag=True, default=False)
 # TODO: @click.option("--update")
 @click.version_option(version=__version__)
-def main(
-    filename: str, output: str, yes_to_all: bool, disable_update_check: bool
-) -> None:
+def main(filename: str, output: str, disable_update_check: bool) -> None:
     # atexit.register(lambda _: input("Press ENTER to exit"))
     atexit.register(lambda: input("按下回车键以退出"))
 
@@ -335,7 +332,7 @@ def main(
     out_filename = output
 
     print("检查参数......")
-    check_args(in_filename, out_filename, yes_to_all)
+    check_args(in_filename, out_filename)
 
     print("获取基金代码列表......")
     fund_codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
