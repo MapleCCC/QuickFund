@@ -303,7 +303,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
         # updating shelve dict entry requires opening shelve with the `writeback`
         # parameter set to True, which could lead to increased memory cost
         # and IO cost and slow down the program.
-        lru = fund_info_cache_db.setdefault("lru_record", LRU())
+        lru = fund_info_cache_db.get("lru_record", LRU())
         for fund_code in fund_codes:
             lru.update(fund_code)
         if len(lru) > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
