@@ -263,10 +263,15 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
                 need_renew = True
                 fund_info = {}
 
-            if not net_value_date_is_latest(fund_info["净值日期"]):
+            net_value_date = fund_info.get("净值日期")
+            if not net_value_date or not net_value_date_is_latest(net_value_date):
                 need_renew = True
                 fund_info.update(fetch_net_value(fund_code))
-            if not estimate_net_value_date_is_latest(fund_info["估算日期"]):
+
+            estimate_net_value_date = fund_info.get("估算日期")
+            if not estimate_net_value_date or not estimate_net_value_date_is_latest(
+                estimate_net_value_date
+            ):
                 need_renew = True
                 fund_info.update(fetch_estimate(fund_code))
 
