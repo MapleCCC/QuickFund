@@ -85,6 +85,10 @@ fieldtypes = [
 def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
     try:
         with xlsxwriter.Workbook(xlsx_filename) as workbook:
+
+            def f(d: Dict) -> xlsxwriter.format.Format:
+                return workbook.add_format(d)
+
             print("新建 Excel 文档......")
             worksheet = workbook.add_worksheet()
 
@@ -96,18 +100,15 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
             yellow_highlight_format = workbook.add_format({"bg_color": "yellow"})
             blue_highlight_format = workbook.add_format({"bg_color": "B4D6E4"})
 
-            # Writer header
-            print("写入文档头......")
-            for i, fieldname in enumerate(fieldnames):
-                worksheet.write(0, i, fieldname, header_format)
-
             # Widen column for fund name field
             for i, fieldname in enumerate(fieldnames):
                 if fieldname == "基金名称":
                     worksheet.set_column(i, i, 22)
                 elif fieldname == "估算日期":
                     worksheet.set_column(i, i, 17)
-                elif fieldname in ("实时估值", "估算增长率"):
+                elif fieldname == "实时估值":
+                    worksheet.set_column(i, i, 11)
+                elif fieldname == "估算增长率":
                     worksheet.set_column(i, i, 11)
                 elif fieldname == "上一天净值":
                     worksheet.set_column(i, i, 10)
@@ -115,6 +116,11 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                     worksheet.set_column(i, i, 14)
                 elif fieldname == "净值日期":
                     worksheet.set_column(i, i, 13)
+
+            # Writer header
+            print("写入文档头......")
+            for i, fieldname in enumerate(fieldnames):
+                worksheet.write(0, i, fieldname, header_format)
 
             # Write body
             print("写入文档体......")
