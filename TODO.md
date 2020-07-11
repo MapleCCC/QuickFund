@@ -79,6 +79,8 @@
 - Issue: color code output is not displayed correctly in some console environment.
 - Try to use Nuikta to compile into performant standalone executable.
 - Fill more details and instructions to README.
+- Try some easy-to-use GUI library.
+- Try to use Django to build a server backend.
 
 
 ## Archive

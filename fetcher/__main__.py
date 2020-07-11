@@ -67,6 +67,8 @@ fieldnames = [
 ]
 fieldtypes = [
     ExcelCellDataType.string,
+    # FIXME if we set 基金代码 to string type, Excel document raises warning about
+    # treating number as text.
     ExcelCellDataType.string,
     ExcelCellDataType.date,
     ExcelCellDataType.number,
@@ -86,6 +88,7 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
     try:
         with xlsxwriter.Workbook(xlsx_filename) as workbook:
 
+            # f = lambda d: workbook.add_format(d)
             def f(d: Dict) -> xlsxwriter.format.Format:
                 return workbook.add_format(d)
 
@@ -148,7 +151,9 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                                 row + 1, col, num, yellow_highlight_format
                             )
                         elif fieldname == "实时估值":
-                            worksheet.write_number(row + 1, col, num, blue_highlight_format)
+                            worksheet.write_number(
+                                row + 1, col, num, blue_highlight_format
+                            )
                         elif fieldname in ("日增长率", "估算增长率"):
                             worksheet.write_number(row + 1, col, num, percentage_format)
                         else:

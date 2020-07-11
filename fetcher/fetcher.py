@@ -100,7 +100,6 @@ def fetch_estimate(fund_code: str) -> Dict[str, str]:
         raise RuntimeError(f"获取基金代码为 {fund_code} 的基金相关估算信息时发生错误") from exc
 
 
-
 def fetch_fund_info(fund_code: str) -> Dict[str, str]:
     try:
         fund_info = {}

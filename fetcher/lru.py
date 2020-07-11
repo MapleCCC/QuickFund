@@ -1,6 +1,6 @@
-from __future__ import (
-    annotations,
-)  # postponed evaluation of type annotations. For type annotating LRU.copy() method.
+# postponed evaluation of type annotations. For type annotating LRU.copy()
+# method.
+from __future__ import annotations
 
 import operator
 from functools import partial
