@@ -192,10 +192,6 @@ def check_update() -> None:
         print("当前已是最新版本")
 
 
-def is_yesterday(d: date) -> bool:
-    return d + timedelta(days=1) == date.today()
-
-
 def net_value_date_is_latest(raw_date: str) -> bool:
     # Take advantage of the knowledge that fund info stays the same
     # within 0:00 to 20:00.
@@ -208,8 +204,9 @@ def net_value_date_is_latest(raw_date: str) -> bool:
     net_value_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
     now = datetime.now()
     today = date.today()
+    yesterday = today - timedelta(days=1)
     if 0 <= now.hour < 20:
-        return is_yesterday(net_value_date)
+        return net_value_date == yesterday
     else:
         return net_value_date == today
 
