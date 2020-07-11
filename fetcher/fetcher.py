@@ -15,13 +15,13 @@ def fetch_net_value(fund_code: str) -> Dict[str, str]:
     try:
         # Add random parameter to the URL to break any cache mechanism of
         # the server or the network or the requests library.
-        garbage = "".join(random.sample(string.ascii_lowercase, 10))
+        salt = "".join(random.sample(string.ascii_lowercase, 10))
         params = {
             "type": "lsjz",
             "page": 1,
             "per": 2,
             "code": fund_code,
-            "garbage": garbage,
+            "salt": salt,
         }
         net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
         response = requests.get(net_value_api, params=params)
@@ -73,8 +73,8 @@ def fetch_estimate(fund_code: str) -> Dict[str, str]:
     try:
         # Add random parameter to the URL to break potential cache mechanism of
         # the server or the network or the requests library.
-        garbage = "".join(random.sample(string.ascii_lowercase, 10))
-        params = {"garbage": garbage}
+        salt = "".join(random.sample(string.ascii_lowercase, 10))
+        params = {"salt": salt}
         estimate_api = "http://fundgz.1234567.com.cn/js/{fund_code}.js"
         response = requests.get(estimate_api.format(fund_code=fund_code), params=params)
         response.encoding = "utf-8"
