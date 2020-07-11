@@ -202,10 +202,10 @@ def net_value_date_is_latest(raw_date: str) -> bool:
     # fall back to use the most robust way to check.
 
     net_value_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
-    now = time.now()
+    now_time = datetime.now().time()
     today = date.today()
     yesterday = today - timedelta(days=1)
-    if time.min <= now < time(20):
+    if time.min <= now_time < time(20):
         return net_value_date == yesterday
     else:
         return net_value_date == today
