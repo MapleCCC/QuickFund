@@ -72,10 +72,10 @@ fieldtypes = [
     ExcelCellDataType.number,
     ExcelCellDataType.date,
     ExcelCellDataType.number,
-    ExcelCellDataType.string,
+    ExcelCellDataType.number,
     ExcelCellDataType.date,
     ExcelCellDataType.number,
-    ExcelCellDataType.string,
+    ExcelCellDataType.number,
     ExcelCellDataType.string,
 ]
 
@@ -99,6 +99,7 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
             datetime_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm"})
             yellow_highlight_format = workbook.add_format({"bg_color": "yellow"})
             blue_highlight_format = workbook.add_format({"bg_color": "B4D6E4"})
+            percentage_format = workbook.add_format({"num_format": "0.00%"})
 
             # Widen column for fund name field
             for i, fieldname in enumerate(fieldnames):
@@ -134,7 +135,10 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                         worksheet.write_string(row + 1, col, fieldvalue)
                     elif fieldtype == ExcelCellDataType.number:
                         try:
-                            num = float(fieldvalue)
+                            if "%" in fieldvalue:
+                                num = float(fieldvalue.rstrip("% ")) * 0.01
+                            else:
+                                num = float(fieldvalue)
                         except ValueError:
                             raise RuntimeError(
                                 f'基金代码为 {info["基金代码"]} 的基金"{info["基金名称"]}"的"{fieldname}"数据无法转换成浮点数格式：{fieldvalue}'
@@ -145,6 +149,8 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                             )
                         elif fieldname == "实时估值":
                             worksheet.write_number(row + 1, col, num, blue_highlight_format)
+                        elif fieldname in ("日增长率", "估算增长率"):
+                            worksheet.write_number(row + 1, col, num, percentage_format)
                         else:
                             worksheet.write_number(row + 1, col, num)
                     elif fieldtype == ExcelCellDataType.date:
