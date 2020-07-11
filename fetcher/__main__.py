@@ -84,85 +84,85 @@ fieldtypes = [
 # harder to maintain.
 def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
     try:
-        print("新建 Excel 文档......")
-        workbook = xlsxwriter.Workbook(xlsx_filename)
-        worksheet = workbook.add_worksheet()
+        with xlsxwriter.Workbook(xlsx_filename) as workbook:
+            print("新建 Excel 文档......")
+            worksheet = workbook.add_worksheet()
 
-        header_format = workbook.add_format(
-            {"bold": True, "align": "center", "valign": "top", "border": 1}
-        )
-        date_format = workbook.add_format({"num_format": "yyyy-mm-dd"})
-        datetime_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm"})
-        yellow_highlight_format = workbook.add_format({"bg_color": "yellow"})
-        blue_highlight_format = workbook.add_format({"bg_color": "B4D6E4"})
+            header_format = workbook.add_format(
+                {"bold": True, "align": "center", "valign": "top", "border": 1}
+            )
+            date_format = workbook.add_format({"num_format": "yyyy-mm-dd"})
+            datetime_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm"})
+            yellow_highlight_format = workbook.add_format({"bg_color": "yellow"})
+            blue_highlight_format = workbook.add_format({"bg_color": "B4D6E4"})
 
-        # Writer header
-        print("写入文档头......")
-        for i, fieldname in enumerate(fieldnames):
-            worksheet.write(0, i, fieldname, header_format)
+            # Writer header
+            print("写入文档头......")
+            for i, fieldname in enumerate(fieldnames):
+                worksheet.write(0, i, fieldname, header_format)
 
-        # Widen column for fund name field
-        for i, fieldname in enumerate(fieldnames):
-            if fieldname == "基金名称":
-                worksheet.set_column(i, i, 22)
-            elif fieldname == "估算日期":
-                worksheet.set_column(i, i, 17)
-            elif fieldname in ("实时估值", "估算增长率"):
-                worksheet.set_column(i, i, 11)
-            elif fieldname == "上一天净值":
-                worksheet.set_column(i, i, 10)
-            elif fieldname == "上一天净值日期":
-                worksheet.set_column(i, i, 14)
-            elif fieldname == "净值日期":
-                worksheet.set_column(i, i, 13)
+            # Widen column for fund name field
+            for i, fieldname in enumerate(fieldnames):
+                if fieldname == "基金名称":
+                    worksheet.set_column(i, i, 22)
+                elif fieldname == "估算日期":
+                    worksheet.set_column(i, i, 17)
+                elif fieldname in ("实时估值", "估算增长率"):
+                    worksheet.set_column(i, i, 11)
+                elif fieldname == "上一天净值":
+                    worksheet.set_column(i, i, 10)
+                elif fieldname == "上一天净值日期":
+                    worksheet.set_column(i, i, 14)
+                elif fieldname == "净值日期":
+                    worksheet.set_column(i, i, 13)
 
-        # Write body
-        print("写入文档体......")
-        for row, info in enumerate(tqdm(fund_infos)):
+            # Write body
+            print("写入文档体......")
+            for row, info in enumerate(tqdm(fund_infos)):
 
-            for col, fieldname in enumerate(fieldnames):
-                fieldvalue = info[fieldname]
-                fieldtype = fieldtypes[col]
+                for col, fieldname in enumerate(fieldnames):
+                    fieldvalue = info[fieldname]
+                    fieldtype = fieldtypes[col]
 
-                if fieldtype == ExcelCellDataType.string:
-                    worksheet.write_string(row + 1, col, fieldvalue)
-                elif fieldtype == ExcelCellDataType.number:
-                    try:
-                        num = float(fieldvalue)
-                    except ValueError:
-                        raise RuntimeError(
-                            f'基金代码为 {info["基金代码"]} 的基金"{info["基金名称"]}"的"{fieldname}"数据无法转换成浮点数格式：{fieldvalue}'
-                        )
-                    if fieldname in ("上一天净值", "单位净值"):
-                        worksheet.write_number(
-                            row + 1, col, num, yellow_highlight_format
-                        )
-                    elif fieldname == "实时估值":
-                        worksheet.write_number(row + 1, col, num, blue_highlight_format)
-                    else:
-                        worksheet.write_number(row + 1, col, num)
-                elif fieldtype == ExcelCellDataType.date:
-                    if fieldname in ("净值日期", "上一天净值日期"):
-                        net_value_date = datetime.strptime(
-                            fieldvalue, "%Y-%m-%d"
-                        ).date()
-                        worksheet.write_datetime(
-                            row + 1, col, net_value_date, date_format
-                        )
-                    elif fieldname == "估算日期":
-                        estimate_datetime = datetime.strptime(
-                            fieldvalue, "%Y-%m-%d %H:%M"
-                        )
-                        worksheet.write_datetime(
-                            row + 1, col, estimate_datetime, datetime_format
-                        )
+                    if fieldtype == ExcelCellDataType.string:
+                        worksheet.write_string(row + 1, col, fieldvalue)
+                    elif fieldtype == ExcelCellDataType.number:
+                        try:
+                            num = float(fieldvalue)
+                        except ValueError:
+                            raise RuntimeError(
+                                f'基金代码为 {info["基金代码"]} 的基金"{info["基金名称"]}"的"{fieldname}"数据无法转换成浮点数格式：{fieldvalue}'
+                            )
+                        if fieldname in ("上一天净值", "单位净值"):
+                            worksheet.write_number(
+                                row + 1, col, num, yellow_highlight_format
+                            )
+                        elif fieldname == "实时估值":
+                            worksheet.write_number(row + 1, col, num, blue_highlight_format)
+                        else:
+                            worksheet.write_number(row + 1, col, num)
+                    elif fieldtype == ExcelCellDataType.date:
+                        if fieldname in ("净值日期", "上一天净值日期"):
+                            net_value_date = datetime.strptime(
+                                fieldvalue, "%Y-%m-%d"
+                            ).date()
+                            worksheet.write_datetime(
+                                row + 1, col, net_value_date, date_format
+                            )
+                        elif fieldname == "估算日期":
+                            estimate_datetime = datetime.strptime(
+                                fieldvalue, "%Y-%m-%d %H:%M"
+                            )
+                            worksheet.write_datetime(
+                                row + 1, col, estimate_datetime, datetime_format
+                            )
+                        else:
+                            raise RuntimeError("Unreachable")
                     else:
                         raise RuntimeError("Unreachable")
-                else:
-                    raise RuntimeError("Unreachable")
 
-        print("Flush 到硬盘......")
-        workbook.close()
+            print("Flush 到硬盘......")
+
     except Exception as exc:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
 
