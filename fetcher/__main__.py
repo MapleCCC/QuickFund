@@ -293,9 +293,9 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
                 need_renew = True
                 fund_info.update(fetch_net_value(fund_code))
 
-            estiamte_datetime = fund_info.get("估算日期")
-            if not estiamte_datetime or not estimate_datetime_is_latest(
-                estiamte_datetime
+            estimate_datetime = fund_info.get("估算日期")
+            if not estimate_datetime or not estimate_datetime_is_latest(
+                estimate_datetime
             ):
                 need_renew = True
                 fund_info.update(fetch_estimate(fund_code))
