@@ -77,10 +77,12 @@ def fetch_estimate(fund_code: str) -> Dict[str, str]:
         params = {"salt": salt}
         estimate_api = "http://fundgz.1234567.com.cn/js/{fund_code}.js"
         response = requests.get(estimate_api.format(fund_code=fund_code), params=params)
+
         response.encoding = "utf-8"
         text = response.text
         content = re.match(r"jsonpgz\((?P<content>.*)\);", text).group("content")
         json_data = json.loads(content)
+
         fund_info = {}
         assert fund_code == json_data["fundcode"]
         fund_info["基金代码"] = fund_code

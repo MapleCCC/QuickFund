@@ -20,7 +20,7 @@ from tqdm import tqdm, trange
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
-from .fetcher import fetch_estimate, fetch_fund_info, fetch_net_value
+from .fetcher import fetch_estimate, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
 from .utils import parse_version_number
@@ -161,6 +161,7 @@ def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
                 else:
                     raise RuntimeError("Unreachable")
 
+        print("Flush 到硬盘......")
         workbook.close()
     except Exception as exc:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
@@ -183,7 +184,8 @@ def check_args(in_filename: str, out_filename: str) -> None:
         except PermissionError:
             raise RuntimeError(
                 f"备份 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
-                f"有可能是 {out_filename} 已经被 Excel 打开"
+                f"有可能是 {out_filename} 已经被 Excel 打开，"
+                "请关闭文件之后重试"
             )
         print(f"{out_filename} 同名文件已存在，备份至 {backup_filename}")
 
@@ -336,6 +338,7 @@ def main(filename: str, output: str, disable_update_check: bool) -> None:
     atexit.register(lambda: input("按下回车键以退出"))
 
     # TODO Remove update check logic after switching architecture to
+    # server/client model
     if not disable_update_check:
         print("检查更新......")
         check_update()
