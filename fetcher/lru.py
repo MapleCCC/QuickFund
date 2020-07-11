@@ -1,5 +1,19 @@
-# from collections import deque
+from __future__ import (
+    annotations,
+)  # postponed evaluation of type annotations. For type annotating LRU.copy() method.
+
+import operator
+from functools import partial
+from itertools import filterfalse
 from typing import Dict, List, TypeVar
+
+from more_itertools import replace
+
+# from collections import deque
+
+# TODO elaborate on algorithmic analysis and time complexity of all operations
+# TODO try other reconstruct criteria, like ratio of dummy cell count
+# against total cell count, instead of absolute number of dummy cell count
 
 __all__ = ["LRU"]
 
@@ -21,6 +35,28 @@ class LRU:
 
     def __len__(self) -> int:
         return len(self._storage)
+
+    def copy(self) -> LRU:
+        new_lru = LRU()
+        new_lru._storage = self._storage
+        new_lru._indexer = self._indexer
+        new_lru._dummy_cell_count = self._dummy_cell_count
+        new_lru._offset = self._offset
+        return new_lru
+
+    def __str__(self) -> str:
+        filterfunc = partial(operator.eq, LRU._DUMMY_CELL)
+        logical_content = list(filterfalse(filterfunc, self._storage))
+        return f"LRU({logical_content})"
+
+    def __repr__(self) -> str:
+        filterfunc = partial(operator.eq, LRU._DUMMY_CELL)
+        repr_content = list(replace(self._storage, filterfunc, ["_DUMMY_CELL"]))
+        return f"LRU({repr_content})"
+
+    @classmethod
+    def empty_lru(cls) -> LRU:
+        return cls().copy()
 
     def update(self, elem: T) -> None:
         if elem in self._indexer:
