@@ -274,32 +274,36 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
         else:
             with ThreadPoolExecutor() as executor:
                 async_mapped = executor.map(get_fund_info, fund_codes)
-                fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))  # type: ignore
+                fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))  # type: ignore # nopep8
 
         print("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)
 
         print("更新缓存 LRU 信息......")
+
+        # TODO remove out-dated cache entries
+
         # Instead of directly in-place updating the "lru_record" entry in
         # fund_info_cache_db, we copy it to a new variable and update the
         # new variable and then copy back. This is because directly in-place
         # updating shelve dict entry requires opening shelve with the `writeback`
         # parameter set to True, which could lead to increased memory cost
         # and IO cost and slow down the program.
+
         lru = fund_info_cache_db.get("lru_record", LRU())
         for fund_code in fund_codes:
             lru.update(fund_code)
+
         if len(lru) > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
             print("检测到缓存较大，清理缓存......")
             to_evict_num = PERSISTENT_CACHE_DB_RECORD_MAX_NUM - len(lru)
             for _ in trange(to_evict_num):
                 evicted_fund_code = lru.evict()
                 del fund_info_cache_db[evicted_fund_code]
+
         fund_info_cache_db["lru_record"] = lru
 
         return fund_infos
-
-        # TODO remove out-dated cache entries
 
 
 @click.command()

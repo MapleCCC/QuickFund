@@ -25,8 +25,13 @@ def fetch_net_value(fund_code: str) -> Dict[str, str]:
         }
         net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
         response = requests.get(net_value_api, params=params)
+
         response.encoding = "utf-8"
         text = response.text
+        # TODO relax the regular expression to be more permissive and hence
+        # more robust to ill input. Remember, we are dealing with data
+        # coming from stranger environment. Better not depend on some
+        # strong assumption made about them.
         content = re.match(r"var apidata={ content:\"(?P<content>.*)\"", text).group(
             "content"
         )
@@ -38,7 +43,7 @@ def fetch_net_value(fund_code: str) -> Dict[str, str]:
         # result
         tds = root.xpath("/table/tbody/tr[1]/td")
         values: List[str] = [td.text for td in tds]
-        values = list(replace(values, lambda x: x == None, [""]))
+        values = list(replace(values, lambda x: x is None, [""]))
 
         if len(keys) != len(values):
             raise RuntimeError("解析基金信息时键值对不匹配")
@@ -80,6 +85,10 @@ def fetch_estimate(fund_code: str) -> Dict[str, str]:
 
         response.encoding = "utf-8"
         text = response.text
+        # TODO relax the regular expression to be more permissive and hence
+        # more robust to ill input. Remember, we are dealing with data
+        # coming from stranger environment. Better not depend on some
+        # strong assumption made about them.
         content = re.match(r"jsonpgz\((?P<content>.*)\);", text).group("content")
         json_data = json.loads(content)
 
