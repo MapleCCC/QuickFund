@@ -9,7 +9,6 @@ import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time, timedelta
-from enum import Enum, auto, unique
 from functools import lru_cache
 from pathlib import Path
 from typing import Callable, Dict, Iterable, Iterator, List, TypeVar
@@ -39,47 +38,6 @@ PERSISTENT_CACHE_DB_RECORD_MAX_NUM = 2000
 # function with optional argument.
 T = TypeVar("T")
 tqdm: Callable[[Iterable[T]], Iterator[T]]
-
-
-@unique
-class ExcelCellDataType(Enum):
-    string = auto()
-    date = auto()
-    number = auto()
-
-
-# TODO use language construct to make sure fieldnames consistent with
-# their occurrences in other places across the code repository. As
-# manually syncing them is both tedious and error-prone.
-
-fieldnames = [
-    "基金名称",
-    "基金代码",
-    "上一天净值日期",
-    "上一天净值",
-    "净值日期",
-    "单位净值",
-    "日增长率",
-    "估算日期",
-    "实时估值",
-    "估算增长率",
-    "分红送配",
-]
-fieldtypes = [
-    ExcelCellDataType.string,
-    # FIXME if we set 基金代码 to string type, Excel document raises warning about
-    # treating number as text.
-    ExcelCellDataType.string,
-    ExcelCellDataType.date,
-    ExcelCellDataType.number,
-    ExcelCellDataType.date,
-    ExcelCellDataType.number,
-    ExcelCellDataType.number,
-    ExcelCellDataType.date,
-    ExcelCellDataType.number,
-    ExcelCellDataType.number,
-    ExcelCellDataType.string,
-]
 
 
 # TODO refactor write_to_xlsx. Such a long function is prone to error and grows
