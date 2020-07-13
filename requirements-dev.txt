@@ -1,3 +1,2 @@
-# TODO: pin dependency version
-
-pyinstaller
+pyinstaller==3.6
+pygithub==1.51

@@ -1,7 +1,6 @@
-# TODO: pin the version of dependencies. Use semantic versioning.
-
-tqdm
-click
-lxml
-xlsxwriter
-more_itertools
+click==7.1.2
+lxml==4.5.2
+more_itertools==8.4.0
+requests==2.24.0
+tqdm==4.47.0
+xlsxwriter==1.2.9
