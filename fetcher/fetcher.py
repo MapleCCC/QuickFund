@@ -98,9 +98,8 @@ def fetch_estimate(fund_code: str) -> FundInfo:
         json_data = json.loads(content)
 
         fund_info = FundInfo()
-        # TODO change assert to explicit check. Becoz when run in optimization mode,
-        # assertion checks are disabled.
-        assert fund_code == json_data["fundcode"]
+        if fund_code != json_data["fundcode"]:
+            raise RuntimeError(f"爬取基金代码为 {fund_code} 的基金相关估算信息时发现基金代码不匹配")
         fund_info.基金代码 = fund_code
         fund_info.基金名称 = json_data["name"]
         fund_info.估算日期 = datetime.strptime(json_data["gztime"], "%Y-%m-%d %H:%M")
