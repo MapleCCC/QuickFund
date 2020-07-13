@@ -62,7 +62,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
 
         last_time_tds = root.xpath("/table/tbody/tr[2]/td")
         last_time_values = [td.text for td in last_time_tds]
-        last_time_values = list(replace(last_time_values, lambda x: x == None, [""]))
+        last_time_values = list(replace(last_time_values, lambda x: x is None, [""]))
 
         if len(keys) != len(values):
             raise RuntimeError("解析基金信息时键值对不匹配")
@@ -96,6 +96,8 @@ def fetch_estimate(fund_code: str) -> FundInfo:
         json_data = json.loads(content)
 
         fund_info = FundInfo()
+        # TODO change assert to explicit check. Becoz when run in optimization mode,
+        # assertion checks are disabled.
         assert fund_code == json_data["fundcode"]
         fund_info.基金代码 = fund_code
         fund_info.基金名称 = json_data["name"]

@@ -40,6 +40,7 @@ def main() -> None:
     if not os.path.isdir(ZIPAPP_DISTPATH):
         os.makedirs(ZIPAPP_DISTPATH)
 
+    print("打包 Python 代码模块成可执行 archive......")
     zipapp.create_archive(
         "fetcher",
         os.path.join(ZIPAPP_DISTPATH, OUTPUT_FILENAME),

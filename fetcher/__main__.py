@@ -42,6 +42,11 @@ T = TypeVar("T")
 tqdm: Callable[[Iterable[T]], Iterator[T]]
 
 
+# TODO change from a big function to a stateful object. For simplifying code.
+class XlsxWriter:
+    pass
+
+
 # TODO refactor write_to_xlsx. Such a long function is prone to error and grows
 # harder to maintain.
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
