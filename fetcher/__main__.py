@@ -12,7 +12,7 @@ from dataclasses import fields
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Iterable, Iterator, List, TypeVar
+from typing import Callable, Dict, Iterable, Iterator, List, TypeVar
 
 import click
 import xlsxwriter
@@ -42,13 +42,6 @@ T = TypeVar("T")
 tqdm: Callable[[Iterable[T]], Iterator[T]]
 
 
-# TODO change from a big function to a stateful object. For simplifying code.
-class XlsxWriter:
-    pass
-
-
-# TODO refactor write_to_xlsx. Such a long function is prone to error and grows
-# harder to maintain.
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
     try:
         with xlsxwriter.Workbook(xlsx_filename) as workbook:
@@ -91,10 +84,12 @@ def check_args(in_filename: str, out_filename: str) -> None:
         raise RuntimeError(f"同名文件夹已存在，无法新建文件 {out_filename}")
 
     if os.path.isfile(out_filename):
+
         if locale.getdefaultlocale()[0] == "zh_CN":
             backup_filename = "[备份] " + out_filename
         else:
             backup_filename = out_filename + ".bak"
+
         try:
             shutil.move(out_filename, backup_filename)
         except PermissionError:
@@ -115,6 +110,7 @@ def check_update() -> None:
     except:
         print("获取最新分发版本号的时候发生错误，暂时跳过。可以通过 --update 命令来手动触发更新检查")
         return
+
     if parse_version_number(latest_version) > parse_version_number(__version__):
         print(f"检测到更新版本 {latest_version}，请手动更新")
         exit()
@@ -134,6 +130,7 @@ def net_value_date_is_latest(net_value_date: date) -> bool:
     now_time = datetime.now().time()
     today = date.today()
     yesterday = today - timedelta(days=1)
+
     if time.min <= now_time < time(20):
         return net_value_date == yesterday
     else:
@@ -177,12 +174,12 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
 
     with shelve.open(shelf_path) as fund_info_cache_db:
         renewed_variable_access_lock = threading.Lock()
-        renewed = {}
+        renewed: Dict[str, FundInfo] = {}
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> FundInfo:
             need_renew = False
-            fund_info = fund_info_cache_db.get(fund_code, FundInfo())
+            fund_info: FundInfo = fund_info_cache_db.get(fund_code, FundInfo())
 
             net_value_date = fund_info.净值日期
             if net_value_date is None or not net_value_date_is_latest(net_value_date):

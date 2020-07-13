@@ -86,11 +86,18 @@
 - Pin the dependencies' versions. Use exact version for max robustness and compatibility.
   - Use some utility tool to help automatically find all third-party library used in the repository.
   - Inspect pipreq library's source code. Figure out how it identifies an import as third-party import.
+  - How to identify an import as third-party import, and not standard import?
+  - Append to project idea
+  - Look into isort library source code. Figure out how isort identifies an import as third-party import.
 - Consider use "WARN:" to replace "WARNING:" in comments.
 - Open issue: Pylance doesn't signal error when a non-existent method is called from a dataclass instance.
 - When getting fund info of fund code 519674, a error is raised saying that NoneType has no member 'group'.
 - Make it a good habit to add elaborte comments and docstring and docs. This is important and has long-lasting benefits for other people to read my code, including the the guy called "future me".
 - Turn out that Pylance static type checker doesn't do a good job in checking about dataclass. It doesn't signal error when a field is assigned a value of type not the same with the type annotation in dataclass definition. It doesn't signal error when dataclass instance is assigned new property dynamically. It doesn't signal error when a non-existent method is called from a datalcass instance.
+  - Check whether Pylance suffers similar problems when checking about attrs library.
+- Move some entries from TODO.md to CHANGELOG.md
+- Make it a good habit to insert blank lines between groups of code to make code more visually readable.
+- When swtiching to client/server architecture, use xlsxwriter's advanced in-memory server feature.
 
 
 ## Archive
