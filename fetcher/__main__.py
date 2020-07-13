@@ -8,10 +8,11 @@ import shelve
 import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import fields
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Iterator, List, TypeVar
+from typing import Callable, Iterable, Iterator, List, TypeVar
 
 import click
 import xlsxwriter
@@ -22,6 +23,7 @@ from .config import REPO_NAME, REPO_OWNER
 from .fetcher import fetch_estimate, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
+from .schema import MISSING, FundInfo
 from .utils import parse_version_number
 
 
@@ -42,99 +44,33 @@ tqdm: Callable[[Iterable[T]], Iterator[T]]
 
 # TODO refactor write_to_xlsx. Such a long function is prone to error and grows
 # harder to maintain.
-def write_to_xlsx(fund_infos: List[Dict[str, str]], xlsx_filename: str) -> None:
+def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
     try:
         with xlsxwriter.Workbook(xlsx_filename) as workbook:
-
-            # f = lambda d: workbook.add_format(d)
-            def f(d: Dict) -> xlsxwriter.format.Format:
-                return workbook.add_format(d)
 
             print("新建 Excel 文档......")
             worksheet = workbook.add_worksheet()
 
-            header_format = workbook.add_format(
-                {"bold": True, "align": "center", "valign": "top", "border": 1}
-            )
-            date_format = workbook.add_format({"num_format": "yyyy-mm-dd"})
-            datetime_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm"})
-            yellow_highlight_format = workbook.add_format({"bg_color": "yellow"})
-            blue_highlight_format = workbook.add_format({"bg_color": "B4D6E4"})
-            percentage_format = workbook.add_format({"num_format": "0.00%"})
+            # Widen column
+            for i, field in enumerate(fields(FundInfo)):
+                width = field.metadata.get("width")
+                worksheet.set_column(i, i, width)
 
-            # Widen column for fund name field
-            for i, fieldname in enumerate(fieldnames):
-                if fieldname == "基金名称":
-                    worksheet.set_column(i, i, 22)
-                elif fieldname == "估算日期":
-                    worksheet.set_column(i, i, 17)
-                elif fieldname == "实时估值":
-                    worksheet.set_column(i, i, 11)
-                elif fieldname == "估算增长率":
-                    worksheet.set_column(i, i, 11)
-                elif fieldname == "上一天净值":
-                    worksheet.set_column(i, i, 10)
-                elif fieldname == "上一天净值日期":
-                    worksheet.set_column(i, i, 14)
-                elif fieldname == "净值日期":
-                    worksheet.set_column(i, i, 13)
-
-            # Writer header
+            # Write header
             print("写入文档头......")
-            for i, fieldname in enumerate(fieldnames):
-                worksheet.write(0, i, fieldname, header_format)
+            for i, field in enumerate(fields(FundInfo)):
+                header_format = workbook.add_format(
+                    {"bold": True, "align": "center", "valign": "top", "border": 1}
+                )
+                worksheet.write_string(0, i, field.name, header_format)
 
             # Write body
             print("写入文档体......")
-            for row, info in enumerate(tqdm(fund_infos)):
-
-                for col, fieldname in enumerate(fieldnames):
-                    fieldvalue = info[fieldname]
-                    fieldtype = fieldtypes[col]
-
-                    if fieldtype == ExcelCellDataType.string:
-                        worksheet.write_string(row + 1, col, fieldvalue)
-                    elif fieldtype == ExcelCellDataType.number:
-                        try:
-                            if "%" in fieldvalue:
-                                num = float(fieldvalue.rstrip("% ")) * 0.01
-                            else:
-                                num = float(fieldvalue)
-                        except ValueError:
-                            raise RuntimeError(
-                                f'基金代码为 {info["基金代码"]} 的基金"{info["基金名称"]}"的"{fieldname}"数据无法转换成浮点数格式：{fieldvalue}'
-                            )
-                        if fieldname in ("上一天净值", "单位净值"):
-                            worksheet.write_number(
-                                row + 1, col, num, yellow_highlight_format
-                            )
-                        elif fieldname == "实时估值":
-                            worksheet.write_number(
-                                row + 1, col, num, blue_highlight_format
-                            )
-                        elif fieldname in ("日增长率", "估算增长率"):
-                            worksheet.write_number(row + 1, col, num, percentage_format)
-                        else:
-                            worksheet.write_number(row + 1, col, num)
-                    elif fieldtype == ExcelCellDataType.date:
-                        if fieldname in ("净值日期", "上一天净值日期"):
-                            net_value_date = datetime.strptime(
-                                fieldvalue, "%Y-%m-%d"
-                            ).date()
-                            worksheet.write_datetime(
-                                row + 1, col, net_value_date, date_format
-                            )
-                        elif fieldname == "估算日期":
-                            estimate_datetime = datetime.strptime(
-                                fieldvalue, "%Y-%m-%d %H:%M"
-                            )
-                            worksheet.write_datetime(
-                                row + 1, col, estimate_datetime, datetime_format
-                            )
-                        else:
-                            raise RuntimeError("Unreachable")
-                    else:
-                        raise RuntimeError("Unreachable")
+            for row, info in enumerate(tqdm(fund_infos), start=1):
+                for col, field in enumerate(fields(FundInfo)):
+                    # TODO what happen if we call add_format(None)?
+                    cell_format = workbook.add_format(field.metadata.get("format"))
+                    worksheet.write(row, col, info[col], cell_format)
 
             print("Flush 到硬盘......")
 
@@ -181,7 +117,7 @@ def check_update() -> None:
         print("当前已是最新版本")
 
 
-def net_value_date_is_latest(raw_date: str) -> bool:
+def net_value_date_is_latest(net_value_date: date) -> bool:
     # Take advantage of the knowledge that fund info stays the same
     # within 0:00 to 20:00.
 
@@ -190,7 +126,6 @@ def net_value_date_is_latest(raw_date: str) -> bool:
     # sometimes holiday policy will make this irregular. We had better
     # fall back to use the most robust way to check.
 
-    net_value_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
     now_time = datetime.now().time()
     today = date.today()
     yesterday = today - timedelta(days=1)
@@ -200,7 +135,7 @@ def net_value_date_is_latest(raw_date: str) -> bool:
         return net_value_date == today
 
 
-def estimate_datetime_is_latest(raw_datetime: str) -> bool:
+def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     # Take advantage of the knowledge that estimate info stays the same
     # within 15:00 to next day 15:00.
 
@@ -208,8 +143,6 @@ def estimate_datetime_is_latest(raw_datetime: str) -> bool:
     # in weekends. But we can't use this knowledge in our logic. Because
     # sometimes holiday policy will make this irregular. We had better
     # fall back to use the most robust way to check.
-
-    estimate_datetime = datetime.strptime(raw_datetime, "%Y-%m-%d %H:%M")
 
     open_market_time = time(9, 30)
     close_market_time = time(15)
@@ -229,7 +162,7 @@ def estimate_datetime_is_latest(raw_datetime: str) -> bool:
         raise RuntimeError("Unreachable")
 
 
-def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
+def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
     if not os.path.isdir(PERSISTENT_CACHE_DB_DIRECTORY):
         os.makedirs(PERSISTENT_CACHE_DB_DIRECTORY)
 
@@ -242,21 +175,35 @@ def get_fund_infos(fund_codes: List[str]) -> List[Dict[str, str]]:
         renewed = {}
 
         @lru_cache(maxsize=None)
-        def get_fund_info(fund_code: str) -> Dict[str, str]:
+        def get_fund_info(fund_code: str) -> FundInfo:
             need_renew = False
-            fund_info = fund_info_cache_db.get(fund_code, {})
+            fund_info = fund_info_cache_db.get(fund_code, FundInfo())
 
-            net_value_date = fund_info.get("净值日期")
-            if not net_value_date or not net_value_date_is_latest(net_value_date):
+            net_value_date = fund_info.净值日期
+            if net_value_date == MISSING or not net_value_date_is_latest(
+                net_value_date
+            ):
                 need_renew = True
-                fund_info.update(fetch_net_value(fund_code))
+                data = fetch_net_value(fund_code)
+                fund_info.基金代码 = data.基金代码
+                fund_info.净值日期 = data.净值日期
+                fund_info.单位净值 = data.单位净值
+                fund_info.日增长率 = data.日增长率
+                fund_info.分红送配 = data.分红送配
+                fund_info.上一天净值 = data.上一天净值
+                fund_info.上一天净值日期 = data.上一天净值日期
 
-            estimate_datetime = fund_info.get("估算日期")
-            if not estimate_datetime or not estimate_datetime_is_latest(
+            estimate_datetime = fund_info.估算日期
+            if estimate_datetime == MISSING or not estimate_datetime_is_latest(
                 estimate_datetime
             ):
                 need_renew = True
-                fund_info.update(fetch_estimate(fund_code))
+                data = fetch_estimate(fund_code)
+                fund_info.基金代码 = data.基金代码
+                fund_info.基金名称 = data.基金名称
+                fund_info.估算日期 = data.估算日期
+                fund_info.实时估值 = data.实时估值
+                fund_info.估算增长率 = data.估算增长率
 
             if need_renew:
                 # TIPS: Uncomment following line to profile lock congestion.

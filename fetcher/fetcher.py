@@ -2,16 +2,19 @@ import json
 import random
 import re
 import string
-from typing import Dict, List
+from datetime import datetime
+from typing import List
 
 import requests
 from lxml import etree  # type: ignore
 from more_itertools import replace
 
+from .schema import FundInfo
+
 __all__ = ["fetch_net_value", "fetch_estimate", "fetch_fund_info"]
 
 
-def fetch_net_value(fund_code: str) -> Dict[str, str]:
+def fetch_net_value(fund_code: str) -> FundInfo:
     try:
         # Add random parameter to the URL to break any cache mechanism of
         # the server or the network or the requests library.
@@ -50,12 +53,12 @@ def fetch_net_value(fund_code: str) -> Dict[str, str]:
 
         responded_data = dict(zip(keys, values))
 
-        fund_info = {}
-        fund_info["基金代码"] = fund_code
-        fund_info["净值日期"] = responded_data["净值日期"]
-        fund_info["单位净值"] = responded_data["单位净值"]
-        fund_info["日增长率"] = responded_data["日增长率"]
-        fund_info["分红送配"] = responded_data["分红送配"]
+        fund_info = FundInfo()
+        fund_info.基金代码 = fund_code
+        fund_info.净值日期 = datetime.strptime(responded_data["净值日期"], "%Y-%m-%d").date()
+        fund_info.单位净值 = float(responded_data["单位净值"])
+        fund_info.日增长率 = float(responded_data["日增长率"].rstrip("% ")) * 0.01
+        fund_info.分红送配 = responded_data["分红送配"]
 
         last_time_tds = root.xpath("/table/tbody/tr[2]/td")
         last_time_values = [td.text for td in last_time_tds]
@@ -66,15 +69,15 @@ def fetch_net_value(fund_code: str) -> Dict[str, str]:
 
         last_time_info = dict(zip(keys, last_time_values))
 
-        fund_info["上一天净值"] = last_time_info["单位净值"]
-        fund_info["上一天净值日期"] = last_time_info["净值日期"]
+        fund_info.上一天净值 = float(last_time_info["单位净值"])
+        fund_info.上一天净值日期 = datetime.strptime(last_time_info["净值日期"], "%Y-%m-%d").date()
 
         return fund_info
     except Exception as exc:
         raise RuntimeError(f"获取基金代码为 {fund_code} 的基金相关净值信息时发生错误") from exc
 
 
-def fetch_estimate(fund_code: str) -> Dict[str, str]:
+def fetch_estimate(fund_code: str) -> FundInfo:
     try:
         # Add random parameter to the URL to break potential cache mechanism of
         # the server or the network or the requests library.
@@ -92,28 +95,45 @@ def fetch_estimate(fund_code: str) -> Dict[str, str]:
         content = re.match(r"jsonpgz\((?P<content>.*)\);", text).group("content")
         json_data = json.loads(content)
 
-        fund_info = {}
+        fund_info = FundInfo()
         assert fund_code == json_data["fundcode"]
-        fund_info["基金代码"] = fund_code
-        fund_info["基金名称"] = json_data["name"]
-        fund_info["估算日期"] = json_data["gztime"]
-        fund_info["实时估值"] = json_data["gsz"]
+        fund_info.基金代码 = fund_code
+        fund_info.基金名称 = json_data["name"]
+        fund_info.估算日期 = datetime.strptime(json_data["gztime"], "%Y-%m-%d %H:%M")
+        fund_info.实时估值 = float(json_data["gsz"])
+        # WARN: the estimate_growth_rate from API is itself a percentage number (despite
+        # that it doesn't come with a % mark), so no need to multiply it by 0.01 anymore.
         estimate_growth_rate = json_data["gszzl"]
-        if "%" in estimate_growth_rate:
-            fund_info["估算增长率"] = estimate_growth_rate
-        else:
-            fund_info["估算增长率"] = estimate_growth_rate + "%"
+        # TODO what's the range of 估算增长率? Can we give it a bound and use the
+        # bound to conduct sanity check?
+        # if not (0 <= estimate_growth_rate <= 1):
+        #     raise NotImplementedError
+        fund_info.估算增长率 = float(estimate_growth_rate)
 
         return fund_info
     except Exception as exc:
         raise RuntimeError(f"获取基金代码为 {fund_code} 的基金相关估算信息时发生错误") from exc
 
 
-def fetch_fund_info(fund_code: str) -> Dict[str, str]:
+def fetch_fund_info(fund_code: str) -> FundInfo:
     try:
-        fund_info = {}
-        fund_info.update(fetch_net_value(fund_code))
-        fund_info.update(fetch_estimate(fund_code))
+        fund_info = FundInfo()
+        net_value_info = fetch_net_value(fund_code)
+        fund_info.基金代码 = net_value_info.基金代码
+        fund_info.净值日期 = net_value_info.净值日期
+        fund_info.单位净值 = net_value_info.单位净值
+        fund_info.日增长率 = net_value_info.日增长率
+        fund_info.分红送配 = net_value_info.分红送配
+        fund_info.上一天净值 = net_value_info.上一天净值
+        fund_info.上一天净值日期 = net_value_info.上一天净值日期
+
+        estimate_data = fetch_estimate(fund_code)
+        fund_info.基金代码 = estimate_data.基金代码
+        fund_info.基金名称 = estimate_data.基金名称
+        fund_info.估算日期 = estimate_data.估算日期
+        fund_info.实时估值 = estimate_data.实时估值
+        fund_info.估算增长率 = estimate_data.估算增长率
+
         return fund_info
     except Exception as exc:
         raise RuntimeError(f"获取基金代码为 {fund_code} 的基金相关信息时发生错误") from exc

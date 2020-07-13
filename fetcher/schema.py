@@ -1,7 +1,8 @@
-from dataclasses import dataclass
-from enum import Enum, auto, unique
+from dataclasses import astuple, dataclass, field
+from datetime import date, datetime
+from typing import Any
 
-__all__ = ["FieldType", "Field", "excel_table_schema"]
+__all__ = ["FundInfo"]
 
 # Use language construct to make sure fieldnames consistent with
 # their occurrences in other places across the code repository. As
@@ -10,60 +11,76 @@ __all__ = ["FieldType", "Field", "excel_table_schema"]
 # FIXME if we set 基金代码 to string type, Excel document raises warning about
 # treating number as text.
 
+# TODO compare implementation choice between dict, user-defined class, dataclass, namedtuple, and
+# attrs library.
 
-@unique
-class FieldType(Enum):
-    string = auto()
-    date = auto()
-    number = auto()
+# TODO thoroughly read through doc of dataclasses module.
+
+# TODO thoroughly read through doc of attrs library.
+
+# TODO read attrs library doc's section about "Why not...?"
+
+# TODO see what features attrs has that dataclass doesn't have.
+
+# TODO after refactor, use binary diff to check regression.
+
+# QUESTION: do we need to specify default value for fields? Have a trial and
+# see what happens if we construct a dataclass without parameters while the
+# dataclass contains fields that have no default values.
+# ANSWER: Turn out that we can't. Try attrs library or try to use a sentinel to
+# signal MISSING VALUE.
+
+# QUESTION: can we dynamically create new property to a dataclass instance?
+# ANSWER: Yes.
+# WORKAROUND: Add __slots__ property, or use attrs library.
+# Turn out that it's been a infamous problem that there is no simple good way to
+# incorporate dataclass and __slots__. So we are left with using attrs library.
+# Or we can use @add_slots decorator by ericvsmith.
+
+# QUESTION: can we assign value to a field that doesn't match the type
+# annotation?
+# ANSWER: Yes. Type annotation doesn't impose runtime restriction, except a
+# few minor situations. We should rely on static type checker to maintain the type
+# restriction in code editing time.
+
+# QUESTION: what happen if workbook.add_format({})? Will we get a default cell format, like
+# what we get when calling workbook.add_format()? What about
+# workbook.add_format(None)?
+
+# QUESTION: Does dataclass support __getitem__?
+# ANSWER: No.
 
 
-@unique
-class FieldName(Enum):
-    基金名称 = auto()
-    基金代码 = auto()
-    上一天净值日期 = auto()
-    上一天净值 = auto()
-    净值日期 = auto()
-    单位净值 = auto()
-    日增长率 = auto()
-    估算日期 = auto()
-    实时估值 = auto()
-    估算增长率 = auto()
-    分红送配 = auto()
+# A sentinel object to signal no value is assigned to a field yet.
+MISSING = object()
 
 
 @dataclass
 class FundInfo:
-    基金名称: str
-    基金代码: str
-    上一天净值日期: str
-    上一天净值: str
-    净值日期: str
-    单位净值: str
-    日增长率: str
-    估算日期: str
-    实时估值: str
-    估算增长率: str
-    分红送配: str
+    基金名称: str = field(default=MISSING, metadata={"width": 22})
+    基金代码: str = field(default=MISSING)
+    上一天净值日期: date = field(
+        default=MISSING, metadata={"width": 14, "format": {"num_format": "yyyy-mm-dd"}}
+    )
+    上一天净值: float = field(
+        default=MISSING, metadata={"width": 10, "format": {"bg_color": "yellow"}}
+    )
+    净值日期: date = field(
+        default=MISSING, metadata={"width": 13, "format": {"num_format": "yyyy-mm-dd"}}
+    )
+    单位净值: float = field(default=MISSING, metadata={"format": {"bg_color": "yellow"}})
+    日增长率: float = field(default=MISSING, metadata={"format": {"num_format": "0.00%"}})
+    估算日期: datetime = field(
+        default=MISSING,
+        metadata={"width": 17, "format": {"num_format": "yyyy-mm-dd hh:mm"}},
+    )
+    实时估值: float = field(
+        default=MISSING, metadata={"width": 11, "format": {"bg_color": "B4D6E4"}}
+    )
+    估算增长率: float = field(
+        default=MISSING, metadata={"width": 11, "format": {"num_format": "0.00%"}}
+    )
+    分红送配: str = field(default=MISSING)
 
-
-@dataclass
-class Field:
-    name: str
-    typ: FieldType
-
-
-excel_table_schema = [
-    Field("基金名称", Field.string),
-    Field("基金代码", Field.string),
-    Field("上一天净值日期", Field.date),
-    Field("上一天净值", Field.number),
-    Field("净值日期", Field.date),
-    Field("单位净值", Field.number),
-    Field("日增长率", Field.number),
-    Field("估算日期", Field.date),
-    Field("实时估值", Field.number),
-    Field("估算增长率", Field.number),
-    Field("分红送配", Field.string),
-]
+    def __getitem__(self, index: int) -> Any:
+        return astuple(self)[index]
