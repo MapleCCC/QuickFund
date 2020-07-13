@@ -105,13 +105,13 @@ def fetch_estimate(fund_code: str) -> FundInfo:
         fund_info.估算日期 = datetime.strptime(json_data["gztime"], "%Y-%m-%d %H:%M")
         fund_info.实时估值 = float(json_data["gsz"])
         # WARN: the estimate_growth_rate from API is itself a percentage number (despite
-        # that it doesn't come with a % mark), so no need to multiply it by 0.01 anymore.
+        # that it doesn't come with a % mark), so we need to multiply it by 0.01.
         estimate_growth_rate = json_data["gszzl"]
         # TODO what's the range of 估算增长率? Can we give it a bound and use the
         # bound to conduct sanity check?
         # if not (0 <= estimate_growth_rate <= 1):
         #     raise NotImplementedError
-        fund_info.估算增长率 = float(estimate_growth_rate)
+        fund_info.估算增长率 = float(estimate_growth_rate) * 0.01
 
         return fund_info
     except Exception as exc:
