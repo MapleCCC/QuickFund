@@ -28,6 +28,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
         }
         net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
         response = requests.get(net_value_api, params=params)
+        response.raise_for_status()
 
         response.encoding = "utf-8"
         text = response.text
@@ -85,6 +86,7 @@ def fetch_estimate(fund_code: str) -> FundInfo:
         params = {"salt": salt}
         estimate_api = "http://fundgz.1234567.com.cn/js/{fund_code}.js"
         response = requests.get(estimate_api.format(fund_code=fund_code), params=params)
+        response.raise_for_status()
 
         response.encoding = "utf-8"
         text = response.text
