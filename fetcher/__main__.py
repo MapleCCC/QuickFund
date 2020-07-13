@@ -23,7 +23,7 @@ from .config import REPO_NAME, REPO_OWNER
 from .fetcher import fetch_estimate, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
-from .schema import MISSING, FundInfo
+from .schema import FundInfo
 from .utils import parse_version_number
 
 
@@ -185,9 +185,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
             fund_info = fund_info_cache_db.get(fund_code, FundInfo())
 
             net_value_date = fund_info.净值日期
-            if net_value_date == MISSING or not net_value_date_is_latest(
-                net_value_date
-            ):
+            if net_value_date is None or not net_value_date_is_latest(net_value_date):
                 need_renew = True
                 data = fetch_net_value(fund_code)
                 fund_info.基金代码 = data.基金代码
@@ -199,7 +197,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
                 fund_info.上一天净值日期 = data.上一天净值日期
 
             estimate_datetime = fund_info.估算日期
-            if estimate_datetime == MISSING or not estimate_datetime_is_latest(
+            if estimate_datetime is None or not estimate_datetime_is_latest(
                 estimate_datetime
             ):
                 need_renew = True

@@ -51,36 +51,32 @@ __all__ = ["FundInfo"]
 # ANSWER: No.
 
 
-# A sentinel object to signal no value is assigned to a field yet.
-MISSING = object()
-
-
 @dataclass
 class FundInfo:
-    基金名称: str = field(default=MISSING, metadata={"width": 22})
-    基金代码: str = field(default=MISSING)
+    基金名称: str = field(default=None, metadata={"width": 22})
+    基金代码: str = field(default=None)
     上一天净值日期: date = field(
-        default=MISSING, metadata={"width": 14, "format": {"num_format": "yyyy-mm-dd"}}
+        default=None, metadata={"width": 14, "format": {"num_format": "yyyy-mm-dd"}}
     )
     上一天净值: float = field(
-        default=MISSING, metadata={"width": 10, "format": {"bg_color": "yellow"}}
+        default=None, metadata={"width": 10, "format": {"bg_color": "yellow"}}
     )
     净值日期: date = field(
-        default=MISSING, metadata={"width": 13, "format": {"num_format": "yyyy-mm-dd"}}
+        default=None, metadata={"width": 13, "format": {"num_format": "yyyy-mm-dd"}}
     )
-    单位净值: float = field(default=MISSING, metadata={"format": {"bg_color": "yellow"}})
-    日增长率: float = field(default=MISSING, metadata={"format": {"num_format": "0.00%"}})
+    单位净值: float = field(default=None, metadata={"format": {"bg_color": "yellow"}})
+    日增长率: float = field(default=None, metadata={"format": {"num_format": "0.00%"}})
     估算日期: datetime = field(
-        default=MISSING,
+        default=None,
         metadata={"width": 17, "format": {"num_format": "yyyy-mm-dd hh:mm"}},
     )
     实时估值: float = field(
-        default=MISSING, metadata={"width": 11, "format": {"bg_color": "B4D6E4"}}
+        default=None, metadata={"width": 11, "format": {"bg_color": "B4D6E4"}}
     )
     估算增长率: float = field(
-        default=MISSING, metadata={"width": 11, "format": {"num_format": "0.00%"}}
+        default=None, metadata={"width": 11, "format": {"num_format": "0.00%"}}
     )
-    分红送配: str = field(default=MISSING)
+    分红送配: str = field(default=None)
 
     def __getitem__(self, index: int) -> Any:
         return astuple(self)[index]
