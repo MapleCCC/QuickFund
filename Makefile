@@ -12,7 +12,7 @@ release:
 	scripts/release.py
 
 format:
-	autopep8 --in-place --recursive --aggressive --aggressive --select E501 .
+	autopep8 --in-place --recursive --aggressive --aggressive --max-line-length 88 .
 	isort --apply
 	black .
 

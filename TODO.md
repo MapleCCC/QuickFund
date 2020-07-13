@@ -89,7 +89,6 @@
 - Consider use "WARN:" to replace "WARNING:" in comments.
 - Open issue: Pylance doesn't signal error when a non-existent method is called from a dataclass instance.
 - When getting fund info of fund code 519674, a error is raised saying that NoneType has no member 'group'.
-- Maybe it's okay to let autopep8 check all, instead of just check E501. Some other problems are worth addressed. Like changing "x == None" to "x is None", and changing "except:" to "except BaseException:".
 - Make it a good habit to add elaborte comments and docstring and docs. This is important and has long-lasting benefits for other people to read my code, including the the guy called "future me".
 - Turn out that Pylance static type checker doesn't do a good job in checking about dataclass. It doesn't signal error when a field is assigned a value of type not the same with the type annotation in dataclass definition. It doesn't signal error when dataclass instance is assigned new property dynamically. It doesn't signal error when a non-existent method is called from a datalcass instance.
 

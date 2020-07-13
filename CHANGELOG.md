@@ -9,3 +9,4 @@
 - Instead of asking for override confirmation, just backup the old file and create the new file in-place.
 - Add LICENSE
 - Take advantage of the knowledge that fund info stays the same within 0:00 to 20:00. Implement persistent cache mechanism to acclerate following queries. Possible implementation schemes are SQLite3, pickle, shelve, dbm, marshal, copyreg, json.
+- Maybe it's okay to let autopep8 check all, instead of just check E501. Some other problems are worth addressed. Like changing "x == None" to "x is None", and changing "except:" to "except BaseException:".
