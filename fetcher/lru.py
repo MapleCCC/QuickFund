@@ -58,7 +58,7 @@ class LRU(Generic[T]):
 
     @classmethod
     def empty_lru(cls) -> LRU:
-        return cls().copy()
+        return cls()
 
     def update(self, elem: T) -> None:
         if elem in self._indexer:
