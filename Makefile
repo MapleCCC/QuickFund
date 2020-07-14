@@ -1,5 +1,9 @@
 # MAKEFLAGS+=.silent
 
+SRC_DIR=fetcher
+TEST_DIR=tests
+
+
 run:
 	scripts/run.py
 
