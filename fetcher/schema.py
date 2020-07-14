@@ -1,8 +1,7 @@
-from dataclasses import astuple, dataclass, field
 from datetime import date, datetime
 from typing import Any
 
-from .utils import add_slots
+import attr
 
 __all__ = ["FundInfo"]
 
@@ -53,33 +52,32 @@ __all__ = ["FundInfo"]
 # ANSWER: No.
 
 
-@add_slots
-@dataclass
+@attr.s(slots=True)
 class FundInfo:
-    基金名称: str = field(default=None, metadata={"width": 22})
-    基金代码: str = field(default=None)
-    上一天净值日期: date = field(
+    基金名称: str = attr.ib(default=None, metadata={"width": 22})
+    基金代码: str = attr.ib(default=None)
+    上一天净值日期: date = attr.ib(
         default=None, metadata={"width": 14, "format": {"num_format": "yyyy-mm-dd"}}
     )
-    上一天净值: float = field(
+    上一天净值: float = attr.ib(
         default=None, metadata={"width": 10, "format": {"bg_color": "yellow"}}
     )
-    净值日期: date = field(
+    净值日期: date = attr.ib(
         default=None, metadata={"width": 13, "format": {"num_format": "yyyy-mm-dd"}}
     )
-    单位净值: float = field(default=None, metadata={"format": {"bg_color": "yellow"}})
-    日增长率: float = field(default=None, metadata={"format": {"num_format": "0.00%"}})
-    估算日期: datetime = field(
+    单位净值: float = attr.ib(default=None, metadata={"format": {"bg_color": "yellow"}})
+    日增长率: float = attr.ib(default=None, metadata={"format": {"num_format": "0.00%"}})
+    估算日期: datetime = attr.ib(
         default=None,
         metadata={"width": 17, "format": {"num_format": "yyyy-mm-dd hh:mm"}},
     )
-    实时估值: float = field(
+    实时估值: float = attr.ib(
         default=None, metadata={"width": 11, "format": {"bg_color": "B4D6E4"}}
     )
-    估算增长率: float = field(
+    估算增长率: float = attr.ib(
         default=None, metadata={"width": 11, "format": {"num_format": "0.00%"}}
     )
-    分红送配: str = field(default=None)
+    分红送配: str = attr.ib(default=None)
 
     def __getitem__(self, index: int) -> Any:
-        return astuple(self)[index]
+        return attr.astuple(self)[index]

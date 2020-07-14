@@ -8,12 +8,12 @@ import shelve
 import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import fields
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from pathlib import Path
 from typing import Callable, Dict, Iterable, Iterator, List, TypeVar
 
+import attr
 import click
 import xlsxwriter
 from tqdm import tqdm, trange
@@ -50,13 +50,13 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
             worksheet = workbook.add_worksheet()
 
             # Widen column
-            for i, field in enumerate(fields(FundInfo)):
+            for i, field in enumerate(attr.fields(FundInfo)):
                 width = field.metadata.get("width")
                 worksheet.set_column(i, i, width)
 
             # Write header
             print("写入文档头......")
-            for i, field in enumerate(fields(FundInfo)):
+            for i, field in enumerate(attr.fields(FundInfo)):
                 header_format = workbook.add_format(
                     {"bold": True, "align": "center", "valign": "top", "border": 1}
                 )
@@ -65,7 +65,7 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
             # Write body
             print("写入文档体......")
             for row, info in enumerate(tqdm(fund_infos), start=1):
-                for col, field in enumerate(fields(FundInfo)):
+                for col, field in enumerate(attr.fields(FundInfo)):
                     # TODO what happen if we call add_format(None)?
                     cell_format = workbook.add_format(field.metadata.get("format"))
                     worksheet.write(row, col, info[col], cell_format)
