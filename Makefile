@@ -7,6 +7,9 @@ TEST_DIR=tests
 run:
 	scripts/run.py
 
+test:
+	pytest ${TEST_DIR}
+
 release:
 	scripts/release.py
 
@@ -30,4 +33,4 @@ todo:
 clean:
 	rm -rf build/ dist/ __pycache__/ *.spec .cache/
 
-.PHONY: run release format type-check lint unused-imports todo clean
+.PHONY: run test release format type-check lint unused-imports todo clean
