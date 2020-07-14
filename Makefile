@@ -15,6 +15,9 @@ format:
 	isort --apply
 	black .
 
+type-check:
+	mypy ${SRC_DIR} ${TEST_DIR}
+
 lint:
 	find ${SRC_DIR} ${TEST_DIR} -type f -name "*.py" | xargs pylint
 
@@ -27,4 +30,4 @@ todo:
 clean:
 	rm -rf build/ dist/ __pycache__/ *.spec .cache/
 
-.PHONY: all run release format lint unused-imports todo clean
+.PHONY: run release format type-check lint unused-imports todo clean
