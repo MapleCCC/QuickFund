@@ -34,7 +34,9 @@ class LRU(Generic[T]):
     __slots__ = ["_storage", "_indexer", "_dummy_cell_count", "_offset"]
 
     def __len__(self) -> int:
-        return len(self._storage)
+        # Note the invariant: len(indexer) + dummy_cell_count === len(storage)
+        # return len(self._indexer)
+        return len(self._storage) - self._dummy_cell_count
 
     def copy(self) -> LRU:
         new_lru = LRU[T]()
