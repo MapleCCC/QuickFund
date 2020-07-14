@@ -71,7 +71,7 @@ class LRU(Generic[T]):
             self._indexer[elem] = len(self._storage) - 1
 
         if self._dummy_cell_count > LRU_MAX_DUMMY_CELL_NUM:
-            self.reconstruct()
+            self._reconstruct()
 
     def evict(self) -> T:
         if self._dummy_cell_count == len(self._storage):
@@ -93,11 +93,11 @@ class LRU(Generic[T]):
         del self._indexer[oldest_non_dummy_cell_elem]
 
         if self._dummy_cell_count > LRU_MAX_DUMMY_CELL_NUM:
-            self.reconstruct()
+            self._reconstruct()
 
         return oldest_non_dummy_cell_elem
 
-    def reconstruct(self) -> None:
+    def _reconstruct(self) -> None:
         self._dummy_cell_count = 0
         self._offset = 0
         old_storage = self._storage
