@@ -5,7 +5,7 @@ from __future__ import annotations
 import operator
 from functools import partial
 from itertools import filterfalse
-from typing import Dict, List, TypeVar
+from typing import ClassVar, Dict, Generic, List, TypeVar, Union, cast
 
 from more_itertools import replace
 
@@ -22,11 +22,11 @@ T = TypeVar("T")
 LRU_MAX_DUMMY_CELL_NUM = 200
 
 
-class LRU:
-    _DUMMY_CELL = object()
+class LRU(Generic[T]):
+    _DUMMY_CELL: ClassVar[object] = object()
 
     def __init__(self) -> None:
-        self._storage: List[T] = []
+        self._storage: List[Union[T, object]] = []
         self._indexer: Dict[T, int] = {}
         self._dummy_cell_count: int = 0
         self._offset: int = 0
@@ -37,7 +37,7 @@ class LRU:
         return len(self._storage)
 
     def copy(self) -> LRU:
-        new_lru = LRU()
+        new_lru = LRU[T]()
         new_lru._storage = self._storage
         new_lru._indexer = self._indexer
         new_lru._dummy_cell_count = self._dummy_cell_count
@@ -82,6 +82,7 @@ class LRU:
 
         for i, elem in enumerate(self._storage[self._offset :], start=self._offset):
             if elem is not LRU._DUMMY_CELL:
+                elem = cast(T, elem)
                 oldest_non_dummy_cell_elem = elem
                 oldest_non_dummy_cell_index = i
                 break
@@ -104,12 +105,13 @@ class LRU:
 
         for elem in old_storage:
             if elem is not LRU._DUMMY_CELL:
+                elem = cast(T, elem)
                 self._storage.append(elem)
                 self._indexer[elem] = len(self._storage) - 1
 
 
 if __name__ == "__main__":
-    l = LRU()
+    l = LRU[int]()
     l.update(1)
     l.update(2)
     l.update(3)
