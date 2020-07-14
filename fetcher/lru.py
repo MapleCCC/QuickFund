@@ -40,8 +40,8 @@ class LRU(Generic[T]):
 
     def copy(self) -> LRU:
         new_lru = LRU[T]()
-        new_lru._storage = self._storage
-        new_lru._indexer = self._indexer
+        new_lru._storage = self._storage.copy()
+        new_lru._indexer = self._indexer.copy()
         new_lru._dummy_cell_count = self._dummy_cell_count
         new_lru._offset = self._offset
         return new_lru
