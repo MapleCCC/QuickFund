@@ -1,9 +1,14 @@
 # 基金信息生成器
 
-![License](https://img.shields.io/github/license/MapleCCC/Fund-Info-Fetcher?color=00BFFF)
+[![License](https://img.shields.io/github/license/MapleCCC/Fund-Info-Fetcher?color=00BFFF)](./LICENSE)
+<!-- build passing -->
+<!-- codecov -->
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/MapleCCC/Fund-Info-Fetcher)](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest)
+[![Semantic release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![LOC](https://sloc.xyz/github/MapleCCC/Fund-Info-Fetcher)](https://sloc.xyz/github/MapleCCC/Fund-Info-Fetcher)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## Introduction
+## Overview
 
 A script to fetch various fund information from `https://fund.eastmoney.com`, and structuralize into Excel document.
 
@@ -41,6 +46,37 @@ $ fund-info-fetch <list of fund codes>
 Go to [Release](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest) page.
 
 ## Development
+
+Prerequisites: Git, Python3.8+, `pip`.
+
+```bash
+# Clone the repository to local environment
+$ git clone https://github.com/MapleCCC/Fund-Info-Fetcher.git
+
+$ cd Fund-Info-Fetcher
+
+# You can optionally create a virtual environment for isolation purpose
+$ python -m virtualenv .venv
+$ source .venv/Scripts/activate
+
+# Install basic build requirements
+$ pip install -r requirements.txt
+
+# Install dev requirements
+$ pip install -r requirements-dev.txt
+```
+
+## Test
+
+The project uses pytest and hypothesis as test framework. Property-based testing is adopted in favor of its flexibility and conciseness.
+
+```bash
+# Install test requirements
+$ python -m pip install -r requirements-test.txt
+
+# unit tests
+$ make test
+```
 
 ### Release Strategy
 
