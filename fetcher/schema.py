@@ -2,6 +2,8 @@ from dataclasses import astuple, dataclass, field
 from datetime import date, datetime
 from typing import Any
 
+from .utils import add_slots
+
 __all__ = ["FundInfo"]
 
 # Use language construct to make sure fieldnames consistent with
@@ -51,6 +53,7 @@ __all__ = ["FundInfo"]
 # ANSWER: No.
 
 
+@add_slots
 @dataclass
 class FundInfo:
     基金名称: str = field(default=None, metadata={"width": 22})
