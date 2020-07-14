@@ -89,6 +89,8 @@
   - How to identify an import as third-party import, and not standard import?
   - Append to project idea
   - Look into isort library source code. Figure out how isort identifies an import as third-party import.
+  - Look into mypy library source code. Figure out how mypy identifies an import as third-party import.
+  - Look into pyright library source code. Figure out how isort identifies an import as third-party import.
 - Consider use "WARN:" to replace "WARNING:" in comments.
 - Open issue: Pylance doesn't signal error when a non-existent method is called from a dataclass instance.
 - When getting fund info of fund code 519674, a error is raised saying that NoneType has no member 'group'.
@@ -98,6 +100,32 @@
 - Move some entries from TODO.md to CHANGELOG.md
 - Make it a good habit to insert blank lines between groups of code to make code more visually readable.
 - When swtiching to client/server architecture, use xlsxwriter's advanced in-memory server feature.
+- 调整输出的 Excel 文档的各列列宽
+- Understand below code taken from attrs library:
+  ```
+  class _Nothing(object):
+      """
+      Sentinel class to indicate the lack of a value when ``None`` is ambiguous.
+
+      ``_Nothing`` is a singleton. There is only ever one of it.
+      """
+
+      _singleton = None
+
+      def __new__(cls):
+          if _Nothing._singleton is None:
+              _Nothing._singleton = super(_Nothing, cls).__new__(cls)
+          return _Nothing._singleton
+
+      def __repr__(self):
+          return "NOTHING"
+
+
+  NOTHING = _Nothing()
+  """
+  Sentinel to indicate the lack of a value when ``None`` is ambiguous.
+  """
+  ```
 
 
 ## Archive

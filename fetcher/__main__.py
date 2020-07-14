@@ -52,6 +52,10 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
             # Widen column
             for i, field in enumerate(attr.fields(FundInfo)):
                 width = field.metadata.get("width")
+                # TODO Despite the xlsxwriter doc saying that set_column(i, i, None) doesn't
+                # change the format, some simple tests show that it does. The source
+                # code of xlsxwriter is too complex that I can't figure out how the
+                # bug happends.
                 worksheet.set_column(i, i, width)
 
             # Write header
@@ -66,7 +70,8 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
             print("写入文档体......")
             for row, info in enumerate(tqdm(fund_infos), start=1):
                 for col, field in enumerate(attr.fields(FundInfo)):
-                    # TODO what happen if we call add_format(None)?
+                    # Judging from source code of xlsxwriter, add_format(None) is
+                    # equivalent to default format.
                     cell_format = workbook.add_format(field.metadata.get("format"))
                     worksheet.write(row, col, info[col], cell_format)
 

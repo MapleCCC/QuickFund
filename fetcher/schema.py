@@ -22,8 +22,12 @@ __all__ = ["FundInfo"]
 # TODO read attrs library doc's section about "Why not...?"
 
 # TODO see what features attrs has that dataclass doesn't have.
+# ANSWER: slots, ..., etc.
 
 # TODO after refactor, use binary diff to check regression.
+# Turn out that we can't. Because Xlsxwriter create Excel document has different hash
+# digest each time, even if we are writing identical content. A possible reason might be
+# Xlsxwriter create Excel document also contain some time-related information.
 
 # QUESTION: do we need to specify default value for fields? Have a trial and
 # see what happens if we construct a dataclass without parameters while the
@@ -35,7 +39,7 @@ __all__ = ["FundInfo"]
 # ANSWER: Yes.
 # WORKAROUND: Add __slots__ property, or use attrs library.
 # Turn out that it's been a infamous problem that there is no simple good way to
-# incorporate dataclass and __slots__. So we are left with using attrs library.
+# incorporate dataclass and slots. So we are left with using attrs library.
 # Or we can use @add_slots decorator by ericvsmith.
 
 # QUESTION: can we assign value to a field that doesn't match the type
@@ -47,6 +51,8 @@ __all__ = ["FundInfo"]
 # QUESTION: what happen if workbook.add_format({})? Will we get a default cell format, like
 # what we get when calling workbook.add_format()? What about
 # workbook.add_format(None)?
+# ANSWER: Judging from source code of the XlsxWriter library, add_format({}) and
+# add_format(None) is equivalent to default format.
 
 # QUESTION: Does dataclass support __getitem__?
 # ANSWER: No.

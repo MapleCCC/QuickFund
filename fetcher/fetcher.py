@@ -3,7 +3,7 @@ import random
 import re
 import string
 from datetime import datetime
-from typing import List
+from typing import Dict, List, Union
 
 import requests
 from lxml import etree  # type: ignore
@@ -19,7 +19,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
         # Add random parameter to the URL to break any cache mechanism of
         # the server or the network or the requests library.
         salt = "".join(random.sample(string.ascii_lowercase, 10))
-        params = {
+        params: Dict[str, Union[str, int]] = {
             "type": "lsjz",
             "page": 1,
             "per": 2,
