@@ -1,10 +1,5 @@
 # MAKEFLAGS+=.silent
 
-PYINSTALLER_FLAGS=--name "基金信息生成器" --upx-dir "D:\Apps\upx-3.96-win64\upx.exe" --onefile
-
-all:
-	pyinstaller ${PYINSTALLER_FLAGS} main.py
-
 run:
 	scripts/run.py
 
