@@ -44,7 +44,9 @@ tqdm: Callable[[Iterable[T]], Iterator[T]]
 
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
     try:
-        with xlsxwriter.Workbook(xlsx_filename) as workbook:
+        # TODO profile to see whether and how much setting constant_memory improves
+        # performance.
+        with xlsxwriter.Workbook(xlsx_filename, {"constant_memory": True}) as workbook:
 
             print("新建 Excel 文档......")
             worksheet = workbook.add_worksheet()
