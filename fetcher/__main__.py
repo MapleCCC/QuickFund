@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Iterator, List, TypeVar
+from typing import Dict, List
 
 import attr
 import click
@@ -34,12 +34,6 @@ else:
 # Instead of using full filename, we use basename, because shelve requires so.
 PERSISTENT_CACHE_DB_FILE_BASENAME = "cache"
 PERSISTENT_CACHE_DB_RECORD_MAX_NUM = 2000
-
-
-# FIXME The problem is that there is no officially supported way to type annotate a
-# function with optional argument.
-T = TypeVar("T")
-tqdm: Callable[[Iterable[T]], Iterator[T]]
 
 
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
