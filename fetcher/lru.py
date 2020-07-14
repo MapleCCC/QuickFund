@@ -45,12 +45,12 @@ class LRU:
         return new_lru
 
     def __str__(self) -> str:
-        filterfunc = partial(operator.eq, LRU._DUMMY_CELL)
+        filterfunc = partial(operator.is_not, LRU._DUMMY_CELL)
         logical_content = list(filterfalse(filterfunc, self._storage))
         return f"LRU({logical_content})"
 
     def __repr__(self) -> str:
-        filterfunc = partial(operator.eq, LRU._DUMMY_CELL)
+        filterfunc = partial(operator.is_not, LRU._DUMMY_CELL)
         repr_content = list(replace(self._storage, filterfunc, ["_DUMMY_CELL"]))
         return f"LRU({repr_content})"
 
@@ -81,7 +81,7 @@ class LRU:
         oldest_non_dummy_cell_index = 0
 
         for i, elem in enumerate(self._storage[self._offset :], start=self._offset):
-            if elem != LRU._DUMMY_CELL:
+            if elem is not LRU._DUMMY_CELL:
                 oldest_non_dummy_cell_elem = elem
                 oldest_non_dummy_cell_index = i
                 break
@@ -103,7 +103,7 @@ class LRU:
         self._storage = []
 
         for elem in old_storage:
-            if elem != LRU._DUMMY_CELL:
+            if elem is not LRU._DUMMY_CELL:
                 self._storage.append(elem)
                 self._indexer[elem] = len(self._storage) - 1
 
