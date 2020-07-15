@@ -15,7 +15,7 @@ release:
 
 format:
 	autopep8 --in-place --recursive --aggressive --aggressive --select E501 --max-line-length 88 .
-	isort --apply
+	isort .
 	black .
 
 type-check:
