@@ -48,7 +48,7 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
             # Widen column
             for i, field in enumerate(attr.fields(FundInfo)):
                 width = field.metadata.get("width")
-                # TODO Despite the xlsxwriter doc saying that set_column(i, i, None) doesn't
+                # FIXME Despite the xlsxwriter doc saying that set_column(i, i, None) doesn't
                 # change the column width, some simple tests show that it does. The source
                 # code of xlsxwriter is too complex that I can't figure out how the
                 # bug happens.
@@ -215,7 +215,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
 
             return fund_info
 
-        # TODO experiment to find a suitable number as threshold between sync and
+        # FIXME experiment to find a suitable number as threshold between sync and
         # async code
         if len(fund_codes) < 3:
             fund_infos = [get_fund_info(code) for code in tqdm(fund_codes)]

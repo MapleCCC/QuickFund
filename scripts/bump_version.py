@@ -13,8 +13,6 @@ from fetcher.__version__ import __version__ as current_version
 from fetcher.utils import parse_version_number
 from scripts.release import main as release_main
 
-# TODO bump version in setup.py
-
 
 @click.command()
 @click.argument("component")

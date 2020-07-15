@@ -2,7 +2,7 @@
 
 <!-- TODO add badge about code coverage -->
 <!-- TODO add badge about requires.io -->
-[![License](https://img.shields.io/github/license/MapleCCC/Fund-Info-Fetcher?color=00BFFF)](./LICENSE)
+[![License](https://img.shields.io/github/license/MapleCCC/Fund-Info-Fetcher?color=00BFFF)](LICENSE)
 [![Build Status](https://travis-ci.com/MapleCCC/Fund-Info-Fetcher.svg?branch=master)](https://travis-ci.com/MapleCCC/Fund-Info-Fetcher)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/MapleCCC/Fund-Info-Fetcher)](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest)
 [![Semantic release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
