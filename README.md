@@ -43,6 +43,10 @@ $ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git
 $ fund-info-fetch <list of fund codes>
 ```
 
+### Example Output
+
+![Example Output](assets/example output.png)
+
 ## Download
 
 Go to [Release](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest) page.
