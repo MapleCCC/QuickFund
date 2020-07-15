@@ -126,6 +126,21 @@
   Sentinel to indicate the lack of a value when ``None`` is ambiguous.
   """
   ```
+- Add screenshot pictures to README.
+- Add badges to README.
+  - build passing
+  - test coverage
+  - license
+  - code format style
+  - semantic version
+  - lines of code
+  - release version number
+  - code quality
+  - pylint rating
+  - commits since latest version
+- Bump to first major release v1.0.0
+- Add scripts to update dependencies and bump their version in requirements*.txt files.
+
 
 
 ## Archive

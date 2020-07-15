@@ -20,6 +20,7 @@ format:
 
 type-check:
 	mypy ${SRC_DIR} ${TEST_DIR}
+	# TODO pyright, pytype, pyre-check
 
 lint:
 	find ${SRC_DIR} ${TEST_DIR} -type f -name "*.py" | xargs pylint

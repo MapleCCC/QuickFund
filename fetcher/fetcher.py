@@ -36,9 +36,9 @@ def fetch_net_value(fund_code: str) -> FundInfo:
         # more robust to ill input. Remember, we are dealing with data
         # coming from stranger environment. Better not depend on some
         # strong assumption made about them.
-        content = re.match(r"var\s*apidata\s*=\s*{\s*content\s*:\s*\"(?P<content>.*)\"", text).group(
-            "content"
-        )
+        content = re.match(
+            r"var\s*apidata\s*=\s*{\s*content\s*:\s*\"(?P<content>.*)\"", text
+        ).group("content")
 
         root = etree.XML(content)
         keys = root.xpath("/table/thead/tr[1]/th/text()")
@@ -107,7 +107,7 @@ def fetch_estimate(fund_code: str) -> FundInfo:
         # WARN: the estimate_growth_rate from API is itself a percentage number (despite
         # that it doesn't come with a % mark), so we need to multiply it by 0.01.
         estimate_growth_rate = json_data["gszzl"]
-        # TODO what's the range of 估算增长率? Can we give it a bound and use the
+        # FIXME what's the range of 估算增长率? Can we give it a bound and use the
         # bound to conduct sanity check?
         # if not (0 <= estimate_growth_rate <= 1):
         #     raise NotImplementedError

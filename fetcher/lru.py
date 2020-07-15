@@ -55,6 +55,8 @@ class LRU:
         repr_content = list(replace(self._storage, filterfunc, ["_DUMMY_CELL"]))
         return f"LRU({repr_content})"
 
+    # TODO god damn it, we don't need this. What's wrong with you? Are
+    # you too sleepy that you become insane?
     @classmethod
     def empty_lru(cls) -> LRU:
         return cls()

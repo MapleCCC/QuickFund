@@ -49,9 +49,9 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
             for i, field in enumerate(attr.fields(FundInfo)):
                 width = field.metadata.get("width")
                 # TODO Despite the xlsxwriter doc saying that set_column(i, i, None) doesn't
-                # change the format, some simple tests show that it does. The source
+                # change the column width, some simple tests show that it does. The source
                 # code of xlsxwriter is too complex that I can't figure out how the
-                # bug happends.
+                # bug happens.
                 worksheet.set_column(i, i, width)
 
             # Write header
