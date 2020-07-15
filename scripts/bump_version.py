@@ -24,7 +24,7 @@ def bump_file___version__(new_version: str) -> None:
 
 
 def bump_file_README(new_version: str) -> None:
-    p = Path("README")
+    p = Path("README.md")
     old_content = p.read_text(encoding="utf-8")
     pattern = r"github.com/MapleCCC/Fund-Info-Fetcher/compare/.*\.\.\.master"
     repl = f"github.com/MapleCCC/Fund-Info-Fetcher/compare/{new_version}...master"
