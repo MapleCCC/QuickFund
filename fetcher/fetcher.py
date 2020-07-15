@@ -32,11 +32,11 @@ def fetch_net_value(fund_code: str) -> FundInfo:
 
         response.encoding = "utf-8"
         text = response.text
-        # TODO relax the regular expression to be more permissive and hence
+        # Relax the regular expression to be more permissive and hence
         # more robust to ill input. Remember, we are dealing with data
         # coming from stranger environment. Better not depend on some
         # strong assumption made about them.
-        content = re.match(r"var apidata={ content:\"(?P<content>.*)\"", text).group(
+        content = re.match(r"var\s*apidata\s*=\s*{\s*content\s*:\s*\"(?P<content>.*)\"", text).group(
             "content"
         )
 
@@ -90,11 +90,11 @@ def fetch_estimate(fund_code: str) -> FundInfo:
 
         response.encoding = "utf-8"
         text = response.text
-        # TODO relax the regular expression to be more permissive and hence
+        # Relax the regular expression to be more permissive and hence
         # more robust to ill input. Remember, we are dealing with data
         # coming from stranger environment. Better not depend on some
         # strong assumption made about them.
-        content = re.match(r"jsonpgz\((?P<content>.*)\);", text).group("content")
+        content = re.match(r"jsonpgz\s*\((?P<content>.*)\)\s*;", text).group("content")
         json_data = json.loads(content)
 
         fund_info = FundInfo()
