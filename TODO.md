@@ -130,6 +130,8 @@
   Sentinel to indicate the lack of a value when ``None`` is ambiguous.
   """
   ```
+- If we decide to use release candidate version, this complicates the version parsing. There is BNF grammar in semver.org. We can write a parser ourselves. Or we can use a dedicated library.
+- Generate TOC for README in pre-commit hook script.
 
 
 ## Archive

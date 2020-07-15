@@ -2,6 +2,7 @@
 
 <!-- TODO add badge about code coverage -->
 <!-- TODO add badge about requires.io -->
+<!-- TODO add badge about pylint rating -->
 [![License](https://img.shields.io/github/license/MapleCCC/Fund-Info-Fetcher?color=00BFFF)](LICENSE)
 [![Build Status](https://travis-ci.com/MapleCCC/Fund-Info-Fetcher.svg?branch=master)](https://travis-ci.com/MapleCCC/Fund-Info-Fetcher)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/MapleCCC/Fund-Info-Fetcher)](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest)
@@ -9,6 +10,7 @@
 [![LOC](https://sloc.xyz/github/MapleCCC/Fund-Info-Fetcher)](https://sloc.xyz/github/MapleCCC/Fund-Info-Fetcher)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/MapleCCC/Fund-Info-Fetcher/latest?sort=semver)](https://github.com/MapleCCC/Fund-Info-Fetcher/compare/v0.8.0...master)
+<!-- TODO which diff method should we use? two dots or three dots? -->
 
 ## Overview
 
@@ -71,6 +73,11 @@ $ pip install -r requirements/install.txt
 # Install dev requirements
 $ pip install -r requirements/dev.txt
 ```
+
+<!-- TODO: Pre-commit hook -->
+<!-- Use black and isort to format staged codes. -->
+<!-- Generate TOC for README. -->
+<!-- Concatenate content of TODO.md and CHANGELOG.md to README. -->
 
 ### Test
 
