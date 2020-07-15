@@ -5,7 +5,7 @@ from __future__ import annotations
 import operator
 from functools import partial
 from itertools import filterfalse
-from typing import ClassVar, Dict, Generic, List, TypeVar, Union, cast
+from typing import Any, ClassVar, Dict, List
 
 from more_itertools import replace
 
@@ -17,17 +17,16 @@ from more_itertools import replace
 
 __all__ = ["LRU"]
 
-T = TypeVar("T")
 
 LRU_MAX_DUMMY_CELL_NUM = 200
 
 
-class LRU(Generic[T]):
+class LRU:
     _DUMMY_CELL: ClassVar[object] = object()
 
     def __init__(self) -> None:
-        self._storage: List[Union[T, object]] = []
-        self._indexer: Dict[T, int] = {}
+        self._storage: List = []
+        self._indexer: Dict[Any, int] = {}
         self._dummy_cell_count: int = 0
         self._offset: int = 0
 
@@ -39,7 +38,7 @@ class LRU(Generic[T]):
         return len(self._storage) - self._dummy_cell_count
 
     def copy(self) -> LRU:
-        new_lru = LRU[T]()
+        new_lru = LRU()
         new_lru._storage = self._storage.copy()
         new_lru._indexer = self._indexer.copy()
         new_lru._dummy_cell_count = self._dummy_cell_count
@@ -60,7 +59,7 @@ class LRU(Generic[T]):
     def empty_lru(cls) -> LRU:
         return cls()
 
-    def update(self, elem: T) -> None:
+    def update(self, elem: Any) -> None:
         if elem in self._indexer:
             index = self._indexer[elem]
             # self._storage[index] = self.__class__._DUMMY_CELL
@@ -75,7 +74,7 @@ class LRU(Generic[T]):
         if self._dummy_cell_count > LRU_MAX_DUMMY_CELL_NUM:
             self._reconstruct()
 
-    def evict(self) -> T:
+    def evict(self) -> Any:
         if self._dummy_cell_count == len(self._storage):
             raise KeyError("evict from empty LRU")
 
@@ -84,7 +83,6 @@ class LRU(Generic[T]):
 
         for i, elem in enumerate(self._storage[self._offset :], start=self._offset):
             if elem is not LRU._DUMMY_CELL:
-                elem = cast(T, elem)
                 oldest_non_dummy_cell_elem = elem
                 oldest_non_dummy_cell_index = i
                 break
@@ -107,13 +105,12 @@ class LRU(Generic[T]):
 
         for elem in old_storage:
             if elem is not LRU._DUMMY_CELL:
-                elem = cast(T, elem)
                 self._storage.append(elem)
                 self._indexer[elem] = len(self._storage) - 1
 
 
 if __name__ == "__main__":
-    l = LRU[int]()
+    l = LRU()
     l.update(1)
     l.update(2)
     l.update(3)
