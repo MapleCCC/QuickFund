@@ -45,7 +45,7 @@ $ fund-info-fetch <list of fund codes>
 
 ### Example Output
 
-![Example Output](assets/example output.png)
+![Example Output](assets/example_output.png)
 
 ## Download
 
