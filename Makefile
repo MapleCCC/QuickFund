@@ -30,7 +30,7 @@ unused-imports:
 	find . -type f -name "*.py" | xargs pylint --disable=all --enable=W0611
 
 todo:
-	rg "# TODO" --glob !Makefile
+	rg "# TODO|# FIXME" --glob !Makefile
 
 clean:
 	rm -rf build/ dist/ __pycache__/ *.spec .cache/
