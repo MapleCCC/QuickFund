@@ -1,7 +1,10 @@
 import re
-from typing import Tuple
+import traceback
+from typing import Iterator, Tuple
 
-__all__ = ["red", "green", "blue", "parse_version_number"]
+from more_itertools import split_at
+
+__all__ = ["red", "green", "blue", "parse_version_number", "print_traceback_digest"]
 
 
 def red(s: str) -> str:
@@ -25,3 +28,24 @@ def parse_version_number(s: str) -> Tuple[int, int, int]:
         return int(major), int(minor), int(patch)
     except Exception as exc:
         raise RuntimeError("解析版本号时出现错误") from exc
+
+
+def split_paragraphs(s: str) -> Iterator[str]:
+    lines = s.splitlines()
+    splits = split_at(lines, lambda line: line == "")
+    for split in splits:
+        yield "\n".join(split)
+
+
+def retrieve_succinct_traceback(tb: str) -> str:
+    paragraphs = split_paragraphs(tb)
+    digest = []
+    for paragraph in paragraphs:
+        digest.append(paragraph.splitlines()[-1])
+    return "\n".join(digest)
+
+
+def print_traceback_digest() -> None:
+    tb = traceback.format_exc()
+    digest = retrieve_succinct_traceback(tb)
+    print(digest)

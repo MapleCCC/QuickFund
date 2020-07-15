@@ -25,7 +25,7 @@ from .fetcher import fetch_estimate, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
-from .utils import parse_version_number
+from .utils import parse_version_number, print_traceback_digest
 
 
 if locale.getdefaultlocale()[0] == "zh_CN":
@@ -269,43 +269,46 @@ def validate_fund_code(s: str) -> bool:
 def main(
     files_or_fund_codes: Tuple[str], output: str, disable_update_check: bool
 ) -> None:
-    # atexit.register(lambda _: input("Press ENTER to exit"))
-    atexit.register(lambda: input("按下回车键以退出"))
+    try:
+        # atexit.register(lambda _: input("Press ENTER to exit"))
+        atexit.register(lambda: input("按下回车键以退出"))
 
-    # TODO Remove update check logic after switching architecture to
-    # server/client model
-    if not disable_update_check:
-        print("检查更新......")
-        check_update()
+        # TODO Remove update check logic after switching architecture to
+        # server/client model
+        if not disable_update_check:
+            print("检查更新......")
+            check_update()
 
-    in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
-    out_filename = output
+        in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
+        out_filename = output
 
-    print("检查参数......")
-    check_args(in_filenames, out_filename)
+        print("检查参数......")
+        check_args(in_filenames, out_filename)
 
-    print("获取基金代码列表......")
-    fund_codes = []
-    for x in files_or_fund_codes:
-        if validate_fund_code(x):
-            fund_codes.append(x)
-        else:
-            lines = Path(x).read_text(encoding="utf-8").splitlines()
-            cleaned_lines = map(str.strip, lines)
-            fund_codes.extend(filter(validate_fund_code, cleaned_lines))
+        print("获取基金代码列表......")
+        fund_codes = []
+        for x in files_or_fund_codes:
+            if validate_fund_code(x):
+                fund_codes.append(x)
+            else:
+                lines = Path(x).read_text(encoding="utf-8").splitlines()
+                cleaned_lines = map(str.strip, lines)
+                fund_codes.extend(filter(validate_fund_code, cleaned_lines))
 
-    if not fund_codes:
-        print("没有发现基金代码")
-        exit()
+        if not fund_codes:
+            print("没有发现基金代码")
+            exit()
 
-    print("获取基金相关信息......")
-    fund_infos = get_fund_infos(fund_codes)
+        print("获取基金相关信息......")
+        fund_infos = get_fund_infos(fund_codes)
 
-    print("将基金相关信息写入 Excel 文件......")
-    write_to_xlsx(fund_infos, out_filename)
+        print("将基金相关信息写入 Excel 文件......")
+        write_to_xlsx(fund_infos, out_filename)
 
-    # The emoji takes inspiration from the black (https://github.com/psf/black)
-    print("完满结束! ✨ 🍰 ✨")
+        # The emoji takes inspiration from the black (https://github.com/psf/black)
+        print("完满结束! ✨ 🍰 ✨")
+    except:
+        print_traceback_digest()
 
 
 if __name__ == "__main__":
