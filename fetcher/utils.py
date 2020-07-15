@@ -45,7 +45,11 @@ def retrieve_succinct_traceback(tb: str) -> str:
     return "\n".join(digest)
 
 
-def print_traceback_digest() -> None:
+def print_traceback_digest(colored: bool = True) -> None:
     tb = traceback.format_exc()
     digest = retrieve_succinct_traceback(tb)
-    print(digest)
+
+    if colored:
+        print(red(digest))
+    else:
+        print(digest)

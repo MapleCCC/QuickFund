@@ -311,9 +311,11 @@ def main(
         # The emoji takes inspiration from the black (https://github.com/psf/black)
         print("完满结束! ✨ 🍰 ✨")
     except:
+        print("Oops! 程序运行过程中遇到了错误，错误信息摘要如下：")
         print_traceback_digest()
         with open(ERR_LOG_FILE, "w", encoding="utf-8") as f:
             traceback.print_exc(file=f)
+        print(f"详细错误信息已写入日志文件 {ERR_LOG_FILE}，请将日志文件提交给开发者进行调试")
 
 
 if __name__ == "__main__":
