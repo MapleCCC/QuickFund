@@ -87,7 +87,7 @@ def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
             raise FileNotFoundError(f"文件 {f} 不存在")
 
     if os.path.isdir(out_filename):
-        raise RuntimeError(f"同名文件夹已存在，无法新建文件 {out_filename}")
+        raise RuntimeError(f'同名文件夹已存在，无法新建文件 "{out_filename}"')
 
     if os.path.isfile(out_filename):
 
@@ -101,10 +101,10 @@ def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
         except PermissionError:
             raise RuntimeError(
                 f"备份 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
-                f"有可能是 {out_filename} 已经被 Excel 打开，"
+                f'有可能是 "{out_filename}" 已经被 Excel 打开，'
                 "请关闭文件之后重试"
             )
-        print(f"{out_filename} 同名文件已存在，备份至 {backup_filename}")
+        print(f'"{out_filename}" 同名文件已存在，备份至 "{backup_filename}"')
 
 
 def check_update() -> None:
@@ -315,7 +315,7 @@ def main(
         print_traceback_digest()
         with open(ERR_LOG_FILE, "w", encoding="utf-8") as f:
             traceback.print_exc(file=f)
-        print(f"详细错误信息已写入日志文件 {ERR_LOG_FILE}，请将日志文件提交给开发者进行调试")
+        print(f'详细错误信息已写入日志文件 "{ERR_LOG_FILE}"，请将日志文件提交给开发者进行调试')
 
 
 if __name__ == "__main__":
