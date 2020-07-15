@@ -66,10 +66,10 @@ $ python -m virtualenv .venv
 $ source .venv/Scripts/activate
 
 # Install basic build requirements
-$ pip install -r requirements.txt
+$ pip install -r requirements/install.txt
 
 # Install dev requirements
-$ pip install -r requirements-dev.txt
+$ pip install -r requirements/dev.txt
 ```
 
 ### Test
@@ -78,7 +78,7 @@ The project uses pytest and hypothesis as test framework. Property-based testing
 
 ```bash
 # Install test requirements
-$ python -m pip install -r requirements-test.txt
+$ python -m pip install -r requirements/test.txt
 
 # unit tests
 $ make test
