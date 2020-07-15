@@ -7,6 +7,7 @@ import re
 import shelve
 import shutil
 import threading
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
@@ -35,6 +36,8 @@ else:
 # Instead of using full filename, we use basename, because shelve requires so.
 PERSISTENT_CACHE_DB_FILE_BASENAME = "cache"
 PERSISTENT_CACHE_DB_RECORD_MAX_NUM = 2000
+
+ERR_LOG_FILE = "错误日志.txt"
 
 
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
@@ -309,6 +312,8 @@ def main(
         print("完满结束! ✨ 🍰 ✨")
     except:
         print_traceback_digest()
+        with open(ERR_LOG_FILE, "w", encoding="utf-8") as f:
+            traceback.print_exc(file=f)
 
 
 if __name__ == "__main__":
