@@ -12,8 +12,7 @@ from fetcher.lru import LRU
 @given(lists(from_type(type)))
 def test_len(l: List) -> None:
     lru = LRU()
-    for i in l:
-        lru.update(i)
+    lru.batch_update(l)
     assert len(lru) == len(set(l))
 
 
@@ -27,8 +26,7 @@ def test_update_evict(i: Any) -> None:
 @given(lists(from_type(type)))
 def test_copy(l: List) -> None:
     lru1 = LRU()
-    for i in l:
-        lru1.update(i)
+    lru1.batch_update(l)
     lru2 = lru1.copy()
     assert lru1 is not lru2
     assert len(lru1) == len(lru2)
@@ -47,8 +45,7 @@ def rfind(l: List, elem: Any) -> int:
 @given(lists(from_type(type)))
 def test_lru_order(l: List) -> None:
     lru = LRU()
-    for i in l:
-        lru.update(i)
+    lru.batch_update(l)
     evicted = []
     for _ in range(len(lru)):
         evicted.append(lru.evict())

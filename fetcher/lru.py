@@ -5,7 +5,7 @@ from __future__ import annotations
 import operator
 from functools import partial
 from itertools import filterfalse
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, Iterable, List
 
 from more_itertools import replace
 
@@ -69,6 +69,10 @@ class LRU:
 
         if self._dummy_cell_count > LRU_MAX_DUMMY_CELL_NUM:
             self._reconstruct()
+
+    def batch_update(self, elems: Iterable[Any]) -> None:
+        for elem in elems:
+            self.update(elem)
 
     def evict(self) -> Any:
         if self._dummy_cell_count == len(self._storage):

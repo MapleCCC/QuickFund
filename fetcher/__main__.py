@@ -244,8 +244,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         # and IO cost and slow down the program.
 
         lru = fund_info_cache_db.get("lru_record", LRU())
-        for fund_code in fund_codes:
-            lru.update(fund_code)
+        lru.batch_update(fund_codes)
 
         if len(lru) > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
             print("检测到缓存较大，清理缓存......")
