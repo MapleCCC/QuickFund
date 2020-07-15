@@ -10,8 +10,9 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
+from itertools import filterfalse
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, Iterable, List, Tuple
 
 import attr
 import click
@@ -77,9 +78,10 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
 
 
-def check_args(in_filename: str, out_filename: str) -> None:
-    if not os.path.exists(in_filename):
-        raise FileNotFoundError(f"文件 {in_filename} 不存在")
+def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
+    for f in in_filenames:
+        if not os.path.exists(f):
+            raise FileNotFoundError(f"文件 {f} 不存在")
 
     if os.path.isdir(out_filename):
         raise RuntimeError(f"同名文件夹已存在，无法新建文件 {out_filename}")
@@ -254,13 +256,19 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         return fund_infos
 
 
+def validate_fund_code(s: str) -> bool:
+    return bool(re.fullmatch(r"\d{6}", s))
+
+
 @click.command()
-@click.argument("filename")
+@click.argument("files_or_fund_codes", nargs=-1)
 @click.option("-o", "--output", default="基金信息.xlsx")
 @click.option("--disable-update-check", is_flag=True, default=False)
 # TODO: @click.option("--update")
 @click.version_option(version=__version__)
-def main(filename: str, output: str, disable_update_check: bool) -> None:
+def main(
+    files_or_fund_codes: Tuple[str], output: str, disable_update_check: bool
+) -> None:
     # atexit.register(lambda _: input("Press ENTER to exit"))
     atexit.register(lambda: input("按下回车键以退出"))
 
@@ -270,17 +278,22 @@ def main(filename: str, output: str, disable_update_check: bool) -> None:
         print("检查更新......")
         check_update()
 
-    in_filename = filename
+    in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
     out_filename = output
 
     print("检查参数......")
-    check_args(in_filename, out_filename)
+    check_args(in_filenames, out_filename)
 
     print("获取基金代码列表......")
-    fund_codes = Path(in_filename).read_text(encoding="utf-8").splitlines()
+    fund_codes = []
+    for x in files_or_fund_codes:
+        if validate_fund_code(x):
+            fund_codes.append(x)
+        else:
+            lines = Path(x).read_text(encoding="utf-8").splitlines()
+            cleaned_lines = map(str.strip, lines)
+            fund_codes.extend(filter(validate_fund_code, cleaned_lines))
 
-    print("清洗基金代码列表......")
-    fund_codes = [code for code in tqdm(fund_codes) if re.fullmatch(r"\d{6}", code)]
     if not fund_codes:
         print("没有发现基金代码")
         exit()
