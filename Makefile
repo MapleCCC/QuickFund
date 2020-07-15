@@ -20,7 +20,8 @@ format:
 
 type-check:
 	mypy .
-	# TODO pyright, pytype, pyre-check
+	pyright
+	# TODO pytype, pyre-check
 
 lint:
 	find . -type f -name "*.py" | xargs pylint
