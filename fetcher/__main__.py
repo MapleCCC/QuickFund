@@ -260,7 +260,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
 
 
 def validate_fund_code(s: str) -> bool:
-    return bool(re.fullmatch(r"\d{6}", s))
+    return bool(re.fullmatch(r"[0-9]{6}", s))
 
 
 @click.command()
