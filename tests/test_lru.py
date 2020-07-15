@@ -1,32 +1,31 @@
-from typing import List, TypeVar
+from typing import Any, List
 
 from hypothesis import given
-from hypothesis.strategies import integers, lists
+from hypothesis.strategies import from_type, lists
 from more_itertools import windowed
 
 from fetcher.lru import LRU
 
-# TODO we need to test on different element types.
 # TODO we need to test on LRU after random sequence of update/evict operations.
 
 
-@given(lists(integers()))
-def test_len(l: List[int]) -> None:
+@given(lists(from_type(type)))
+def test_len(l: List) -> None:
     lru = LRU()
     for i in l:
         lru.update(i)
     assert len(lru) == len(set(l))
 
 
-@given(integers())
-def test_update_evict(i: int) -> None:
+@given(from_type(type))
+def test_update_evict(i: Any) -> None:
     lru = LRU()
     lru.update(i)
     assert i == lru.evict()
 
 
-@given(lists(integers()))
-def test_copy(l: List[int]) -> None:
+@given(lists(from_type(type)))
+def test_copy(l: List) -> None:
     lru1 = LRU()
     for i in l:
         lru1.update(i)
@@ -38,18 +37,15 @@ def test_copy(l: List[int]) -> None:
     assert len(lru1) == len(lru2) == 0
 
 
-T = TypeVar("T")
-
-
-def rfind(l: List[T], elem: T) -> int:
+def rfind(l: List, elem: Any) -> int:
     for i in range(len(l) - 1, -1, -1):
         if l[i] == elem:
             return i
     return -1
 
 
-@given(lists(integers()))
-def test_lru_order(l: List[int]) -> None:
+@given(lists(from_type(type)))
+def test_lru_order(l: List) -> None:
     lru = LRU()
     for i in l:
         lru.update(i)
