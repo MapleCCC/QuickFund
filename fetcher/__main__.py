@@ -17,6 +17,7 @@ from typing import Dict, Iterable, List, Tuple
 
 import attr
 import click
+import colorama
 import xlsxwriter
 from tqdm import tqdm, trange
 
@@ -274,6 +275,8 @@ def main(
     try:
         # atexit.register(lambda _: input("Press ENTER to exit"))
         atexit.register(lambda: input("按下回车键以退出"))
+
+        colorama.init(autoreset=True)
 
         # TODO Remove update check logic after switching architecture to
         # server/client model

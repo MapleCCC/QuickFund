@@ -3,21 +3,10 @@ import re
 import traceback
 from typing import Iterator, Tuple
 
+from colorama import Fore
 from more_itertools import split_at
 
-__all__ = ["red", "green", "blue", "parse_version_number", "print_traceback_digest"]
-
-
-def red(s: str) -> str:
-    return "\033[91m" + s + "\033[0m"
-
-
-def green(s: str) -> str:
-    return "\033[92m" + s + "\033[0m"
-
-
-def blue(s: str) -> str:
-    return "\033[94m" + s + "\033[0m"
+__all__ = ["parse_version_number", "print_traceback_digest"]
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
@@ -90,6 +79,6 @@ def print_traceback_digest(
         digest = "\n".join(numbered_lines)
 
     if colored:
-        print(red(digest))
+        print(Fore.RED + digest)  # type: ignore
     else:
         print(digest)
