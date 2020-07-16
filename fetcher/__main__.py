@@ -8,7 +8,6 @@ import shelve
 import shutil
 import threading
 import traceback
-from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache, partial
 from itertools import filterfalse
@@ -20,6 +19,8 @@ import click
 import colorama
 import xlsxwriter
 from tqdm import tqdm, trange
+from tqdm.contrib import tenumerate, tmap
+from tqdm.contrib.concurrent import thread_map
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
@@ -76,7 +77,7 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
 
             # Write body
             logger.log("写入文档体......")
-            for row, info in enumerate(tqdm(fund_infos), start=1):
+            for row, info in tenumerate(fund_infos, start=1):
                 for col, field in enumerate(attr.fields(FundInfo)):
                     # Judging from source code of xlsxwriter, add_format(None) is
                     # equivalent to default format.
@@ -231,11 +232,9 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         # FIXME experiment to find a suitable number as threshold between sync and
         # async code
         if len(fund_codes) < 3:
-            fund_infos = [get_fund_info(code) for code in tqdm(fund_codes)]
+            fund_infos = list(tmap(get_fund_info, fund_codes))
         else:
-            with ThreadPoolExecutor() as executor:
-                async_mapped = executor.map(get_fund_info, fund_codes)
-                fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))  # type: ignore # nopep8
+            fund_infos = thread_map(get_fund_info, fund_codes)
 
         logger.log("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)
