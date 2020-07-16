@@ -27,7 +27,7 @@ from .fetcher import fetch_estimate, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
-from .utils import parse_version_number, print_traceback_digest
+from .utils import Logger, parse_version_number, print_traceback_digest
 
 
 if locale.getdefaultlocale()[0] == "zh_CN":
@@ -40,6 +40,8 @@ PERSISTENT_CACHE_DB_RECORD_MAX_NUM = 2000
 
 ERR_LOG_FILE = "错误日志.txt"
 
+logger = Logger()
+
 
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
     try:
@@ -47,7 +49,7 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
         # performance.
         with xlsxwriter.Workbook(xlsx_filename, {"constant_memory": True}) as workbook:
 
-            print("新建 Excel 文档......")
+            logger.log("新建 Excel 文档......")
             worksheet = workbook.add_worksheet()
 
             # Widen column
@@ -60,7 +62,7 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
                 worksheet.set_column(i, i, width)
 
             # Write header
-            print("写入文档头......")
+            logger.log("写入文档头......")
             for i, field in enumerate(attr.fields(FundInfo)):
                 header_format = workbook.add_format(
                     {"bold": True, "align": "center", "valign": "top", "border": 1}
@@ -68,7 +70,7 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
                 worksheet.write_string(0, i, field.name, header_format)
 
             # Write body
-            print("写入文档体......")
+            logger.log("写入文档体......")
             for row, info in enumerate(tqdm(fund_infos), start=1):
                 for col, field in enumerate(attr.fields(FundInfo)):
                     # Judging from source code of xlsxwriter, add_format(None) is
@@ -76,7 +78,7 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
                     cell_format = workbook.add_format(field.metadata.get("format"))
                     worksheet.write(row, col, info[col], cell_format)
 
-            print("Flush 到硬盘......")
+            logger.log("Flush 到硬盘......")
 
     except Exception as exc:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
@@ -105,24 +107,24 @@ def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
                 f'有可能是 "{out_filename}" 已经被 Excel 打开，'
                 "请关闭文件之后重试"
             )
-        print(f'"{out_filename}" 同名文件已存在，备份至 "{backup_filename}"')
+        logger.log(f'"{out_filename}" 同名文件已存在，备份至 "{backup_filename}"')
 
 
 def check_update() -> None:
-    print("获取最新分发版本号......")
+    logger.log("获取最新分发版本号......")
     # TODO Handle the case when the lastest release's tag name is not semantic
     # version.
     try:
         latest_version = get_latest_release_version(REPO_OWNER, REPO_NAME)
     except:
-        print("获取最新分发版本号的时候发生错误，暂时跳过。可以通过 --update 命令来手动触发更新检查")
+        logger.log("获取最新分发版本号的时候发生错误，暂时跳过。可以通过 --update 命令来手动触发更新检查")
         return
 
     if parse_version_number(latest_version) > parse_version_number(__version__):
-        print(f"检测到更新版本 {latest_version}，请手动更新")
+        logger.log(f"检测到更新版本 {latest_version}，请手动更新")
         exit()
     else:
-        print("当前已是最新版本")
+        logger.log("当前已是最新版本")
 
 
 def net_value_date_is_latest(net_value_date: date) -> bool:
@@ -230,10 +232,10 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
                 async_mapped = executor.map(get_fund_info, fund_codes)
                 fund_infos = list(tqdm(async_mapped, total=len(fund_codes)))  # type: ignore # nopep8
 
-        print("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
+        logger.log("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)
 
-        print("更新缓存 LRU 信息......")
+        logger.log("更新缓存 LRU 信息......")
 
         # TODO remove out-dated cache entries
 
@@ -248,7 +250,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         lru.batch_update(fund_codes)
 
         if len(lru) > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
-            print("检测到缓存较大，清理缓存......")
+            logger.log("检测到缓存较大，清理缓存......")
             to_evict_num = PERSISTENT_CACHE_DB_RECORD_MAX_NUM - len(lru)
             for _ in trange(to_evict_num):
                 evicted_fund_code = lru.evict()
@@ -287,10 +289,10 @@ def main(
         in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
         out_filename = output
 
-        print("检查参数......")
+        logger.log("检查参数......")
         check_args(in_filenames, out_filename)
 
-        print("获取基金代码列表......")
+        logger.log("获取基金代码列表......")
         fund_codes = []
         for x in files_or_fund_codes:
             if validate_fund_code(x):
@@ -301,23 +303,23 @@ def main(
                 fund_codes.extend(filter(validate_fund_code, cleaned_lines))
 
         if not fund_codes:
-            print("没有发现基金代码")
+            logger.log("没有发现基金代码")
             exit()
 
-        print("获取基金相关信息......")
+        logger.log("获取基金相关信息......")
         fund_infos = get_fund_infos(fund_codes)
 
-        print("将基金相关信息写入 Excel 文件......")
+        logger.log("将基金相关信息写入 Excel 文件......")
         write_to_xlsx(fund_infos, out_filename)
 
         # The emoji takes inspiration from the black (https://github.com/psf/black)
-        print("完满结束! ✨ 🍰 ✨")
+        logger.log("完满结束! ✨ 🍰 ✨")
     except:
-        print("Oops! 程序运行过程中遇到了错误，错误信息摘要如下：")
+        logger.log("Oops! 程序运行过程中遇到了错误，错误信息摘要如下：")
         print_traceback_digest()
         with open(ERR_LOG_FILE, "w", encoding="utf-8") as f:
             traceback.print_exc(file=f)
-        print(f'详细错误信息已写入日志文件 "{ERR_LOG_FILE}"，请将日志文件提交给开发者进行调试')
+        logger.log(f'详细错误信息已写入日志文件 "{ERR_LOG_FILE}"，请将日志文件提交给开发者进行调试')
 
 
 if __name__ == "__main__":

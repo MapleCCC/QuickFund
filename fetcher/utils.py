@@ -6,7 +6,7 @@ from typing import Iterator, Tuple
 from colorama import Fore
 from more_itertools import split_at
 
-__all__ = ["parse_version_number", "print_traceback_digest"]
+__all__ = ["parse_version_number", "print_traceback_digest", "Logger"]
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
@@ -82,3 +82,14 @@ def print_traceback_digest(
         print(Fore.RED + digest)  # type: ignore
     else:
         print(digest)
+
+
+class Logger:
+    def __init__(self) -> None:
+        self._count = 1
+
+    __slots__ = "_count"
+
+    def log(self, s: str) -> None:
+        print(Fore.GREEN + str(self._count) + ". " + Fore.RESET + s)  # type: ignore
+        self._count += 1
