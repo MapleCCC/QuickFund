@@ -41,6 +41,7 @@ localization_table = {
         "The above exception was the direct cause of the following exception:": "以上所述的错误直接引发了以下错误:",
         "PermissionError": "权限错误",
         "RuntimeError": "运行时错误",
+        "KeyboardInterrupt": "来自键盘的中断信号",
     }
 }
 

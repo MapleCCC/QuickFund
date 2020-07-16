@@ -21,6 +21,8 @@ import xlsxwriter
 from tqdm import tqdm, trange
 from tqdm.contrib import tenumerate, tmap
 from tqdm.contrib.concurrent import thread_map
+# GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
+# from tqdm.gui import tqdm, trange
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
@@ -45,6 +47,7 @@ logger = Logger()
 
 
 # Refer to https://github.com/tqdm/tqdm/issues/454
+# FIXME: wait for the fix in upstream repository to land
 if os.name == "nt":
     tqdm = partial(tqdm, ascii=True)
     trange = partial(trange, ascii=True)
@@ -81,7 +84,7 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
 
             # Write body
             logger.log("写入文档体......")
-            for row, info in tenumerate(fund_infos, start=1):
+            for row, info in tenumerate(fund_infos, start=1, unit="行", desc="写入基金信息"):
                 for col, field in enumerate(attr.fields(FundInfo)):
                     # Judging from source code of xlsxwriter, add_format(None) is
                     # equivalent to default format.
@@ -236,9 +239,9 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         # FIXME experiment to find a suitable number as threshold between sync and
         # async code
         if len(fund_codes) < 3:
-            fund_infos = list(tmap(get_fund_info, fund_codes))
+            fund_infos = list(tmap(get_fund_info, fund_codes, unit="个", desc="获取基金信息"))
         else:
-            fund_infos = thread_map(get_fund_info, fund_codes)
+            fund_infos = thread_map(get_fund_info, fund_codes, unit="个", desc="获取基金信息")
 
         logger.log("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)
@@ -260,7 +263,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         if len(lru) > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
             logger.log("检测到缓存较大，清理缓存......")
             to_evict_num = PERSISTENT_CACHE_DB_RECORD_MAX_NUM - len(lru)
-            for _ in trange(to_evict_num):
+            for _ in trange(to_evict_num, unit="条", desc="清理缓存"):
                 del fund_info_cache_db[lru.evict()]
 
         fund_info_cache_db["lru_record"] = lru

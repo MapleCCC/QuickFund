@@ -65,6 +65,7 @@
 - 调整输出的 Excel 文档的各列列宽
 - Add badges to README.
   - build passing
+  - lint passing
   - test coverage
   - license
   - code format style

@@ -68,6 +68,8 @@ def main(component: str, release: bool) -> None:
     print("Creating tag for new version......")
     subprocess.run(["git", "tag", new_version]).check_returncode()
 
+    # TODO if we change from using subprocess.run to using PyGithub,
+    # will the time cost be shorter?
     print("Pushing tag to remote......")
     subprocess.run(["git", "push", "origin", new_version]).check_returncode()
 
