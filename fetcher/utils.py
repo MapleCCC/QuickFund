@@ -56,7 +56,9 @@ localization_table = {
 }
 
 
-def print_traceback_digest(colored: bool = True, localized: bool = True) -> None:
+def print_traceback_digest(
+    colored: bool = True, numbered: bool = True, localized: bool = True
+) -> None:
     tb = traceback.format_exc()
     digest = retrieve_succinct_traceback(tb)
 
@@ -80,6 +82,12 @@ def print_traceback_digest(colored: bool = True, localized: bool = True) -> None
             # translation rules matters?
             for src, dst in translation_dict.items():
                 digest = digest.replace(src, dst)
+
+    if numbered:
+        numbered_lines = []
+        for i, line in enumerate(digest.splitlines(), start=1):
+            numbered_lines.append(f"{i}. {line}")
+        digest = "\n".join(numbered_lines)
 
     if colored:
         print(red(digest))
