@@ -80,7 +80,7 @@ def print_traceback_digest(
         digest = "\n".join(numbered_lines)
 
     if colored:
-        print(Fore.RED + digest)  # type: ignore
+        print(Fore.RED + digest + Fore.RESET)  # type: ignore
     else:
         print(digest)
 
