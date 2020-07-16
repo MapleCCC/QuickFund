@@ -253,8 +253,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
             logger.log("检测到缓存较大，清理缓存......")
             to_evict_num = PERSISTENT_CACHE_DB_RECORD_MAX_NUM - len(lru)
             for _ in trange(to_evict_num):
-                evicted_fund_code = lru.evict()
-                del fund_info_cache_db[evicted_fund_code]
+                del fund_info_cache_db[lru.evict()]
 
         fund_info_cache_db["lru_record"] = lru
 
@@ -315,11 +314,11 @@ def main(
         # The emoji takes inspiration from the black (https://github.com/psf/black)
         logger.log("完满结束! ✨ 🍰 ✨")
     except:
-        logger.log("Oops! 程序运行过程中遇到了错误，错误信息摘要如下：")
+        logger.log("Oops! 程序运行过程中遇到了错误，打印错误信息摘要如下：")
         print_traceback_digest()
         with open(ERR_LOG_FILE, "w", encoding="utf-8") as f:
             traceback.print_exc(file=f)
-        logger.log(f'详细错误信息已写入日志文件 "{ERR_LOG_FILE}"，请将日志文件提交给开发者进行调试')
+        logger.log(f'详细错误信息已写入日志文件 "{ERR_LOG_FILE}"，请将日志文件提交给开发者进行调试 debug')
 
 
 if __name__ == "__main__":

@@ -2,21 +2,23 @@
 
 - Add docstring to functions, for better maintenance
   - Also add docstring to classes and modules.
-- Try to use more modernized python project dependency management tools, like poetry, pyproject. Instead of using the naive requirements.txt method.
+- Try to use more modernized python project dependency management tools, like poetry, pyenv, pip-tools, requirements.in, Pipfile, Pipfile.lock, pipenv, pyproject, etc. Instead of using the naive requirements.txt method.
 - Add pre-commit hook script. Lint, reformat, bump version.
 - Deploy pre-commit hook using the famous "pre-commit" repository.
   - Reformat staged Python code with `isort` and `black`
   - Linting
 - Append content of TODO.md and CHANGELOG.md to README.md
+- Generate TOC for README in pre-commit hook script.
 - Bump to first major release v1.0.0
 - Try release candidate version.
 - Search on the internet about existing project that make async possible with requests library.
+- Polish the `--help` generated message.
 
 
 ## Priority Medium
 
-- Use Go to rewrite.
-- Use color output in console. Use library like colorama, colored.
+- Use Go to rewrite. Leverage Go language's builtin concurrency support.
+- Use color output in console. Use library like colorama, colored, termcolor, blessings.
 - Read the book "High Performance Python" and deploy some tricks from there. Especially the part about mitigating expensive network IO.
 - Reduce overhead of network IO, which is expensive.
 - Use line profiler to find performance hotspots.
@@ -31,6 +33,7 @@
 - exit() vs sys.exit() vs quit(). What's the difference? Which should we use?
   - atexit module
 - See content of `rg TODO`
+- See content of `rg FIXME`
 - Specify minimal supported Python version.
 - Add unit test suite/framework. Tox, pytest, nose.
 - Play with atexit hook to reason about its behaviour.
@@ -38,7 +41,6 @@
   - When program terminates due to uncaught exception.
   - When program terminates due to call to exit()/sys.exit()/quit().
 - Adopt `conventional commit` conventions.
-- Polish the `--help` generated message.
 - Find way to quick unit test, integrate test, regression test. No need to stand up with the startup time overhead of the super heavyweight Excel program anymore.
 - Use requests session feature to leverage connection pool.
 - Use requests body content flow stream. So we can display progress bar when downloading or uploading large files.
@@ -131,7 +133,6 @@
   """
   ```
 - If we decide to use release candidate version, this complicates the version parsing. There is BNF grammar in semver.org. We can write a parser ourselves. Or we can use a dedicated library.
-- Generate TOC for README in pre-commit hook script.
 
 
 ## Archive
