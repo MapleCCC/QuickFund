@@ -113,6 +113,7 @@ class ColoredConsoleContext:
         `color` argument could be Colorama's constant shorthand for ANSI escape sequences
         """
         self._color = color
+        print(Style.RESET_ALL)
 
     def __enter__(self) -> None:
         print(self._color)
