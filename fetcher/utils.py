@@ -46,37 +46,40 @@ def retrieve_succinct_traceback(tb: str) -> str:
     return "\n".join(digest)
 
 
+localization_table = {
+    "zh_CN": {
+        "During handling of the above exception, another exception occurred:": "在处理以上所述的错误时，发生了如下的另一个错误:",
+        "The above exception was the direct cause of the following exception:": "以上所述的错误直接引发了以下错误:",
+        "PermissionError": "权限错误",
+        "RuntimeError": "运行时错误",
+    }
+}
+
+
 def print_traceback_digest(colored: bool = True, localized: bool = True) -> None:
     tb = traceback.format_exc()
     digest = retrieve_succinct_traceback(tb)
 
     if localized:
-        cause_msg = (
-            "The above exception was the direct cause of the following exception:"
-        )
-        context_msg = (
-            "During handling of the above exception, another exception occurred:"
-        )
         local_lang = locale.getdefaultlocale()[0]
+        if not local_lang or local_lang not in localization_table:
+            # If we can't detect local langauge or we don't have translation
+            # dictionary for the given local language, we can either
+            # 1. raise an exception, or
+            # 2. fall back to English.
+            local_lang = "en_US"
 
         if local_lang.startswith("en"):
-            localized_digest = digest
-        elif local_lang == "zh_CN":
-            localized_digest_lines = []
-            for line in digest.splitlines():
-                if line == context_msg:
-                    localized_digest_lines.append("在处理以上所述的错误时，发生了如下的另一个错误:")
-                elif line == cause_msg:
-                    localized_digest_lines.append("以上所述的错误直接引发了以下错误:")
-                else:
-                    line = line.replace("PermissionError", "权限错误")
-                    line = line.replace("RuntimeError", "运行时错误")
-                    localized_digest_lines.append(line)
-            localized_digest = "\n".join(localized_digest_lines)
+            # English is the default language of CPython, so we don't need
+            # to do anything additionally.
+            pass
         else:
-            raise NotImplementedError
-
-        digest = localized_digest
+            translation_dict = localization_table[local_lang]
+            # FIXME what if some translation rules conflict with each other?
+            # i.e., how to handle the situation when the order of applying
+            # translation rules matters?
+            for src, dst in translation_dict.items():
+                digest = digest.replace(src, dst)
 
     if colored:
         print(red(digest))
