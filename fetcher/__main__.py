@@ -10,7 +10,7 @@ import threading
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time, timedelta
-from functools import lru_cache
+from functools import lru_cache, partial
 from itertools import filterfalse
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
@@ -41,6 +41,11 @@ PERSISTENT_CACHE_DB_RECORD_MAX_NUM = 2000
 ERR_LOG_FILE = "错误日志.txt"
 
 logger = Logger()
+
+
+# Refer to https://github.com/tqdm/tqdm/issues/454
+if os.name == "nt":
+    tqdm = partial(tqdm, ascii=True)
 
 
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
