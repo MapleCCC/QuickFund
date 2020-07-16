@@ -28,7 +28,12 @@ from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
 from .tqdm_enhanced import tenumerate, thread_map, tmap, tqdm, trange
-from .utils import Logger, parse_version_number, print_traceback_digest
+from .utils import (
+    Logger,
+    parse_version_number,
+    pause_before_exit,
+    print_traceback_digest,
+)
 
 
 if locale.getdefaultlocale()[0] == "zh_CN":
@@ -274,11 +279,8 @@ def validate_fund_code(s: str) -> bool:
 def main(
     files_or_fund_codes: Tuple[str], output: str, disable_update_check: bool
 ) -> None:
-    with colorama_text():
+    with colorama_text(), pause_before_exit():
         try:
-            # atexit.register(lambda _: input("Press ENTER to exit"))
-            atexit.register(lambda: input("按下回车键以退出"))
-
             # TODO Remove update check logic after switching architecture to
             # server/client model
             if not disable_update_check:

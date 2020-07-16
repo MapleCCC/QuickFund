@@ -1,12 +1,19 @@
+import atexit
 import locale
 import re
 import traceback
+from contextlib import contextmanager
 from typing import Iterator, Tuple
 
 from colorama import Fore
 from more_itertools import split_at
 
-__all__ = ["parse_version_number", "print_traceback_digest", "Logger"]
+__all__ = [
+    "parse_version_number",
+    "print_traceback_digest",
+    "Logger",
+    "pause_before_exit",
+]
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
@@ -94,3 +101,14 @@ class Logger:
     def log(self, s: str) -> None:
         print(Fore.GREEN + str(self._count) + ". " + Fore.RESET + s)  # type: ignore
         self._count += 1
+
+
+@contextmanager
+def pause_before_exit() -> Iterator:
+    # fn = lambda _: input("Press ENTER to exit")
+    fn = lambda: input("按下回车键以退出")
+    atexit.register(fn)
+    try:
+        yield
+    finally:
+        atexit.unregister(fn)
