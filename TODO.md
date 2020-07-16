@@ -134,6 +134,7 @@
   """
   ```
 - If we decide to use release candidate version, this complicates the version parsing. There is BNF grammar in semver.org. We can write a parser ourselves. Or we can use a dedicated library.
+- What happens when yield keyword is used alone without the following yeild_expression?
 
 
 ## Archive

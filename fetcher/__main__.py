@@ -9,7 +9,7 @@ import shutil
 import threading
 import traceback
 from datetime import date, datetime, time, timedelta
-from functools import lru_cache, partial
+from functools import lru_cache
 from itertools import filterfalse
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
@@ -18,10 +18,6 @@ import attr
 import click
 import colorama
 import xlsxwriter
-from colorama import Fore
-from tqdm import tqdm, trange
-from tqdm.contrib import tenumerate, tmap
-from tqdm.contrib.concurrent import thread_map
 # GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
 # from tqdm.gui import tqdm, trange
 
@@ -31,12 +27,9 @@ from .fetcher import fetch_estimate, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
-from .utils import (
-    Logger,
-    colored_console_context,
-    parse_version_number,
-    print_traceback_digest,
-)
+from .tqdm_enhanced import tenumerate, thread_map, tmap, tqdm, trange
+from .utils import Logger, parse_version_number, print_traceback_digest
+
 
 if locale.getdefaultlocale()[0] == "zh_CN":
     PERSISTENT_CACHE_DB_DIRECTORY = ".缓存"
@@ -49,16 +42,6 @@ PERSISTENT_CACHE_DB_RECORD_MAX_NUM = 2000
 ERR_LOG_FILE = "错误日志.txt"
 
 logger = Logger()
-
-
-# Refer to https://github.com/tqdm/tqdm/issues/454
-# FIXME: wait for the fix in upstream repository to land
-if os.name == "nt":
-    tqdm = partial(tqdm, ascii=True)
-    trange = partial(trange, ascii=True)
-    tmap = partial(tmap, ascii=True)
-    tenumerate = partial(tenumerate, ascii=True)
-    thread_map = partial(thread_map, ascii=True)
 
 
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
@@ -89,15 +72,12 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
 
             # Write body
             logger.log("写入文档体......")
-            with colored_console_context(Fore.GREEN):  # type: ignore
-                for row, info in tenumerate(
-                    fund_infos, start=1, unit="行", desc="写入基金信息"
-                ):
-                    for col, field in enumerate(attr.fields(FundInfo)):
-                        # Judging from source code of xlsxwriter, add_format(None) is
-                        # equivalent to default format.
-                        cell_format = workbook.add_format(field.metadata.get("format"))
-                        worksheet.write(row, col, info[col], cell_format)
+            for row, info in tenumerate(fund_infos, start=1, unit="行", desc="写入基金信息"):
+                for col, field in enumerate(attr.fields(FundInfo)):
+                    # Judging from source code of xlsxwriter, add_format(None) is
+                    # equivalent to default format.
+                    cell_format = workbook.add_format(field.metadata.get("format"))
+                    worksheet.write(row, col, info[col], cell_format)
 
             logger.log("Flush 到硬盘......")
 
@@ -247,15 +227,11 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         # FIXME experiment to find a suitable number as threshold between sync and
         # async code
         if len(fund_codes) < 3:
-            with colored_console_context(Fore.GREEN):  # type: ignore
-                fund_infos = list(
-                    tmap(get_fund_info, fund_codes, unit="个", desc="获取基金信息")
-                )
+            fund_infos = list(tmap(get_fund_info, fund_codes, unit="个", desc="获取基金信息"))
         else:
-            with colored_console_context(Fore.GREEN):  # type: ignore
-                fund_infos = thread_map(
-                    get_fund_info, fund_codes, unit="个", desc="获取基金信息"
-                )
+            fund_infos = list(
+                thread_map(get_fund_info, fund_codes, unit="个", desc="获取基金信息")
+            )
 
         logger.log("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)
@@ -277,9 +253,8 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         if len(lru) > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
             logger.log("检测到缓存较大，清理缓存......")
             to_evict_num = PERSISTENT_CACHE_DB_RECORD_MAX_NUM - len(lru)
-            with colored_console_context(Fore.GREEN):
-                for _ in trange(to_evict_num, unit="条", desc="清理缓存"):
-                    del fund_info_cache_db[lru.evict()]
+            for _ in trange(to_evict_num, unit="条", desc="清理缓存"):
+                del fund_info_cache_db[lru.evict()]
 
         fund_info_cache_db["lru_record"] = lru
 

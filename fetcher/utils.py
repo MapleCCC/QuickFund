@@ -1,18 +1,12 @@
 import locale
 import re
 import traceback
-from contextlib import contextmanager
 from typing import Iterator, Tuple
 
-from colorama import Fore, Style
+from colorama import Fore
 from more_itertools import split_at
 
-__all__ = [
-    "parse_version_number",
-    "print_traceback_digest",
-    "Logger",
-    "colored_console_context",
-]
+__all__ = ["parse_version_number", "print_traceback_digest", "Logger"]
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
@@ -100,21 +94,3 @@ class Logger:
     def log(self, s: str) -> None:
         print(Fore.GREEN + str(self._count) + ". " + Fore.RESET + s)  # type: ignore
         self._count += 1
-
-
-@contextmanager
-def colored_console_context(color: str) -> Iterator:
-    """
-    `color` argument could be Colorama's constant shorthand for ANSI escape sequences
-    """
-    # FIXME we will lose the previous style. There is no way to restore the style before
-    # the call to colored_console_context.__enter__(). This is problematic in the
-    # situation when nesting colored_console_context's are present.
-    print(Style.RESET_ALL)
-    print(color)
-    try:
-        # FIXME What happens when yield keyword is used alone without the
-        # following yeild_expression?
-        yield
-    finally:
-        print(Style.RESET_ALL)
