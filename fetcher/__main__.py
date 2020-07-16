@@ -47,6 +47,10 @@ logger = Logger()
 # Refer to https://github.com/tqdm/tqdm/issues/454
 if os.name == "nt":
     tqdm = partial(tqdm, ascii=True)
+    trange = partial(trange, ascii=True)
+    tmap = partial(tmap, ascii=True)
+    tenumerate = partial(tenumerate, ascii=True)
+    thread_map = partial(thread_map, ascii=True)
 
 
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
