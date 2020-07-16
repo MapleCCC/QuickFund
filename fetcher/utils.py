@@ -107,6 +107,9 @@ def colored_console_context(color: str) -> Iterator:
     """
     `color` argument could be Colorama's constant shorthand for ANSI escape sequences
     """
+    # FIXME we will lose the previous style. There is no way to restore the style before
+    # the call to colored_console_context.__enter__(). This is problematic in the
+    # situation when nesting colored_console_context's are present.
     print(Style.RESET_ALL)
     print(color)
     try:
