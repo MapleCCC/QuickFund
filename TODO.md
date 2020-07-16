@@ -9,8 +9,7 @@
   - Linting
 - Append content of TODO.md and CHANGELOG.md to README.md
 - Generate TOC for README in pre-commit hook script.
-- Bump to first major release v1.0.0
-- Try release candidate version.
+- Try release candidate version. (e.g. v1.0.0rc1)
 - Search on the internet about existing project that make async possible with requests library.
 - Polish the `--help` generated message.
 
@@ -18,7 +17,6 @@
 ## Priority Medium
 
 - Use Go to rewrite. Leverage Go language's builtin concurrency support.
-- Use color output in console. Use library like colorama, colored, termcolor, blessings.
 - Read the book "High Performance Python" and deploy some tricks from there. Especially the part about mitigating expensive network IO.
 - Reduce overhead of network IO, which is expensive.
 - Use line profiler to find performance hotspots.
@@ -50,8 +48,6 @@
 - Too many issues and feature requests. Consider using GitHub's issue system.
 - Try PyPy to accelerate the script.
 - See content of snippets.py
-- Issue: tqdm progress bar is not displayed correctly in some console environment.
-- Issue: color code output is not displayed correctly in some console environment.
 - Try some easy-to-use GUI library.
 - Pin the dependencies' versions. Use exact version for max robustness and compatibility.
   - Use some utility tool to help automatically find all third-party library used in the repository.
@@ -136,6 +132,7 @@
 - If we decide to use release candidate version, this complicates the version parsing. There is BNF grammar in semver.org. We can write a parser ourselves. Or we can use a dedicated library.
 - What happens when yield keyword is used alone without the following yeild_expression?
 - Consider moving colorama.init/deinit pair to every colored output. Prevent polluting global space. Also prevent forgetting to colorama.init in different places across the code repository. What's the overhead if we do so?
+- Deploy prompt-toolkit library.
 
 
 ## Archive

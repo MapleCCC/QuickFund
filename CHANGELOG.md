@@ -45,3 +45,7 @@
   - Mypy does good.
   - Turn out that Pylance is good as well. We just need to turn the configuration term python.analysis.typeCheckingMode from off to strict.
 - Move some entries from TODO.md to CHANGELOG.md
+- Use color output in console. Use library like colorama, colored, termcolor, blessings.
+- Bump to first major release v1.0.0
+- Issue: tqdm progress bar is not displayed correctly in some console environment.
+- Issue: color code output is not displayed correctly in some console environment.
