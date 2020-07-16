@@ -31,7 +31,7 @@ from .fetcher import fetch_estimate, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
-from .utils import Logger, parse_version_number, print_traceback_digest
+from .utils import ColoredConsoleContext, Logger, parse_version_number, print_traceback_digest
 
 
 if locale.getdefaultlocale()[0] == "zh_CN":
@@ -85,14 +85,13 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
 
             # Write body
             logger.log("写入文档体......")
-            print(Fore.GREEN)
-            for row, info in tenumerate(fund_infos, start=1, unit="行", desc="写入基金信息"):
-                for col, field in enumerate(attr.fields(FundInfo)):
-                    # Judging from source code of xlsxwriter, add_format(None) is
-                    # equivalent to default format.
-                    cell_format = workbook.add_format(field.metadata.get("format"))
-                    worksheet.write(row, col, info[col], cell_format)
-            print(Fore.RESET)
+            with ColoredConsoleContext(Fore.GREEN):  # type: ignore
+                for row, info in tenumerate(fund_infos, start=1, unit="行", desc="写入基金信息"):
+                    for col, field in enumerate(attr.fields(FundInfo)):
+                        # Judging from source code of xlsxwriter, add_format(None) is
+                        # equivalent to default format.
+                        cell_format = workbook.add_format(field.metadata.get("format"))
+                        worksheet.write(row, col, info[col], cell_format)
 
             logger.log("Flush 到硬盘......")
 
@@ -242,13 +241,11 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         # FIXME experiment to find a suitable number as threshold between sync and
         # async code
         if len(fund_codes) < 3:
-            print(Fore.GREEN)
-            fund_infos = list(tmap(get_fund_info, fund_codes, unit="个", desc="获取基金信息"))
-            print(Fore.RESET)
+            with ColoredConsoleContext(Fore.GREEN):  # type: ignore
+                fund_infos = list(tmap(get_fund_info, fund_codes, unit="个", desc="获取基金信息"))
         else:
-            print(Fore.GREEN)
-            fund_infos = thread_map(get_fund_info, fund_codes, unit="个", desc="获取基金信息")
-            print(Fore.RESET)
+            with ColoredConsoleContext(Fore.GREEN):  # type: ignore
+                fund_infos = thread_map(get_fund_info, fund_codes, unit="个", desc="获取基金信息")
 
         logger.log("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)

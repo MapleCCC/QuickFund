@@ -1,12 +1,23 @@
 import locale
 import re
 import traceback
-from typing import Iterator, Tuple
+from types import TracebackType
+from typing import (
+    Iterator,
+    Optional,
+    Tuple,
+    Type,
+)  # FIXME typing.Type is not public API.
 
-from colorama import Fore
+from colorama import Fore, Style
 from more_itertools import split_at
 
-__all__ = ["parse_version_number", "print_traceback_digest", "Logger"]
+__all__ = [
+    "parse_version_number",
+    "print_traceback_digest",
+    "Logger",
+    "ColoredConsoleContext",
+]
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
@@ -94,3 +105,22 @@ class Logger:
     def log(self, s: str) -> None:
         print(Fore.GREEN + str(self._count) + ". " + Fore.RESET + s)  # type: ignore
         self._count += 1
+
+
+class ColoredConsoleContext:
+    def __init__(self, color: str) -> None:
+        """
+        `color` argument could be Colorama's constant shorthand for ANSI escape sequences
+        """
+        self._color = color
+
+    def __enter__(self) -> None:
+        print(self._color)
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        print(Style.RESET_ALL)
