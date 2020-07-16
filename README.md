@@ -49,6 +49,12 @@ $ fund-info-fetch <list of fund codes>
 
 ![Example Output](assets/example_output.png)
 
+![Run](assets/run.png)
+
+![Exception Handling Graceful Degrade](assets/exception_handling_graceful_degrade.png)
+
+![Run ASCII](assets/run_ascii.png)
+
 ## Download
 
 Go to [Release](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest) page.
