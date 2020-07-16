@@ -13,12 +13,10 @@ from fetcher.__version__ import __version__
 
 OUTPUT_FILENAME = f"基金信息生成器 {__version__}.pyz"
 ZIPAPP_DISTPATH = "dist"
-ENTRY_FILE = "fetcher/__main__.py"
-ENTRY_FILE_BACKUP = ENTRY_FILE + ".bak"
+INPUT_PACKAGE = "fetcher"
 
 
-def transform_relative_imports(file: str) -> None:
-    p = Path(file)
+def transform_relative_imports(p: Path) -> None:
     old_content = p.read_text(encoding="utf-8")
     new_lines = []
     for line in old_content.splitlines():
@@ -33,16 +31,21 @@ def transform_relative_imports(file: str) -> None:
 
 
 def main() -> None:
-    shutil.copy2(ENTRY_FILE, ENTRY_FILE_BACKUP)
+    top_level_python_files = []
+    for f in Path(INPUT_PACKAGE).iterdir():
+        if f.is_file() and f.name.endswith(".py"):
+            top_level_python_files.append(f)
 
-    transform_relative_imports(ENTRY_FILE)
+    for f in top_level_python_files:
+        shutil.copy2(f, f.name + ".bak")
+        transform_relative_imports(f)
 
     if not os.path.isdir(ZIPAPP_DISTPATH):
         os.makedirs(ZIPAPP_DISTPATH)
 
     print("打包 Python 代码模块成可执行 archive......")
     zipapp.create_archive(
-        "fetcher",
+        INPUT_PACKAGE,
         os.path.join(ZIPAPP_DISTPATH, OUTPUT_FILENAME),
         interpreter="/usr/bin/env python3",
         compressed=True,
@@ -57,7 +60,8 @@ def main() -> None:
     #     compressed=True,
     # )
 
-    shutil.move(ENTRY_FILE_BACKUP, ENTRY_FILE)
+    for f in top_level_python_files:
+        shutil.move(f.name + ".bak", f)
 
 
 if __name__ == "__main__":
