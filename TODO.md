@@ -135,6 +135,7 @@
   ```
 - If we decide to use release candidate version, this complicates the version parsing. There is BNF grammar in semver.org. We can write a parser ourselves. Or we can use a dedicated library.
 - What happens when yield keyword is used alone without the following yeild_expression?
+- Consider moving colorama.init/deinit pair to every colored output. Prevent polluting global space. Also prevent forgetting to colorama.init in different places across the code repository. What's the overhead if we do so?
 
 
 ## Archive

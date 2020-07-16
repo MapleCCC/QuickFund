@@ -18,8 +18,6 @@ import attr
 import click
 import xlsxwriter
 from colorama import colorama_text
-# GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
-# from tqdm.gui import tqdm, trange
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
@@ -34,6 +32,9 @@ from .utils import (
     pause_before_exit,
     print_traceback_digest,
 )
+
+# GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
+# from tqdm.gui import tqdm, trange
 
 
 if locale.getdefaultlocale()[0] == "zh_CN":
@@ -279,7 +280,9 @@ def validate_fund_code(s: str) -> bool:
 def main(
     files_or_fund_codes: Tuple[str], output: str, disable_update_check: bool
 ) -> None:
+
     with colorama_text(), pause_before_exit():
+
         try:
             # TODO Remove update check logic after switching architecture to
             # server/client model
@@ -315,6 +318,7 @@ def main(
 
             # The emoji takes inspiration from the black (https://github.com/psf/black)
             logger.log("完满结束! ✨ 🍰 ✨")
+
         except:
             logger.log("Oops! 程序运行过程中遇到了错误，打印错误信息摘要如下：")
             print_traceback_digest()

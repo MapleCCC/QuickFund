@@ -60,7 +60,7 @@ def main(component: str, release: bool) -> None:
     # want to commit yet?
     subprocess.run(["git", "add", "README.md"]).check_returncode()
 
-    print("Commiting the special commit for bumping version......")
+    print("Committing the special commit for bumping version......")
     subprocess.run(
         ["git", "commit", "-m", f"Bump version to {new_version}"]
     ).check_returncode()
