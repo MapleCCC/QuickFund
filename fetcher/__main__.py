@@ -31,8 +31,12 @@ from .fetcher import fetch_estimate, fetch_net_value
 from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
-from .utils import ColoredConsoleContext, Logger, parse_version_number, print_traceback_digest
-
+from .utils import (
+    Logger,
+    colored_console_context,
+    parse_version_number,
+    print_traceback_digest,
+)
 
 if locale.getdefaultlocale()[0] == "zh_CN":
     PERSISTENT_CACHE_DB_DIRECTORY = ".缓存"
@@ -85,8 +89,10 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
 
             # Write body
             logger.log("写入文档体......")
-            with ColoredConsoleContext(Fore.GREEN):  # type: ignore
-                for row, info in tenumerate(fund_infos, start=1, unit="行", desc="写入基金信息"):
+            with colored_console_context(Fore.GREEN):  # type: ignore
+                for row, info in tenumerate(
+                    fund_infos, start=1, unit="行", desc="写入基金信息"
+                ):
                     for col, field in enumerate(attr.fields(FundInfo)):
                         # Judging from source code of xlsxwriter, add_format(None) is
                         # equivalent to default format.
@@ -241,11 +247,15 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         # FIXME experiment to find a suitable number as threshold between sync and
         # async code
         if len(fund_codes) < 3:
-            with ColoredConsoleContext(Fore.GREEN):  # type: ignore
-                fund_infos = list(tmap(get_fund_info, fund_codes, unit="个", desc="获取基金信息"))
+            with colored_console_context(Fore.GREEN):  # type: ignore
+                fund_infos = list(
+                    tmap(get_fund_info, fund_codes, unit="个", desc="获取基金信息")
+                )
         else:
-            with ColoredConsoleContext(Fore.GREEN):  # type: ignore
-                fund_infos = thread_map(get_fund_info, fund_codes, unit="个", desc="获取基金信息")
+            with colored_console_context(Fore.GREEN):  # type: ignore
+                fund_infos = thread_map(
+                    get_fund_info, fund_codes, unit="个", desc="获取基金信息"
+                )
 
         logger.log("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
         fund_info_cache_db.update(renewed)

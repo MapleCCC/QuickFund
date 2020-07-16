@@ -1,13 +1,8 @@
 import locale
 import re
 import traceback
-from types import TracebackType
-from typing import (
-    Iterator,
-    Optional,
-    Tuple,
-    Type,
-)  # FIXME typing.Type is not public API.
+from contextlib import contextmanager
+from typing import Iterator, Tuple
 
 from colorama import Fore, Style
 from more_itertools import split_at
@@ -16,7 +11,7 @@ __all__ = [
     "parse_version_number",
     "print_traceback_digest",
     "Logger",
-    "ColoredConsoleContext",
+    "colored_console_context",
 ]
 
 
@@ -107,21 +102,16 @@ class Logger:
         self._count += 1
 
 
-class ColoredConsoleContext:
-    def __init__(self, color: str) -> None:
-        """
-        `color` argument could be Colorama's constant shorthand for ANSI escape sequences
-        """
-        self._color = color
-        print(Style.RESET_ALL)
-
-    def __enter__(self) -> None:
-        print(self._color)
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
+@contextmanager
+def colored_console_context(color: str) -> Iterator:
+    """
+    `color` argument could be Colorama's constant shorthand for ANSI escape sequences
+    """
+    print(Style.RESET_ALL)
+    print(color)
+    try:
+        # FIXME What happens when yield keyword is used alone without the
+        # following yeild_expression?
+        yield
+    finally:
         print(Style.RESET_ALL)
