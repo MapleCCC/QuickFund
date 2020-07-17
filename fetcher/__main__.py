@@ -281,7 +281,7 @@ def main(
     with colorama_text():
 
         # atexit.register(lambda _: input("Press ENTER to exit"))
-        atexit.register(lambda: input("按下回车键以退出"))
+        atexit.register(lambda: input(Style.BRIGHT + Fore.BLUE + "按下回车键以退出" + Style.RESET_ALL))  # type: ignore # nopep8
 
         try:
             # TODO Remove update check logic after switching architecture to
