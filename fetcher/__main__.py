@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import atexit
 import locale
 import os
 import re
@@ -119,8 +118,10 @@ def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
 
 def check_update() -> None:
     logger.log("获取最新分发版本号......")
-    # TODO Handle the case when the lastest release's tag name is not semantic
+    # TODO Handle the case when the latest release's tag name is not semantic
     # version.
+    # TODO Handle the case when the latest release's tag name is semantic version but
+    # with additional suffix, like rc (release candidate), build, etc.
     try:
         latest_version = get_latest_release_version(REPO_OWNER, REPO_NAME)
     except:

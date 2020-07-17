@@ -32,6 +32,7 @@
   - atexit module
 - See content of `rg TODO`
 - See content of `rg FIXME`
+- See content of `make todo`, namely, `rg "# TODO|# FIXME" --glob !Makefile`
 - Specify minimal supported Python version.
 - Add unit test suite/framework. Tox, pytest, nose.
 - Play with atexit hook to reason about its behaviour.
@@ -60,19 +61,21 @@
 - Consider use "WARN:" to replace "WARNING:" in comments.
 - 调整输出的 Excel 文档的各列列宽
 - Add badges to README.
-  - build passing
-  - lint passing
-  - test coverage
-  - license
-  - code format style
-  - we adopt semantic version
-  - lines of code
-  - release version number
-  - code quality
-  - pylint rating
-  - commits since latest version/release
-  - contribution is welcome
+  - [x] build passing
+  - [ ] lint passing
+  - [ ] test coverage
+  - [x] license
+  - [x] code format style
+  - [ ] we adopt semantic version
+  - [x] lines of code
+  - [x] release version number
+  - [ ] code quality
+  - [ ] pylint rating
+  - [x] commits since latest version/release
+  - [ ] contribution is welcome
 - Add scripts to update dependencies and bump their version in requirements*.txt files.
+  - Requires.io
+  - GitHub's Dependabot
 - Some TODO should be FIXME. Change to proper names.
 
 
@@ -129,10 +132,12 @@
   Sentinel to indicate the lack of a value when ``None`` is ambiguous.
   """
   ```
-- If we decide to use release candidate version, this complicates the version parsing. There is BNF grammar in semver.org. We can write a parser ourselves. Or we can use a dedicated library.
+- If we decide to use release candidate version, this complicates the version parsing. There is BNF grammar in semver.org. We can either write a parser ourselves. Or we can use an existing dedicated library.
 - What happens when yield keyword is used alone without the following yeild_expression?
 - Consider moving colorama.init/deinit pair to every colored output. Prevent polluting global space. Also prevent forgetting to colorama.init in different places across the code repository. What's the overhead if we do so?
+  - Use timeit to check colorama.init/deinit overhead.
 - Deploy prompt-toolkit library.
+- Add `--help` output to README's "Usage" section.
 
 
 ## Archive

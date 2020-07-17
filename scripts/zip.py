@@ -16,17 +16,14 @@ ZIPAPP_DISTPATH = "dist"
 INPUT_PACKAGE = "fetcher"
 
 
+# FIXME it's possible that we accidentally transform the relative import that is not
+# actually relative import. For example, a relative import embedded in a string literal.
+# The only way to avoid such problem is to construct syntax tree.
 def transform_relative_imports(p: Path) -> None:
     old_content = p.read_text(encoding="utf-8")
-    new_lines = []
-    for line in old_content.splitlines():
-        matchobj = re.fullmatch(r"from \.(?P<module>\w*) import (?P<names>.*)", line)
-        if matchobj:
-            module_name, imported_names = matchobj.group("module", "names")
-            new_lines.append(f"from {module_name} import {imported_names}")
-        else:
-            new_lines.append(line)
-    new_content = "\n".join(new_lines)
+    pattern = r"from \.(?P<module>\w*) import (?P<names>.*)"
+    repl = r"from \g<module> import \g<names>"
+    new_content = re.sub(pattern, repl, old_content)
     p.write_text(new_content, encoding="utf-8")
 
 
