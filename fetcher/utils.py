@@ -5,7 +5,7 @@ import traceback
 from contextlib import contextmanager
 from typing import Iterator, Tuple
 
-from colorama import Fore
+from colorama import Fore, Style
 from more_itertools import split_at
 
 __all__ = [
@@ -87,7 +87,7 @@ def print_traceback_digest(
         digest = "\n".join(numbered_lines)
 
     if colored:
-        print(Fore.RED + digest + Fore.RESET)  # type: ignore
+        print(Style.BRIGHT + Fore.RED + digest + Style.RESET_ALL)  # type: ignore
     else:
         print(digest)
 
@@ -99,7 +99,7 @@ class Logger:
     __slots__ = "_count"
 
     def log(self, s: str) -> None:
-        print(Fore.GREEN + str(self._count) + ". " + Fore.RESET + s)  # type: ignore
+        print(Style.BRIGHT + Fore.GREEN + str(self._count) + ". " + Style.RESET_ALL + s)  # type: ignore
         self._count += 1
 
 

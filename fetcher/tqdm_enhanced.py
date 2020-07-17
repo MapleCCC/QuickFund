@@ -3,7 +3,7 @@ import os
 from functools import partial
 from typing import Any, Callable, Iterable, Iterator
 
-from colorama import Fore
+from colorama import Fore, Style
 from tqdm import tqdm as std_tqdm
 from tqdm import trange as std_trange
 from tqdm.contrib import tenumerate as std_tenumerate
@@ -32,8 +32,9 @@ def green_fore_color_console_wrapper(
         # before the call to our function. This is problematic in the situation when
         # nesting colored console contexts are present.
         print()
+        print(Style.BRIGHT + Fore.GREEN, end="")
         yield from iter(fn(*args, **kwargs))
-        print(Fore.RESET, end="")
+        print(Style.RESET_ALL, end="")
         print()
 
     return wrapper
