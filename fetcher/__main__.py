@@ -26,7 +26,7 @@ from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
 from .tqdm_enhanced import tenumerate, thread_map, tmap, tqdm, trange
-from .utils import Logger, parse_version_number, print_traceback_digest
+from .utils import Logger, bright_blue, parse_version_number, print_traceback_digest
 
 # GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
 # from tqdm.gui import tqdm, trange
@@ -281,7 +281,7 @@ def main(
     with colorama_text():
 
         # atexit.register(lambda _: input("Press ENTER to exit"))
-        atexit.register(lambda: input(Style.BRIGHT + Fore.BLUE + "按下回车键以退出" + Style.RESET_ALL))  # type: ignore # nopep8
+        atexit.register(lambda: input(bright_blue("按下回车键以退出")))
 
         try:
             # TODO Remove update check logic after switching architecture to

@@ -6,7 +6,26 @@ from typing import Iterator, Tuple
 from colorama import Fore, Style
 from more_itertools import split_at
 
-__all__ = ["parse_version_number", "print_traceback_digest", "Logger"]
+__all__ = [
+    "bright_red",
+    "bright_green",
+    "bright_blue",
+    "parse_version_number",
+    "print_traceback_digest",
+    "Logger",
+]
+
+
+def bright_red(s: str) -> str:
+    return Style.BRIGHT + Fore.RED + s + Style.RESET_ALL  # type: ignore
+
+
+def bright_green(s: str) -> str:
+    return Style.BRIGHT + Fore.GREEN + s + Style.RESET_ALL  # type: ignore
+
+
+def bright_blue(s: str) -> str:
+    return Style.BRIGHT + Fore.BLUE + s + Style.RESET_ALL  # type: ignore
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
@@ -80,7 +99,7 @@ def print_traceback_digest(
         digest = "\n".join(numbered_lines)
 
     if colored:
-        print(Style.BRIGHT + Fore.RED + digest + Style.RESET_ALL)  # type: ignore
+        print(bright_red(digest))
     else:
         print(digest)
 
@@ -92,5 +111,5 @@ class Logger:
     __slots__ = "_count"
 
     def log(self, s: str) -> None:
-        print(Style.BRIGHT + Fore.GREEN + str(self._count) + ". " + Style.RESET_ALL + s)  # type: ignore
+        print(bright_green(str(self._count) + ". ") + s)
         self._count += 1
