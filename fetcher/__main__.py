@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import atexit
 import locale
 import os
 import re
@@ -25,12 +26,7 @@ from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
 from .tqdm_enhanced import tenumerate, thread_map, tmap, tqdm, trange
-from .utils import (
-    Logger,
-    parse_version_number,
-    pause_before_exit,
-    print_traceback_digest,
-)
+from .utils import Logger, parse_version_number, print_traceback_digest
 
 # GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
 # from tqdm.gui import tqdm, trange
@@ -282,7 +278,10 @@ def main(
     files_or_fund_codes: Tuple[str], output: str, disable_update_check: bool
 ) -> None:
 
-    with colorama_text(), pause_before_exit():
+    with colorama_text():
+
+        # atexit.register(lambda _: input("Press ENTER to exit"))
+        atexit.register(lambda: input("按下回车键以退出"))
 
         try:
             # TODO Remove update check logic after switching architecture to
