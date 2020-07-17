@@ -31,9 +31,9 @@ def green_fore_color_console_wrapper(
         # FIXME we will lose the previous style. There is no way to restore the style
         # before the call to our function. This is problematic in the situation when
         # nesting colored console contexts are present.
-        print(Fore.GREEN)
+        print(Fore.GREEN, end="")
         yield from iter(fn(*args, **kwargs))
-        print(Fore.RESET)
+        print(Fore.RESET, end="")
 
     return wrapper
 
