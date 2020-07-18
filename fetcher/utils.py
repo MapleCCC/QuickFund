@@ -90,7 +90,10 @@ def localize(s: str) -> str:
 
 
 def print_traceback_digest(
-    colored: bool = True, numbered: bool = True, indented: bool = True, localized: bool = True
+    colored: bool = True,
+    numbered: bool = True,
+    indented: bool = True,
+    localized: bool = True,
 ) -> None:
     tb = traceback.format_exc()
     digest = retrieve_succinct_traceback(tb)
