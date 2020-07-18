@@ -137,7 +137,7 @@ def net_value_date_is_latest(net_value_date: date) -> bool:
 
     # WARNING: it's true that most of time the market is not opened
     # in weekends. But we can't use this knowledge in our logic. Because
-    # sometimes holiday policy will make this irregular. We had better
+    # sometimes holiday policy will make this irregular. We'd better
     # fall back to use the most robust way to check.
 
     now_time = datetime.now().time()
@@ -156,7 +156,7 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
 
     # WARNING: it's true that most of time the market is not opened
     # in weekends. But we can't use this knowledge in our logic. Because
-    # sometimes holiday policy will make this irregular. We had better
+    # sometimes holiday policy will make this irregular. We'd better
     # fall back to use the most robust way to check.
 
     open_market_time = time(9, 30)
@@ -322,6 +322,7 @@ def main(
         except:
             logger.log("Oops! 程序运行过程中遇到了错误，打印错误信息摘要如下：")
             print_traceback_digest()
+
             with open(ERR_LOG_FILE, "w", encoding="utf-8") as f:
                 traceback.print_exc(file=f)
             logger.log(f'详细错误信息已写入日志文件 "{ERR_LOG_FILE}"，请将日志文件提交给开发者进行调试 debug')

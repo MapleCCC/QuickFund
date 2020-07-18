@@ -2,7 +2,7 @@
 
 - Add docstring to functions, for better maintenance
   - Also add docstring to classes and modules.
-- Try to use more modernized python project dependency management tools, like poetry, pyenv, pip-tools, requirements.in, Pipfile, Pipfile.lock, pipenv, pyproject, etc. Instead of using the naive requirements.txt method.
+- Try to use more modernized python project dependency management tools, like poetry, pyenv, pip-tools, requirements.in, Pipfile, Pipfile.lock, pipenv, pyproject, etc. Instead of using the naive requirements.txt method. We want deterministic build environment.
 - Add pre-commit hook script. Lint, reformat, bump version.
 - Deploy pre-commit hook using the famous "pre-commit" repository.
   - Reformat staged Python code with `isort` and `black`
@@ -134,8 +134,8 @@
   ```
 - If we decide to use release candidate version, this complicates the version parsing. There is BNF grammar in semver.org. We can either write a parser ourselves. Or we can use an existing dedicated library.
 - What happens when yield keyword is used alone without the following yeild_expression?
-- Consider moving colorama.init/deinit pair to every colored output. Prevent polluting global space. Also prevent forgetting to colorama.init in different places across the code repository. What's the overhead if we do so?
-  - Use timeit to check colorama.init/deinit overhead.
+- Consider moving colorama.init/deinit/reinit pair to every colored output. Prevent polluting global space. Also prevent forgetting to colorama.init in different places across the code repository. What's the overhead if we do so?
+  - Use timeit to check colorama.init/deinit/reinit overhead.
 - Deploy prompt-toolkit library.
 - Add `--help` output to README's "Usage" section.
 

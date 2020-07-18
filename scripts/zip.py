@@ -18,7 +18,8 @@ INPUT_PACKAGE = "fetcher"
 
 # FIXME it's possible that we accidentally transform the relative import that is not
 # actually relative import. For example, a relative import embedded in a string literal.
-# The only way to avoid such problem is to construct syntax tree.
+# The only robust and correct way to avoid such problem is to construct syntax tree
+# using lexical analysis and syntax analysis.
 def transform_relative_imports(p: Path) -> None:
     old_content = p.read_text(encoding="utf-8")
     pattern = r"from \.(?P<module>\w*) import (?P<names>.*)"
