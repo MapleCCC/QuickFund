@@ -90,7 +90,7 @@ def localize(s: str) -> str:
 
 
 def print_traceback_digest(
-    colored: bool = True, numbered: bool = True, localized: bool = True
+    colored: bool = True, numbered: bool = True, indented: bool = True, localized: bool = True
 ) -> None:
     tb = traceback.format_exc()
     digest = retrieve_succinct_traceback(tb)
@@ -103,6 +103,9 @@ def print_traceback_digest(
         for i, line in enumerate(digest.splitlines(), start=1):
             numbered_lines.append(f"{i}. {line}")
         digest = "\n".join(numbered_lines)
+
+    if indented:
+        digest = "\n".join("    " + line for line in digest.splitlines())
 
     if colored:
         print(bright_red(digest))
