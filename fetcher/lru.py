@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import operator
 from functools import partial
-from itertools import filterfalse
 from typing import Any, ClassVar, Dict, Iterable, List
 
 from more_itertools import replace
@@ -47,7 +46,7 @@ class LRU:
 
     def __str__(self) -> str:
         filterfunc = partial(operator.is_not, LRU._DUMMY_CELL)
-        logical_content = list(filterfalse(filterfunc, self._storage))
+        logical_content = list(filter(filterfunc, self._storage))
         return f"LRU({logical_content})"
 
     def __repr__(self) -> str:
