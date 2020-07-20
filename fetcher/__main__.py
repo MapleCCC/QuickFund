@@ -16,8 +16,8 @@ from typing import Dict, Iterable, List, Tuple
 
 import attr
 import click
+import colorama
 import xlsxwriter
-from colorama import colorama_text
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
@@ -285,54 +285,55 @@ def main(
     files_or_fund_codes: Tuple[str], output: str, disable_update_check: bool
 ) -> None:
 
-    with colorama_text():
+    colorama.init()
 
-        # atexit.register(lambda _: input("Press ENTER to exit"))
-        atexit.register(lambda: input(bright_blue("按下回车键以退出")))
+    atexit.register(lambda: colorama.deinit())
+    # atexit.register(lambda _: input("Press ENTER to exit"))
+    atexit.register(lambda: input(bright_blue("按下回车键以退出")))
 
-        try:
-            # TODO Remove update check logic after switching architecture to
-            # server/client model
-            if not disable_update_check:
-                print("检查更新......")
-                check_update()
+    try:
+        # TODO Remove update check logic after switching architecture to
+        # server/client model
+        if not disable_update_check:
+            print("检查更新......")
+            check_update()
 
-            in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
-            out_filename = output
+        in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
+        out_filename = output
 
-            logger.log("检查参数......")
-            check_args(in_filenames, out_filename)
+        logger.log("检查参数......")
+        check_args(in_filenames, out_filename)
 
-            logger.log("获取基金代码列表......")
-            fund_codes = []
-            for x in files_or_fund_codes:
-                if validate_fund_code(x):
-                    fund_codes.append(x)
-                else:
-                    lines = Path(x).read_text(encoding="utf-8").splitlines()
-                    cleaned_lines = map(str.strip, lines)
-                    fund_codes.extend(filter(validate_fund_code, cleaned_lines))
+        logger.log("获取基金代码列表......")
+        fund_codes = []
+        for x in files_or_fund_codes:
+            if validate_fund_code(x):
+                fund_codes.append(x)
+            else:
+                lines = Path(x).read_text(encoding="utf-8").splitlines()
+                cleaned_lines = map(str.strip, lines)
+                fund_codes.extend(filter(validate_fund_code, cleaned_lines))
 
-            if not fund_codes:
-                logger.log("没有发现基金代码")
-                exit()
+        if not fund_codes:
+            logger.log("没有发现基金代码")
+            exit()
 
-            logger.log("获取基金相关信息......")
-            fund_infos = get_fund_infos(fund_codes)
+        logger.log("获取基金相关信息......")
+        fund_infos = get_fund_infos(fund_codes)
 
-            logger.log("将基金相关信息写入 Excel 文件......")
-            write_to_xlsx(fund_infos, out_filename)
+        logger.log("将基金相关信息写入 Excel 文件......")
+        write_to_xlsx(fund_infos, out_filename)
 
-            # The emoji takes inspiration from the black (https://github.com/psf/black)
-            logger.log("完满结束! ✨ 🍰 ✨")
+        # The emoji takes inspiration from the black (https://github.com/psf/black)
+        logger.log("完满结束! ✨ 🍰 ✨")
 
-        except:
-            logger.log("Oops! 程序运行过程中遇到了错误，打印错误信息摘要如下：")
-            print_traceback_digest()
+    except:
+        logger.log("Oops! 程序运行过程中遇到了错误，打印错误信息摘要如下：")
+        print_traceback_digest()
 
-            with open(ERR_LOG_FILE, "w", encoding="utf-8") as f:
-                traceback.print_exc(file=f)
-            logger.log(f'详细错误信息已写入日志文件 "{ERR_LOG_FILE}"，请将日志文件提交给开发者进行调试 debug')
+        with open(ERR_LOG_FILE, "w", encoding="utf-8") as f:
+            traceback.print_exc(file=f)
+        logger.log(f'详细错误信息已写入日志文件 "{ERR_LOG_FILE}"，请将日志文件提交给开发者进行调试 debug')
 
 
 if __name__ == "__main__":
