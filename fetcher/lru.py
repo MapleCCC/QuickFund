@@ -51,7 +51,7 @@ class LRU:
         return f"LRU({logical_content})"
 
     def __repr__(self) -> str:
-        filterfunc = partial(operator.is_not, LRU._DUMMY_CELL)
+        filterfunc = partial(operator.is_, LRU._DUMMY_CELL)
         repr_content = list(replace(self._storage, filterfunc, ["_DUMMY_CELL"]))
         return f"LRU({repr_content})"
 
