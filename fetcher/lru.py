@@ -2,11 +2,7 @@
 # method.
 from __future__ import annotations
 
-import operator
-from functools import partial
-from typing import Any, ClassVar, Dict, Iterable, List
-
-from more_itertools import replace
+from typing import Any, Dict, Iterable, Iterator, List, Type
 
 # from collections import deque
 
@@ -20,9 +16,31 @@ __all__ = ["LRU"]
 LRU_MAX_DUMMY_CELL_NUM = 200
 
 
-class LRU:
-    _DUMMY_CELL: ClassVar[object] = object()
+def switch(iterable: Iterable) -> Iterator:
+    return ((y, x) for x, y in iterable)
 
+
+class DummyCell:
+    """ A singleton to signal lack of value """
+
+    _singleton = None
+
+    def __new__(cls: Type[DummyCell]) -> DummyCell:
+        if cls._singleton is None:
+            cls._singleton = object.__new__(cls)
+        return cls._singleton
+
+    def __str__(self) -> str:
+        return "_DUMMY_CELL"
+
+    __repr__ = __str__
+
+
+# A singleton to signal lack of value
+_DUMMY_CELL = DummyCell()
+
+
+class LRU:
     def __init__(self) -> None:
         self._storage: List = []
         self._indexer: Dict[Any, int] = {}
@@ -33,8 +51,11 @@ class LRU:
 
     def __len__(self) -> int:
         # Note the invariant: len(indexer) + dummy_cell_count === len(storage)
-        # return len(self._indexer)
+        # Alternative: return len(self._indexer)
         return len(self._storage) - self._dummy_cell_count
+
+    def empty(self) -> bool:
+        return self.__len__() == 0
 
     def copy(self) -> LRU:
         new_lru = LRU()
@@ -45,20 +66,17 @@ class LRU:
         return new_lru
 
     def __str__(self) -> str:
-        filterfunc = partial(operator.is_not, LRU._DUMMY_CELL)
-        logical_content = list(filter(filterfunc, self._storage))
+        logical_content = [elm for elm in self._storage if elm is not _DUMMY_CELL]
         return f"LRU({logical_content})"
 
     def __repr__(self) -> str:
-        filterfunc = partial(operator.is_, LRU._DUMMY_CELL)
-        repr_content = list(replace(self._storage, filterfunc, ["_DUMMY_CELL"]))
-        return f"LRU({repr_content})"
+        return f"LRU({self._storage})"
 
     def update(self, elem: Any) -> None:
         if elem in self._indexer:
             index = self._indexer[elem]
-            # self._storage[index] = self.__class__._DUMMY_CELL
-            self._storage[index] = LRU._DUMMY_CELL
+            # Alternative: self._storage[index] = self.__class__._DUMMY_CELL
+            self._storage[index] = _DUMMY_CELL
             self._dummy_cell_count += 1
             self._storage.append(elem)
             self._indexer[elem] = len(self._storage) - 1
@@ -69,24 +87,26 @@ class LRU:
         if self._dummy_cell_count > LRU_MAX_DUMMY_CELL_NUM:
             self._reconstruct()
 
-    def batch_update(self, elems: Iterable[Any]) -> None:
+    def batch_update(self, elems: Iterable) -> None:
         for elem in elems:
             self.update(elem)
 
     def evict(self) -> Any:
-        if self._dummy_cell_count == len(self._storage):
+        if self.empty():
             raise KeyError("evict from empty LRU")
 
         oldest_non_dummy_cell_elem = None
-        oldest_non_dummy_cell_index = 0
+        oldest_non_dummy_cell_index = None
 
         for i, elem in enumerate(self._storage[self._offset :], start=self._offset):
-            if elem is not LRU._DUMMY_CELL:
+            if elem is not _DUMMY_CELL:
                 oldest_non_dummy_cell_elem = elem
                 oldest_non_dummy_cell_index = i
                 break
 
-        self._storage[oldest_non_dummy_cell_index] = LRU._DUMMY_CELL
+        assert oldest_non_dummy_cell_index is not None
+
+        self._storage[oldest_non_dummy_cell_index] = _DUMMY_CELL
         self._dummy_cell_count += 1
         self._offset = oldest_non_dummy_cell_index + 1
         del self._indexer[oldest_non_dummy_cell_elem]
@@ -99,13 +119,11 @@ class LRU:
     def _reconstruct(self) -> None:
         self._dummy_cell_count = 0
         self._offset = 0
-        old_storage = self._storage
-        self._storage = []
 
-        for elem in old_storage:
-            if elem is not LRU._DUMMY_CELL:
-                self._storage.append(elem)
-                self._indexer[elem] = len(self._storage) - 1
+        old_storage = self._storage
+        self._storage = [elm for elm in old_storage if elm is not _DUMMY_CELL]
+
+        self._indexer.update(switch(enumerate(self._storage)))
 
 
 if __name__ == "__main__":
