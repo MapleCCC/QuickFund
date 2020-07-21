@@ -46,6 +46,12 @@ logger = Logger()
 
 
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
+    """
+    Structuralize a list of fund infos to an Excel document.
+
+    Input: a list of fund infos, and an Excel filename.
+    """
+
     try:
         # TODO profile to see whether and how much setting constant_memory improves
         # performance.
@@ -87,14 +93,21 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
 
 
 def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
+    """
+    Check validness of command line arguments
+    """
+
+    # Check in_filenames
     for f in in_filenames:
         if not os.path.exists(f):
             raise FileNotFoundError(f"文件 {f} 不存在")
 
+    # Check out_filename
     if os.path.isdir(out_filename):
         raise RuntimeError(f'同名文件夹已存在，无法新建文件 "{out_filename}"')
 
     if os.path.isfile(out_filename):
+        # If out_filename already exists, make a backup.
 
         if locale.getdefaultlocale()[0] == "zh_CN":
             backup_filename = "[备份] " + out_filename
@@ -113,6 +126,10 @@ def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
 
 
 def check_update() -> None:
+    """
+    Check if update to the program is available.
+    """
+
     logger.log("获取最新分发版本号......")
     # TODO Handle the case when the latest release's tag name is not semantic
     # version.
@@ -132,13 +149,17 @@ def check_update() -> None:
 
 
 def net_value_date_is_latest(net_value_date: date) -> bool:
-    # Take advantage of the knowledge that fund info stays the same
-    # within 0:00 to 20:00.
+    """
+    Check if the net value date is latest.
 
-    # WARNING: it's true that most of time the market is not opened
-    # in weekends. But we can't use this knowledge in our logic. Because
-    # sometimes holiday policy will make this irregular. We'd better
-    # fall back to use the most robust way to check.
+    Take advantage of the knowledge that fund info stays the same
+    within 0:00 to 20:00.
+
+    WARNING: it's true that most of time the market is not opened
+    in weekends. But we can't use this knowledge in our logic. Because
+    sometimes holiday policy will make this irregular. We'd better
+    fall back to use the most robust way to check.
+    """
 
     now_time = datetime.now().time()
     today = date.today()
@@ -151,13 +172,17 @@ def net_value_date_is_latest(net_value_date: date) -> bool:
 
 
 def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
-    # Take advantage of the knowledge that estimate info stays the same
-    # within 15:00 to next day 15:00.
+    """
+    Check if the estimte datetime is latest.
 
-    # WARNING: it's true that most of time the market is not opened
-    # in weekends. But we can't use this knowledge in our logic. Because
-    # sometimes holiday policy will make this irregular. We'd better
-    # fall back to use the most robust way to check.
+    Take advantage of the knowledge that estimate info stays the same
+    within 15:00 to next day 15:00.
+
+    WARNING: it's true that most of time the market is not opened
+    in weekends. But we can't use this knowledge in our logic. Because
+    sometimes holiday policy will make this irregular. We'd better
+    fall back to use the most robust way to check.
+    """
 
     open_market_time = time(9, 30)
     close_market_time = time(15)
@@ -178,6 +203,11 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
 
 
 def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
+    """
+    Input: a list of fund codes
+    Output: a list of fund infos corresponding to the fund code
+    """
+
     if not os.path.isdir(PERSISTENT_CACHE_DB_DIRECTORY):
         os.makedirs(PERSISTENT_CACHE_DB_DIRECTORY)
 
@@ -186,6 +216,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
     )
 
     with shelve.open(shelf_path) as fund_info_cache_db:
+        # Check protocol version
         cache_db_protocol_version = fund_info_cache_db.get("protocol_version")
         if cache_db_protocol_version is None or cache_db_protocol_version < __version__:
             logger.log("缓存数据库的协议版本过低或信息缺失，更新到新版本，并清空旧协议存储......")
@@ -198,6 +229,11 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> FundInfo:
+            """
+            Input: a fund code
+            Output: fund info related to the fund code
+            """
+
             need_renew = False
             fund_info: FundInfo = fund_info_cache_db.get(fund_code, FundInfo())
 
@@ -272,6 +308,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
 
 
 def validate_fund_code(s: str) -> bool:
+    """ Check if a string represents a valid fund code """
     return bool(re.fullmatch(r"[0-9]{6}", s))
 
 
@@ -284,6 +321,7 @@ def validate_fund_code(s: str) -> bool:
 def main(
     files_or_fund_codes: Tuple[str], output: str, disable_update_check: bool
 ) -> None:
+    """ Command line entry function """
 
     colorama.init()
 
@@ -316,8 +354,10 @@ def main(
         fund_codes = []
         for x in files_or_fund_codes:
             if validate_fund_code(x):
+                # if x is fund code
                 fund_codes.append(x)
             else:
+                # if x is filename
                 lines = Path(x).read_text(encoding="utf-8").splitlines()
                 cleaned_lines = map(str.strip, lines)
                 fund_codes.extend(filter(validate_fund_code, cleaned_lines))
