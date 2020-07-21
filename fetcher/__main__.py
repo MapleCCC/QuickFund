@@ -288,10 +288,15 @@ def main(
     colorama.init()
 
     atexit.register(lambda: colorama.deinit())
-    # atexit.register(lambda _: input("Press ENTER to exit"))
     @atexit.register
     def pause_wait_enter() -> None:
-        print(bright_blue("按下回车键以退出"), end="")
+        if locale.getdefaultlocale()[0] == "zh_CN":
+            # localization for Simplified Chinese
+            msg = "按任意键以退出"
+        else:
+            # default to English
+            msg = "Press any key to exit"
+        print(bright_blue(msg), end="")
         input()
 
     try:
