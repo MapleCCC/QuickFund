@@ -188,7 +188,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
     with shelve.open(shelf_path) as fund_info_cache_db:
         cache_db_protocol_version = fund_info_cache_db.get("protocol_version")
         if cache_db_protocol_version is None or cache_db_protocol_version < __version__:
-            logger.log("缓存数据库的协议版本过低，更新到新版本，并清空旧协议存储......")
+            logger.log("缓存数据库的协议版本过低或信息缺失，更新到新版本，并清空旧协议存储......")
             fund_info_cache_db.clear()
 
         fund_info_cache_db["protocol_version"] = __version__
