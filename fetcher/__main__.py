@@ -224,8 +224,15 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
 
         fund_info_cache_db["protocol_version"] = __version__
 
-        renewed_variable_access_lock = threading.Lock()
-        renewed: Dict[str, FundInfo] = {}
+        # Create variable `new_records` to keep track of the fund infos that get refreshed.
+        new_records_access_lock = threading.Lock()
+        new_records: Dict[str, FundInfo] = {}
+        def add_to_new_records(fund_code: str, fund_info: FundInfo)->None:
+            # TIPS: Uncomment following line to profile lock congestion.
+            # print(renewed_variable_access_lock.locked())
+            new_records_access_lock.acquire()
+            new_records[fund_code] = fund_info
+            new_records_access_lock.release()
 
         @lru_cache(maxsize=None)
         def get_fund_info(fund_code: str) -> FundInfo:
@@ -262,11 +269,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
                 fund_info.估算增长率 = data.估算增长率
 
             if need_renew:
-                # TIPS: Uncomment following line to profile lock congestion.
-                # print(renewed_variable_access_lock.locked())
-                renewed_variable_access_lock.acquire()
-                renewed[fund_code] = fund_info
-                renewed_variable_access_lock.release()
+                add_to_new_records(fund_code, fund_info)
 
             return fund_info
 
@@ -280,7 +283,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
             )
 
         logger.log("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
-        fund_info_cache_db.update(renewed)
+        fund_info_cache_db.update(new_records)
 
         logger.log("更新缓存 LRU 信息......")
 
