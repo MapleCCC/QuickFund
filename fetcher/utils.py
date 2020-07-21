@@ -46,7 +46,7 @@ def parse_version_number(s: str) -> Tuple[int, int, int]:
     """
 
     try:
-        version_pattern = r"v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)"
+        version_pattern = r"v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+).*"
         major, minor, patch = re.match(version_pattern, s).group(
             "major", "minor", "patch"
         )
