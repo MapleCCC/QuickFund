@@ -289,7 +289,10 @@ def main(
 
     atexit.register(lambda: colorama.deinit())
     # atexit.register(lambda _: input("Press ENTER to exit"))
-    atexit.register(lambda: input(bright_blue("按下回车键以退出")))
+    @atexit.register
+    def pause_wait_enter() -> None:
+        print(bright_blue("按下回车键以退出"), end="")
+        input()
 
     try:
         # TODO Remove update check logic after switching architecture to
