@@ -1,7 +1,9 @@
+import functools
 import locale
 import re
+import time
 import traceback
-from typing import Iterator, Tuple
+from typing import Any, Callable, Iterator, Tuple
 
 from colorama import Fore, Style
 from more_itertools import split_at
@@ -13,6 +15,7 @@ __all__ = [
     "parse_version_number",
     "print_traceback_digest",
     "Logger",
+    "timefunc",
 ]
 
 
@@ -125,3 +128,32 @@ class Logger:
     def log(self, s: str) -> None:
         print(bright_green(str(self._count) + ". ") + s)
         self._count += 1
+
+
+def timefunc(fn: Callable) -> Callable:
+    """
+    A decorator to collect execution time statistics of the wrapped function.
+
+    Statistics is stored in the `exe_time_statistics` attribute of the wrapped function.
+    """
+
+    statistics = {}
+
+    @functools.wraps(fn)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        pre = time.time()
+        result = fn(*args, **kwargs)
+        post = time.time()
+
+        format_args = str(args).strip("()")
+        if kwargs:
+            format_args += ", " + str(kwargs).strip("{}")
+        format_args = "(" + format_args + ")"
+
+        # print(f"Input is {format_args}, execution duration is {post-pre}")
+        statistics[format_args] = post - pre
+
+        return result
+
+    wrapper.exe_time_statistics = statistics  # type: ignore
+    return wrapper
