@@ -325,7 +325,6 @@ def main(
 
     colorama.init()
 
-    atexit.register(lambda: colorama.deinit())
     @atexit.register
     def pause_wait_enter() -> None:
         if locale.getdefaultlocale()[0] == "zh_CN":
