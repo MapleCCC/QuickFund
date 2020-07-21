@@ -20,18 +20,31 @@ __all__ = [
 
 
 def bright_red(s: str) -> str:
+    """
+    Augment a string, so that when printed, the string is displayed in bright red color.
+    """
     return Style.BRIGHT + Fore.RED + s + Style.RESET_ALL  # type: ignore
 
 
 def bright_green(s: str) -> str:
+    """
+    Augment a string, so that when printed, the string is displayed in bright green color.
+    """
     return Style.BRIGHT + Fore.GREEN + s + Style.RESET_ALL  # type: ignore
 
 
 def bright_blue(s: str) -> str:
+    """
+    Augment a string, so that when printed, the string is displayed in bright blue color.
+    """
     return Style.BRIGHT + Fore.BLUE + s + Style.RESET_ALL  # type: ignore
 
 
 def parse_version_number(s: str) -> Tuple[int, int, int]:
+    """
+    Parse a string representing version number, according to semantic version specification.
+    """
+
     try:
         version_pattern = r"v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)"
         major, minor, patch = re.match(version_pattern, s).group(
@@ -43,6 +56,10 @@ def parse_version_number(s: str) -> Tuple[int, int, int]:
 
 
 def split_paragraphs(s: str) -> Iterator[str]:
+    """
+    Similar to splitlines(), except we split paragraphs, no lines.
+    """
+
     lines = s.splitlines()
     splits = split_at(lines, lambda line: line == "")
     for split in splits:
@@ -50,6 +67,10 @@ def split_paragraphs(s: str) -> Iterator[str]:
 
 
 def retrieve_succinct_traceback(tb: str) -> str:
+    """
+    A utility that retrive succint traceback digest from a complete traceback string.
+    """
+
     paragraphs = split_paragraphs(tb)
     digest = []
     for paragraph in paragraphs:
@@ -69,6 +90,13 @@ localization_table = {
 
 
 def localize(s: str) -> str:
+    """
+    Localize a string with a pre-defined translation dictionary.
+
+    If we can't detect local langauge or we don't have translation dictionary for the
+        given local language, we simply fall back to English.
+    """
+
     local_lang = locale.getdefaultlocale()[0]
     if not local_lang or local_lang not in localization_table:
         # If we can't detect local langauge or we don't have translation
@@ -98,6 +126,15 @@ def print_traceback_digest(
     indented: bool = True,
     localized: bool = True,
 ) -> None:
+    """
+    Print a digest of traceback
+
+    colored: A flag to control whether should print with color.
+    numbered: A flag to control whether should print with line number prepended.
+    indented: A flag to control whether should print with additional indentation, to emphasize.
+    localized: A flag to control whether should localize the traceback digest.
+    """
+
     tb = traceback.format_exc()
     digest = retrieve_succinct_traceback(tb)
 
@@ -120,6 +157,13 @@ def print_traceback_digest(
 
 
 class Logger:
+    """
+    A lightweight logger.
+
+    It's just a thin wrapper over the builtin print function, except that it prints
+    strings with order numbers prepended.
+    """
+
     def __init__(self) -> None:
         self._count = 1
 
