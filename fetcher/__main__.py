@@ -121,7 +121,7 @@ def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
                 f"备份 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
                 f'有可能是 "{out_filename}" 已经被 Excel 打开，'
                 "请关闭文件之后重试"
-            )
+            ) from None
         logger.log(f'"{out_filename}" 同名文件已存在，备份至 "{backup_filename}"')
 
 
