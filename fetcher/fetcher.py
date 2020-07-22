@@ -15,6 +15,8 @@ __all__ = ["fetch_net_value", "fetch_estimate", "fetch_fund_info"]
 
 
 def fetch_net_value(fund_code: str) -> FundInfo:
+    """ Fetch the net value related info related to the given fund code """
+
     try:
         # Add random parameter to the URL to break any cache mechanism of
         # the server or the network or the requests library.
@@ -50,7 +52,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
         values = list(replace(values, lambda x: x is None, [""]))
 
         if len(keys) != len(values):
-            raise RuntimeError("解析基金信息时键值对不匹配")
+            raise RuntimeError("解析基金信息时表头和表体的长度不匹配")
 
         responded_data = dict(zip(keys, values))
 
@@ -66,7 +68,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
         last_time_values = list(replace(last_time_values, lambda x: x is None, [""]))
 
         if len(keys) != len(values):
-            raise RuntimeError("解析基金信息时键值对不匹配")
+            raise RuntimeError("解析基金信息时表头和表体的长度不匹配")
 
         last_time_info = dict(zip(keys, last_time_values))
 
@@ -79,6 +81,8 @@ def fetch_net_value(fund_code: str) -> FundInfo:
 
 
 def fetch_estimate(fund_code: str) -> FundInfo:
+    """ Fetch the estimate info related to the given fund code """
+
     try:
         # Add random parameter to the URL to break potential cache mechanism of
         # the server or the network or the requests library.
@@ -119,6 +123,8 @@ def fetch_estimate(fund_code: str) -> FundInfo:
 
 
 def fetch_fund_info(fund_code: str) -> FundInfo:
+    """ Fetch the fund info related to the given fund code """
+
     try:
         fund_info = FundInfo()
         net_value_info = fetch_net_value(fund_code)

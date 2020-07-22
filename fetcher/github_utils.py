@@ -2,6 +2,7 @@ import requests
 
 __all__ = ["get_latest_release_version", "get_latest_release_asset"]
 
+# TODO Add exception handling.
 
 # Reference to GitHub official REST API document:
 # https://docs.github.com/en/rest
@@ -10,6 +11,11 @@ ENDPOINT = "https://api.github.com"
 
 
 def get_latest_release_version(owner: str, repo: str) -> str:
+    """
+    Get the latest release version of a repository of the url: https://github.com/<owner>/<repo>
+    """
+
+    # According to the GitHub REST API doc, it's recommended to specify the ACCEPT key to following value in the request header.
     headers = {"accept": "application/vnd.github.v3+json"}
     response = requests.get(
         f"{ENDPOINT}/repos/{owner}/{repo}/releases/latest", headers=headers
@@ -22,7 +28,12 @@ def get_latest_release_version(owner: str, repo: str) -> str:
 
 
 def download_asset(owner: str, repo: str, asset_id: str) -> bytes:
+    """
+    Download the asset with given asset id from a repository of the url: https://github.com/<owner>/<repo>
+    """
+
     # TODO: add display progress bar when downloading latest asset
+    # According to the GitHub REST API doc, it's recommended to specify the ACCEPT key to following value in the request header.
     headers = {"Accept": "application/octet-stream"}
     download_url = f"{ENDPOINT}/repos/{owner}/{repo}/releases/assets/{asset_id}"
     r = requests.get(download_url, headers=headers,)
@@ -31,7 +42,12 @@ def download_asset(owner: str, repo: str, asset_id: str) -> bytes:
 
 
 def get_latest_release_asset(owner: str, repo: str, asset_name: str) -> bytes:
+    """
+    Download the latest released asset with given asset name from a repository of the url: https://github.com/<owner>/<repo>
+    """
+
     print("获取最新分发版本......")
+    # According to the GitHub REST API doc, it's recommended to specify the ACCEPT key to following value in the request header.
     headers = {"accept": "application/vnd.github.v3+json"}
     response = requests.get(
         f"{ENDPOINT}/repos/{owner}/{repo}/releases/latest", headers=headers

@@ -60,6 +60,10 @@ __all__ = ["FundInfo"]
 
 @attr.s(slots=True)
 class FundInfo:
+    """
+    A dataclass to represent fund info.
+    """
+
     基金名称: str = attr.ib(default=None, metadata={"width": 22})
     基金代码: str = attr.ib(default=None)
     上一天净值日期: date = attr.ib(

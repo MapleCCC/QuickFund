@@ -21,25 +21,27 @@ __all__ = [
 
 def bright_red(s: str) -> str:
     """
-    Augment a string, so that when printed, the string is displayed in bright red color.
+    Augment a string, so that when printed to console, the string is displayed in bright red color.
     """
     return Style.BRIGHT + Fore.RED + s + Style.RESET_ALL  # type: ignore
 
 
 def bright_green(s: str) -> str:
     """
-    Augment a string, so that when printed, the string is displayed in bright green color.
+    Augment a string, so that when printed to console, the string is displayed in bright green color.
     """
     return Style.BRIGHT + Fore.GREEN + s + Style.RESET_ALL  # type: ignore
 
 
 def bright_blue(s: str) -> str:
     """
-    Augment a string, so that when printed, the string is displayed in bright blue color.
+    Augment a string, so that when printed to console, the string is displayed in bright blue color.
     """
     return Style.BRIGHT + Fore.BLUE + s + Style.RESET_ALL  # type: ignore
 
 
+# TODO use existing semantic version parser library to handle tedious cases,
+# instead of reinventing wheels.
 def parse_version_number(s: str) -> Tuple[int, int, int]:
     """
     Parse a string representing version number, according to semantic version specification.
@@ -57,7 +59,7 @@ def parse_version_number(s: str) -> Tuple[int, int, int]:
 
 def split_paragraphs(s: str) -> Iterator[str]:
     """
-    Similar to splitlines(), except we split paragraphs, no lines.
+    Similar to splitlines(), except it splits paragraphs, not lines.
     """
 
     lines = s.splitlines()
@@ -129,10 +131,10 @@ def print_traceback_digest(
     """
     Print a digest of traceback
 
-    colored: A flag to control whether should print with color.
-    numbered: A flag to control whether should print with line number prepended.
-    indented: A flag to control whether should print with additional indentation, to emphasize.
-    localized: A flag to control whether should localize the traceback digest.
+    `colored`: A flag to control whether should print with color.
+    `numbered`: A flag to control whether should print with line number prepended.
+    `indented`: A flag to control whether should print with additional indentation, to emphasize.
+    `localized`: A flag to control whether should localize the traceback digest.
     """
 
     tb = traceback.format_exc()
@@ -170,6 +172,10 @@ class Logger:
     __slots__ = "_count"
 
     def log(self, s: str) -> None:
+        """
+        It's just a thin wrapper over the builtin print function, except that it prints
+        strings with order numbers prepended.
+        """
         print(bright_green(str(self._count) + ". ") + s)
         self._count += 1
 
