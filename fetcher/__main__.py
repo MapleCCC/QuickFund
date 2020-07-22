@@ -333,10 +333,10 @@ def main(
     def pause_wait_enter() -> None:
         if locale.getdefaultlocale()[0] == "zh_CN":
             # localization for Simplified Chinese
-            msg = "按任意键以退出"
+            msg = "按回车键以退出"
         else:
             # default to English
-            msg = "Press any key to exit"
+            msg = "Press ENTER to exit"
         print(bright_blue(msg), end="")
         input()
 
