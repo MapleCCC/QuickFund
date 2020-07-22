@@ -227,7 +227,8 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         # Create variable `new_records` to keep track of the fund infos that get refreshed.
         new_records_access_lock = threading.Lock()
         new_records: Dict[str, FundInfo] = {}
-        def add_to_new_records(fund_code: str, fund_info: FundInfo)->None:
+
+        def add_to_new_records(fund_code: str, fund_info: FundInfo) -> None:
             # TIPS: Uncomment following line to profile lock congestion.
             # print(renewed_variable_access_lock.locked())
             new_records_access_lock.acquire()

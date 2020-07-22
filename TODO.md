@@ -1,14 +1,14 @@
 ## Priority High
 
-- Add docstring to functions, for better maintenance
+- Add docstring to functions, for better maintainability.
   - Also add docstring to classes and modules.
 - Try to use more modernized python project dependency management tools, like poetry, pyenv, pip-tools, requirements.in, Pipfile, Pipfile.lock, pipenv, pyproject, etc. Instead of using the naive requirements.txt method. We want deterministic build environment.
 - Add pre-commit hook script. Lint, reformat, bump version.
 - Deploy pre-commit hook using the famous "pre-commit" repository.
   - Reformat staged Python code with `isort` and `black`
   - Linting
-- Append content of TODO.md and CHANGELOG.md to README.md
-- Generate TOC for README in pre-commit hook script.
+  - Append content of TODO.md and CHANGELOG.md to README.md
+  - Generate TOC for README in pre-commit hook script.
 - Try release candidate version. (e.g. v1.0.0rc1)
 - Search on the internet about existing project that make async possible with requests library.
 - Polish the `--help` generated message.
@@ -138,6 +138,9 @@
   - Use timeit to check colorama.init/deinit/reinit overhead.
 - Deploy prompt-toolkit library.
 - Add `--help` output to README's "Usage" section.
+- Use SortedList in sortedcontainers library to replace self-made LRU implementation. Benchmark to compare performance.
+- Remove "build by PyInstaller" feature, and all related codes.
+- Change all "except:" to "except Exception:". We don't want to catch some exceptions derived from BaseException, like KeyboardInterrupt, SystemExit.
 
 
 ## Archive
