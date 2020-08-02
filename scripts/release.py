@@ -28,7 +28,9 @@ def main(new_version: str, upload_executable: bool = False) -> None:
     g = Github(github_account_access_token)
     repo = g.get_repo(f"{REPO_OWNER}/{REPO_NAME}")
     git_release = repo.create_git_release(
-        tag=new_version, name=new_version, message="Update"
+        tag=new_version,
+        name=new_version,
+        message="For detail changelog, please consult commit history, and commit messages.",
     )
 
     if upload_executable:

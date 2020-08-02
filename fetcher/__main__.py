@@ -337,6 +337,9 @@ def main(
         else:
             # default to English
             msg = "Press ENTER to exit"
+        # WARNING: colorama doesn't seem to be compatible with the builtin input()
+        # function under some console environment. The workaround here is to transform
+        # from `input("xxx")` to `print("xxx"); input()`.
         print(bright_blue(msg), end="")
         input()
 

@@ -15,7 +15,7 @@ ZIPAPP_DISTPATH = "dist"
 INPUT_PACKAGE = "fetcher"
 
 
-# FIXME it's possible that we accidentally transform the relative import that is not
+# FIXME it's possible for current implementation to accidentally transform the relative import that is not
 # actually relative import. For example, a relative import embedded in a string literal.
 # The only robust and correct way to avoid such problem is to construct syntax tree
 # using lexical analysis and syntax analysis.

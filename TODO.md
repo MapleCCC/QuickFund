@@ -21,7 +21,7 @@
 - Reduce overhead of network IO, which is expensive.
 - Use line profiler to find performance hotspots.
 - Any compression algorithm targeted at binary file instead of text? Try to do some literature review on this research topic.
-- Use lightweight utlity tool to preview content Excel document. So that we don't have to wait for the heavyweight Excel program to startup everytime we want to test on our program.
+- Use lightweight utlity tool to preview content of Excel document. So that we don't have to wait for the heavyweight Excel program to startup everytime we want to test on our program.
 - Read semver.org. Understand thoroughly how to choose proper version number.
 - Use advanced feature from click. Take inspiration from black library.
   - click.Path
@@ -40,7 +40,7 @@
   - When program terminates due to uncaught exception.
   - When program terminates due to call to exit()/sys.exit()/quit().
 - Adopt `conventional commit` conventions.
-- Find way to quick unit test, integrate test, regression test. No need to stand up with the startup time overhead of the super heavyweight Excel program anymore.
+- Find way to quick unit test, integrate test, regression test. No need to stand the startup time overhead of the super heavyweight Excel program anymore.
 - Use requests session feature to leverage connection pool.
 - Use requests body content flow stream. So we can display progress bar when downloading or uploading large files.
   - Incorporate with tqdm.
@@ -101,13 +101,13 @@
 ## Keep Doing
 
 - Add more error / corner case handling logic. Improve/enhance/increase robustness.
-- Make it a good habit to add elaborte comments and docstring and docs. This is important and has long-lasting benefits for other people to read my code, including the the guy called "future me".
-- Make it a good habit to insert blank lines between groups of code to make code more visually readable.
+- Make it a good habit to add elaborate comments and docstring and docs. This is important and has long-lasting benefits for other people to read my code, including the the guy called "future me".
+- Make it a good habit to insert blank lines between groups of code to make code more visually readable and aesthetic.
 
 
 ## Yet to be classified
 
-- Understand below code taken from attrs library:
+- Understand below code taken from the attrs library:
   ```
   class _Nothing(object):
       """
@@ -141,6 +141,8 @@
 - Use SortedList in sortedcontainers library to replace self-made LRU implementation. Benchmark to compare performance.
 - Remove "build by PyInstaller" feature, and all related codes.
 - Change all "except:" to "except Exception:". We don't want to catch some exceptions derived from BaseException, like KeyboardInterrupt, SystemExit.
+- Add retry mechanism ot all occurrences of requests.get across the whole repository.
+- Update screenshots in README.
 
 
 ## Archive
