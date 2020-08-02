@@ -6,12 +6,18 @@ from datetime import datetime
 from typing import Dict, List, Union
 
 import requests
+from requests.adapters import HTTPAdapter
 from lxml import etree  # type: ignore
 from more_itertools import replace
 
 from .schema import FundInfo
 
 __all__ = ["fetch_net_value", "fetch_estimate", "fetch_fund_info"]
+
+
+sess = requests.session()
+sess.mount("https://", HTTPAdapter(max_retries=3))
+sess.mount("http://", HTTPAdapter(max_retries=3))
 
 
 def fetch_net_value(fund_code: str) -> FundInfo:
@@ -29,7 +35,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
             "salt": salt,
         }
         net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
-        response = requests.get(net_value_api, params=params)
+        response = sess.get(net_value_api, params=params)
         response.raise_for_status()
 
         response.encoding = "utf-8"
@@ -89,7 +95,7 @@ def fetch_estimate(fund_code: str) -> FundInfo:
         salt = "".join(random.sample(string.ascii_lowercase, 10))
         params = {"salt": salt}
         estimate_api = "http://fundgz.1234567.com.cn/js/{fund_code}.js"
-        response = requests.get(estimate_api.format(fund_code=fund_code), params=params)
+        response = sess.get(estimate_api.format(fund_code=fund_code), params=params)
         response.raise_for_status()
 
         response.encoding = "utf-8"
