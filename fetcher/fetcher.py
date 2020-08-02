@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Dict, List, Union
 
 import requests
+from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from lxml import etree  # type: ignore
 from more_itertools import replace
@@ -15,9 +16,15 @@ from .schema import FundInfo
 __all__ = ["fetch_net_value", "fetch_estimate", "fetch_fund_info"]
 
 
+retry_strategy = Retry(
+    total=3,
+    status_forcelist=[500, 502, 503, 504],
+    method_whitelist=["HEAD", "GET", "OPTIONS"],
+)
+adapter = HTTPAdapter(max_retries=retry_strategy)
 sess = requests.session()
-sess.mount("https://", HTTPAdapter(max_retries=3))
-sess.mount("http://", HTTPAdapter(max_retries=3))
+sess.mount("https://", adapter)
+sess.mount("http://", adapter)
 
 
 def fetch_net_value(fund_code: str) -> FundInfo:
