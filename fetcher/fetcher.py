@@ -21,6 +21,7 @@ retry_strategy = Retry(
     backoff_factor=0.3,
     status_forcelist=[500, 502, 503, 504],
     method_whitelist=["HEAD", "GET", "OPTIONS"],
+    raise_on_status=False,  # type: ignore
 )
 adapter = HTTPAdapter(max_retries=retry_strategy)
 sess = requests.session()
