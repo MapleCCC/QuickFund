@@ -381,7 +381,7 @@ def main(
         # The emoji takes inspiration from the black (https://github.com/psf/black)
         logger.log("完满结束! ✨ 🍰 ✨")
 
-    except:
+    except Exception:
         logger.log("Oops! 程序运行过程中遇到了错误，打印错误信息摘要如下：")
         print_traceback_digest()
 
