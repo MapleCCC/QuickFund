@@ -19,7 +19,7 @@ __all__ = ["fetch_net_value", "fetch_estimate", "fetch_fund_info"]
 retry_strategy = Retry(
     total=3,
     backoff_factor=0.3,
-    status_forcelist=[500, 502, 503, 504],
+    status_forcelist=[500, 502, 503, 504, 514],
     method_whitelist=["HEAD", "GET", "OPTIONS"],
     raise_on_status=False,  # type: ignore
 )
