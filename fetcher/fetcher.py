@@ -59,7 +59,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
 
         root = etree.XML(content)
         keys = root.xpath("/table/thead/tr[1]/th/text()")
-        # WARNING: don't use root.xpath("/table/tbody/tr//td/text()") to extract
+        # WARNING: don't use root.xpath("/table/tbody/tr[1]//td/text()") to extract
         # values. The XPath expression will omit empty text, causing erroneous
         # result
         tds = root.xpath("/table/tbody/tr[1]/td")
@@ -78,6 +78,9 @@ def fetch_net_value(fund_code: str) -> FundInfo:
         fund_info.日增长率 = float(responded_data["日增长率"].rstrip("% ")) * 0.01
         fund_info.分红送配 = responded_data["分红送配"]
 
+        # WARNING: don't use root.xpath("/table/tbody/tr[2]//td/text()") to extract
+        # values. The XPath expression will omit empty text, causing erroneous
+        # result
         last_time_tds = root.xpath("/table/tbody/tr[2]/td")
         last_time_values = [td.text for td in last_time_tds]
         last_time_values = list(replace(last_time_values, lambda x: x is None, [""]))
