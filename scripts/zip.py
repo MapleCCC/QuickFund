@@ -28,10 +28,7 @@ def transform_relative_imports(p: Path) -> None:
 
 
 def main() -> None:
-    top_level_python_files = []
-    for f in Path(INPUT_PACKAGE).iterdir():
-        if f.is_file() and f.name.endswith(".py"):
-            top_level_python_files.append(f)
+    top_level_python_files = Path(INPUT_PACKAGE).glob("*.py")
 
     for f in top_level_python_files:
         shutil.copy2(f, f.name + ".bak")
