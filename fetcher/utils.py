@@ -1,9 +1,8 @@
 import functools
 import locale
-import re
 import time
 import traceback
-from typing import Any, Callable, Iterator, Tuple
+from typing import Any, Callable, Iterator
 
 from colorama import Fore, Style
 from more_itertools import split_at
@@ -12,7 +11,6 @@ __all__ = [
     "bright_red",
     "bright_green",
     "bright_blue",
-    "parse_version_number",
     "print_traceback_digest",
     "Logger",
     "timefunc",
@@ -38,23 +36,6 @@ def bright_blue(s: str) -> str:
     Augment a string, so that when printed to console, the string is displayed in bright blue color.
     """
     return Style.BRIGHT + Fore.BLUE + s + Style.RESET_ALL  # type: ignore
-
-
-# TODO use existing semantic version parser library to handle tedious cases,
-# instead of reinventing wheels.
-def parse_version_number(s: str) -> Tuple[int, int, int]:
-    """
-    Parse a string representing version number, according to semantic version specification.
-    """
-
-    try:
-        version_pattern = r"v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+).*"
-        major, minor, patch = re.match(version_pattern, s).group(
-            "major", "minor", "patch"
-        )
-        return int(major), int(minor), int(patch)
-    except Exception as exc:
-        raise RuntimeError("解析版本号时出现错误") from exc
 
 
 def split_paragraphs(s: str) -> Iterator[str]:

@@ -18,6 +18,7 @@ from typing import Dict, Iterable, List, Tuple
 import attr
 import click
 import colorama
+import semver
 import xlsxwriter
 
 from .__version__ import __version__
@@ -27,7 +28,7 @@ from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
 from .tqdm_enhanced import tenumerate, thread_map, tmap, tqdm, trange
-from .utils import Logger, bright_blue, parse_version_number, print_traceback_digest
+from .utils import Logger, bright_blue, print_traceback_digest
 
 # GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
 # from tqdm.gui import tqdm, trange
@@ -142,7 +143,7 @@ def check_update() -> None:
         logger.log("获取最新分发版本号的时候发生错误，暂时跳过。可以通过 --update 命令来手动触发更新检查")
         return
 
-    if parse_version_number(latest_version) > parse_version_number(__version__):
+    if semver.compare(latest_version, __version__) > 0:
         logger.log(f"检测到更新版本 {latest_version}，请手动更新")
         sys.exit()
     else:
