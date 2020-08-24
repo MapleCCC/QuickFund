@@ -8,10 +8,10 @@ from pathlib import Path
 from typing import List
 
 import click
+import semver
 
 sys.path.append(os.getcwd())
 from fetcher.__version__ import __version__ as current_version
-from fetcher.utils import parse_version_number
 from scripts.release import main as release_main
 
 
@@ -44,16 +44,17 @@ def run(cmd: List[str]) -> None:
 def main(component: str, no_release: bool) -> None:
     print("Calculating new version......")
 
-    major, minor, patch = parse_version_number(current_version)
+    old_version_info = semver.VersionInfo.parse(current_version)
 
-    if component == "major":
-        new_version = "v" + ".".join(map(str, (major + 1, 0, 0)))
-    elif component == "minor":
-        new_version = "v" + ".".join(map(str, (major, minor + 1, 0)))
-    elif component == "patch":
-        new_version = "v" + ".".join(map(str, (major, minor, patch + 1)))
-    else:
-        raise RuntimeError("Invalid argument")
+    method = getattr(old_version_info, f"bump_{component}", None)
+    if method is None:
+        raise ValueError(
+            "Invalid value for argument `component`. "
+            "Valid values are `major`, `minor`, `patch`, and `prerelease`."
+        )
+    new_version_info = method()
+
+    new_version = "v" + str(new_version_info)
 
     print("Bump the __version__ variable in __version__.py ......")
     bump_file___version__(new_version)
