@@ -42,6 +42,25 @@ def run(cmd: List[str]) -> None:
     subprocess.run(cmd).check_returncode()
 
 
+def contains_uncommitted_change(filepath: str):
+    # Add non-existent file check/guard, because `git status --porcelain` has
+    # similar output for both unmodified file and non-existent file
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"Can't get status of non-existent file: {filepath}")
+
+    cmpl_proc = subprocess.run(
+        ["git", "status", "--porcelain", "--no-renames", "--", filepath],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+    if cmpl_proc.returncode != 0:
+        raise RuntimeError(f"Error getting status of {filepath}")
+
+    return cmpl_proc.stdout[:2] != "  "
+
+
 @click.command()
 @click.argument("component")
 @click.option("--no-release", is_flag=True)
@@ -67,8 +86,12 @@ def main(component: str, no_release: bool) -> None:
     bump_file_README(new_version)
 
     run(["git", "add", "fetcher/__version__.py"])
-    # FIXME what if README contains some local changes that we don't
-    # want to commit yet?
+
+    if contains_uncommitted_change("README.md"):
+        raise RuntimeError(
+            "README.md contains uncommitted change. "
+            "Please clean it up before rerun the script."
+        )
     run(["git", "add", "README.md"])
 
     print("Committing the special commit for bumping version......")
