@@ -58,7 +58,7 @@ def contains_uncommitted_change(filepath: str):
     if cmpl_proc.returncode != 0:
         raise RuntimeError(f"Error getting status of {filepath}")
 
-    return cmpl_proc.stdout[:2] != "  "
+    return len(cmpl_proc.stdout) != 0
 
 
 @click.command()
