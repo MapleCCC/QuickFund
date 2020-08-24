@@ -65,6 +65,12 @@ def contains_uncommitted_change(filepath: str):
 @click.argument("component")
 @click.option("--no-release", is_flag=True)
 def main(component: str, no_release: bool) -> None:
+    if contains_uncommitted_change("README.md"):
+        raise RuntimeError(
+            "README.md contains uncommitted change. "
+            "Please clean it up before rerun the script."
+        )
+
     print("Calculating new version......")
 
     old_version_info = semver.VersionInfo.parse(current_version.lstrip("v"))
@@ -87,11 +93,6 @@ def main(component: str, no_release: bool) -> None:
 
     run(["git", "add", "fetcher/__version__.py"])
 
-    if contains_uncommitted_change("README.md"):
-        raise RuntimeError(
-            "README.md contains uncommitted change. "
-            "Please clean it up before rerun the script."
-        )
     run(["git", "add", "README.md"])
 
     print("Committing the special commit for bumping version......")
