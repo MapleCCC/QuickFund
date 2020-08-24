@@ -111,9 +111,9 @@ def check_args(in_files: Iterable[Path], out_file: Path) -> None:
         # If out_filename already exists, make a backup.
 
         if locale.getdefaultlocale()[0] == "zh_CN":
-            backup_filename = out_file.resolve().parent / ("[备份] " + out_file.name)
+            backup_filename = out_file.parent / ("[备份] " + out_file.name)
         else:
-            backup_filename = out_file.resolve().parent / (out_file.name + ".bak")
+            backup_filename = out_file.parent / (out_file.name + ".bak")
 
         try:
             # FIXME wait for Python 3.9 lands, and then shutil.move accept Path object
