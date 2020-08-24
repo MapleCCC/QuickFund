@@ -6,6 +6,7 @@ import os
 import re
 import shelve
 import shutil
+import sys
 import threading
 import traceback
 from datetime import date, datetime, time, timedelta
@@ -143,7 +144,7 @@ def check_update() -> None:
 
     if parse_version_number(latest_version) > parse_version_number(__version__):
         logger.log(f"检测到更新版本 {latest_version}，请手动更新")
-        exit()
+        sys.exit()
     else:
         logger.log("当前已是最新版本")
 
@@ -353,7 +354,7 @@ def main(
         if not files_or_fund_codes:
             # FIXME
             print("Usage: fund-info-fetch <list of fund codes>")
-            exit()
+            sys.exit()
 
         in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
         out_filename = output
@@ -375,7 +376,7 @@ def main(
 
         if not fund_codes:
             logger.log("没有发现基金代码")
-            exit()
+            sys.exit()
 
         logger.log("获取基金相关信息......")
         fund_infos = get_fund_infos(fund_codes)
