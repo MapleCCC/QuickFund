@@ -12,7 +12,7 @@ import semver
 
 sys.path.append(os.getcwd())
 from fetcher.__version__ import __version__ as current_version
-from scripts.release import main as release_main
+from scripts.release import release
 
 
 def bump_file(filename: str, pattern: str, repl: str) -> None:
@@ -83,7 +83,7 @@ def main(component: str, no_release: bool) -> None:
     run(["git", "push", "origin", new_version])
 
     if not no_release:
-        release_main(new_version)
+        release(new_version)
 
 
 if __name__ == "__main__":

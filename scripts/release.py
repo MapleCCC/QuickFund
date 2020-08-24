@@ -4,6 +4,7 @@ import os
 import sys
 from zipfile import ZipFile
 
+import click
 from github import Github
 
 sys.path.append(os.getcwd())
@@ -18,7 +19,7 @@ from scripts.build import PYINSTALLER_DISTPATH
 from scripts.build import main as build_main
 
 
-def main(new_version: str, upload_executable: bool = False) -> None:
+def release(new_version: str, upload_executable: bool = False) -> None:
     print("在 GitHub 仓库创建 Release......")
 
     # TODO when releasing, put in the message about what's updated, what's fixed,
@@ -59,3 +60,13 @@ def main(new_version: str, upload_executable: bool = False) -> None:
         # TODO display upload progress (such as a progress bar)
         # TODO open issue or PR in PyGithub repository
         git_release.upload_asset(asset_filepath)
+
+
+@click.command()
+@click.argument("new_version")
+def main(new_version: str) -> None:
+    release(new_version)
+
+
+if __name__ == "__main__":
+    main()
