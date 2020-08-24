@@ -320,6 +320,7 @@ def validate_fund_code(s: str) -> bool:
 @click.command(
     name="fund-info-fetcher",
     help="A script to fetch various fund information from https://fund.eastmoney.com, and structuralize into Excel document",
+    epilog="Input file format: one fund code per line.",
     no_args_is_help=True,  # type: ignore
 )
 @click.argument(
