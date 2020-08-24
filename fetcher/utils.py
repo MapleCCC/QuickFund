@@ -69,6 +69,7 @@ localization_table = {
         "RuntimeError": "运行时错误",
         "KeyboardInterrupt": "来自键盘的中断信号",
         "Server Error": "服务器错误",
+        "Press any key to exit ...": "按任意键以退出 ...",
     }
 }
 

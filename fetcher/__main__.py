@@ -27,7 +27,7 @@ from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
 from .tqdm_enhanced import tenumerate, thread_map, tmap, tqdm, trange
-from .utils import Logger, bright_blue, print_traceback_digest
+from .utils import Logger, bright_blue, localize, print_traceback_digest
 
 # GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
 # from tqdm.gui import tqdm, trange
@@ -349,13 +349,9 @@ def main(
 
     colorama.init()
 
-    if locale.getdefaultlocale()[0] == "zh_CN":
-        # localization for Simplified Chinese
-        msg = "按回车键以退出"
-    else:
-        # default to English
-        msg = "Press ENTER to exit"
-    atexit.register(partial(click.pause, info=bright_blue(msg)))
+    atexit.register(
+        partial(click.pause, info=bright_blue(localize("Press any key to exit ...")))
+    )
 
     try:
         # TODO Remove update check logic after switching architecture to
