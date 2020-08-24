@@ -12,6 +12,25 @@
 [![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/MapleCCC/Fund-Info-Fetcher/latest?sort=semver)](https://github.com/MapleCCC/Fund-Info-Fetcher/compare/v1.3.1...master)
 <!-- TODO which diff method should we use? two dots or three dots? -->
 
+## TOC
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Example Output](#example-output)
+- [Download](#download)
+- [Development](#development)
+  - [Test](#test)
+  - [Release Strategy](#release-strategy)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+
 ## Overview
 
 A script to fetch various fund information from `https://fund.eastmoney.com`, and structuralize into Excel document.
