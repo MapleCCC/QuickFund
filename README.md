@@ -43,6 +43,8 @@ Prerequisites: Python>=3.8, [Git](https://git-scm.com/), [pip](https://pip.pypa.
 
 One-liner installation recipe:
 
+<!-- FIXME specify to only install the latest stable version when installing via git+https protocol -->
+
 ```bash
 $ python -m pip install git+https://github.com/MapleCCC/Fund-Info-Fetcher.git#egg=Fund-Info-Fetcher
 ```
@@ -115,6 +117,8 @@ $ python -m pip install -r requirements/test.txt
 # unit tests
 $ make test
 ```
+
+<!-- Use tox as test framework -->
 
 ### Release Strategy
 

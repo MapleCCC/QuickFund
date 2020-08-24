@@ -317,10 +317,13 @@ def validate_fund_code(s: str) -> bool:
     return bool(re.fullmatch(r"[0-9]{6}", s))
 
 
+# FIXME is_flag=True implies default=False. No need to specify both.
 @click.command()
 @click.argument("files_or_fund_codes", nargs=-1)
 @click.option("-o", "--output", default="基金信息.xlsx")
 @click.option("--disable-update-check", is_flag=True, default=False)
+# @click.option("--disable-cache", is_flag=True, default=False)
+# @click.option("--versbose", is_flag=True, default=False)
 # TODO: @click.option("--update")
 @click.version_option(version=__version__)
 def main(

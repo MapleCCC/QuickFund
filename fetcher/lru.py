@@ -1,3 +1,7 @@
+"""
+TODO add introduction and elaborated algorithmic details.
+"""
+
 # postponed evaluation of type annotations. For type annotating LRU.copy()
 # method.
 from __future__ import annotations

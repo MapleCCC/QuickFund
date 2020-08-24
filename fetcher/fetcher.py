@@ -8,6 +8,8 @@ from typing import Dict, List, Union
 import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+# TODO when lxml is not available (no C extension, or CPython portable zip environment),
+# provide fallback to the builtin "import xml.etree.ElementTree as etree".
 from lxml import etree  # type: ignore
 from more_itertools import replace
 
@@ -57,6 +59,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
             r"var\s*apidata\s*=\s*{\s*content\s*:\s*\"(?P<content>.*)\"", text
         ).group("content")
 
+        # TODO root = etree.HTML(content)
         root = etree.XML(content)
         keys = root.xpath("/table/thead/tr[1]/th/text()")
         # WARNING: don't use root.xpath("/table/tbody/tr[1]//td/text()") to extract
