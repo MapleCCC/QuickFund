@@ -11,7 +11,6 @@
   - Generate TOC for README in pre-commit hook script.
 - Try release candidate version. (e.g. v1.0.0rc1)
 - Search on the internet about existing project that make async possible with requests library.
-- Polish the `--help` generated message.
 
 
 ## Priority Medium
@@ -137,7 +136,6 @@
 - Consider moving colorama.init/deinit/reinit pair to every colored output. Prevent polluting global space. Also prevent forgetting to colorama.init in different places across the code repository. What's the overhead if we do so?
   - Use timeit to check colorama.init/deinit/reinit overhead.
 - Deploy prompt-toolkit library.
-- Add `--help` output to README's "Usage" section.
 - Use SortedList in sortedcontainers library to replace self-made LRU implementation. Benchmark to compare performance.
 - Remove "build by PyInstaller" feature, and all related codes.
 - Change all "except:" to "except Exception:". We don't want to catch some exceptions derived from BaseException, like KeyboardInterrupt, SystemExit.

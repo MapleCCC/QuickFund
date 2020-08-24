@@ -49,3 +49,5 @@
 - Bump to first major release v1.0.0
 - Issue: tqdm progress bar is not displayed correctly in some console environment.
 - Issue: color code output is not displayed correctly in some console environment.
+- Add `--help` output to README's "Usage" section.
+- Polish the `--help` generated message.

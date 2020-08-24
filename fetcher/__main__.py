@@ -66,8 +66,8 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
                 width = field.metadata.get("width")
                 # FIXME Despite the xlsxwriter doc saying that set_column(i, i, None) doesn't
                 # change the column width, some simple tests show that it does. The source
-                # code of xlsxwriter is too complex that I can't figure out how the
-                # bug happens.
+                # code of xlsxwriter is too complex that I can't figure out where the
+                # bug originates.
                 worksheet.set_column(i, i, width)
 
             # Write header
@@ -296,7 +296,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         # new variable and then copy back. This is because directly in-place
         # updating shelve dict entry requires opening shelve with the `writeback`
         # parameter set to True, which could lead to increased memory cost
-        # and IO cost and slow down the program.
+        # and IO cost, hence slowing down the program.
 
         lru = fund_info_cache_db.get("lru_record", LRU())
         lru.batch_update(fund_codes)
