@@ -13,6 +13,9 @@ import semver
 sys.path.append(os.getcwd())
 from fetcher.__version__ import __version__ as current_version
 from scripts.release import release
+from fetcher.utils import Logger
+
+logger = Logger()
 
 
 def bump_file(filename: str, pattern: str, repl: str) -> None:
@@ -71,7 +74,7 @@ def main(component: str, no_release: bool) -> None:
             "Please clean it up before rerun the script."
         )
 
-    print("Calculating new version......")
+    logger.log("Calculating new version......")
 
     old_version_info = semver.VersionInfo.parse(current_version.lstrip("v"))
 
@@ -85,25 +88,25 @@ def main(component: str, no_release: bool) -> None:
 
     new_version = "v" + str(new_version_info)
 
-    print("Bump the __version__ variable in __version__.py ......")
+    logger.log("Bump the __version__ variable in __version__.py ......")
     bump_file___version__(new_version)
 
-    print("Bump version-related information in README.md ......")
+    logger.log("Bump version-related information in README.md ......")
     bump_file_README(new_version)
 
     run(["git", "add", "fetcher/__version__.py"])
 
     run(["git", "add", "README.md"])
 
-    print("Committing the special commit for bumping version......")
+    logger.log("Committing the special commit for bumping version......")
     run(["git", "commit", "-m", f"Bump version to {new_version}"])
 
-    print("Creating tag for new version......")
+    logger.log("Creating tag for new version......")
     run(["git", "tag", new_version])
 
     # TODO if we change from using subprocess.run to using PyGithub,
     # will the time cost be shorter?
-    print("Pushing tag to remote......")
+    logger.log("Pushing tag to remote......")
     run(["git", "push", "origin", new_version])
 
     if not no_release:
