@@ -144,7 +144,7 @@ def check_update() -> None:
         logger.log("获取最新分发版本号的时候发生错误，暂时跳过。可以通过 --update 命令来手动触发更新检查")
         return
 
-    if semver.compare(latest_version, __version__) > 0:
+    if semver.compare(latest_version.lstrip("v"), __version__.lstrip("v")) > 0:
         logger.log(f"检测到更新版本 {latest_version}，请手动更新")
         sys.exit()
     else:

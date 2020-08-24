@@ -48,7 +48,7 @@ def run(cmd: List[str]) -> None:
 def main(component: str, no_release: bool) -> None:
     print("Calculating new version......")
 
-    old_version_info = semver.VersionInfo.parse(current_version)
+    old_version_info = semver.VersionInfo.parse(current_version.lstrip("v"))
 
     method = getattr(old_version_info, f"bump_{component}", None)
     if method is None:
