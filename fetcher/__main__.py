@@ -317,16 +317,30 @@ def validate_fund_code(s: str) -> bool:
     return bool(re.fullmatch(r"[0-9]{6}", s))
 
 
-@click.command()
-@click.argument("files_or_fund_codes", nargs=-1)
-@click.option("-o", "--output", default="基金信息.xlsx")
-@click.option("--disable-update-check", is_flag=True)
+@click.command(
+    name="fund-info-fetcher",
+    help="A script to fetch various fund information from https://fund.eastmoney.com, and structuralize into Excel document",
+    no_args_is_help=True,  # type: ignore
+)
+@click.argument(
+    "fund_codes_or_files",
+    nargs=-1,
+    metavar="<fund codes or files containing fund codes>",
+)
+@click.option(
+    "-o",
+    "--output",
+    default="基金信息.xlsx",
+    show_default=True,
+    help="The output file path.",
+)
+@click.option("--disable-update-check", is_flag=True, help="Disable update check.")
 # @click.option("--disable-cache", is_flag=True)
 # @click.option("--versbose", is_flag=True)
 # TODO: @click.option("--update")
 @click.version_option(version=__version__)
 def main(
-    files_or_fund_codes: Tuple[str], output: str, disable_update_check: bool
+    fund_codes_or_files: Tuple[str], output: str, disable_update_check: bool
 ) -> None:
     """ Command line entry function """
 
@@ -353,12 +367,12 @@ def main(
             print("检查更新......")
             check_update()
 
-        if not files_or_fund_codes:
+        if not fund_codes_or_files:
             # FIXME
             print("Usage: fund-info-fetch <list of fund codes>")
             sys.exit()
 
-        in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
+        in_filenames = filterfalse(validate_fund_code, fund_codes_or_files)
         out_filename = output
 
         logger.log("检查参数......")
@@ -366,7 +380,7 @@ def main(
 
         logger.log("获取基金代码列表......")
         fund_codes = []
-        for x in files_or_fund_codes:
+        for x in fund_codes_or_files:
             if validate_fund_code(x):
                 # if x is fund code
                 fund_codes.append(x)
