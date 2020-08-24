@@ -1,4 +1,4 @@
-# 基金信息生成器
+# 基金信息爬取与结构化器
 
 <!-- TODO add badge about code coverage -->
 <!-- TODO add badge about requires.io -->
@@ -26,6 +26,7 @@
 - [Development](#development)
   - [Test](#test)
   - [Release Strategy](#release-strategy)
+- [Contribution](#contribution)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -52,7 +53,7 @@ $ python -m pip install git+https://github.com/MapleCCC/Fund-Info-Fetcher.git#eg
 If editable mode installation is preferred:
 
 ```bash
-# You can optionally create a virtual environment for isolation purpose
+# Optionally create a virtual environment for isolation purpose
 $ python -m virtualenv .venv
 $ source .venv/Scripts/activate
 
@@ -106,15 +107,27 @@ $ git clone https://github.com/MapleCCC/Fund-Info-Fetcher.git
 
 $ cd Fund-Info-Fetcher
 
-# You can optionally create a virtual environment for isolation purpose
+# Optionally create a virtual environment for isolation purpose
 $ python -m virtualenv .venv
 $ source .venv/Scripts/activate
 
 # Install basic build requirements
-$ pip install -r requirements/install.txt
+$ python -m pip install -r requirements/install.txt
 
 # Install dev requirements
-$ pip install -r requirements/dev.txt
+$ python -m pip install -r requirements/dev.txt
+
+$ python -m pip install -e .  # Mind the dot
+```
+
+Alternatively, just a one-liner:
+
+```bash
+# Optionally create a virtual environment for isolation purpose
+$ python -m virtualenv .venv
+$ source .venv/Scripts/activate
+
+$ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git#egg=Fund-Info-Fetcher
 ```
 
 <!-- TODO: Pre-commit hook -->
@@ -142,6 +155,10 @@ We follow [semantic version convention](https://semver.org). Every tag pushed to
 
 We follow [conventional commit message guideline](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## Contribution
+
+Go to [issues](https://github.com/MapleCCC/Fund-Info-Fetcher/issues) to send issues or feedbacks. Pull requests are welcome.
+
 ## License
 
-[MIT](./LICENSE)
+This project is currently licensed under terms of [MIT](LICENSE) license. Feel free to contribute, fork, modify or redistribute.
