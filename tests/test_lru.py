@@ -10,10 +10,10 @@ from fetcher.lru import LRU
 
 
 @given(lists(from_type(type)))
-def test_len(l: List) -> None:
+def test_size(l: List) -> None:
     lru = LRU()
     lru.batch_update(l)
-    assert len(lru) == len(set(l))
+    assert lru.size == len(set(l))
 
 
 @given(from_type(type))
@@ -29,10 +29,10 @@ def test_copy(l: List) -> None:
     lru1.batch_update(l)
     lru2 = lru1.copy()
     assert lru1 is not lru2
-    assert len(lru1) == len(lru2)
-    for _ in range(len(lru1)):
+    assert lru1.size == lru2.size
+    for _ in range(lru1.size):
         assert lru1.evict() == lru2.evict()
-    assert len(lru1) == len(lru2) == 0
+    assert lru1.size == lru2.size == 0
 
 
 def rfind(l: List, elem: Any) -> int:
@@ -47,9 +47,9 @@ def test_lru_order(l: List) -> None:
     lru = LRU()
     lru.batch_update(l)
     evicted = []
-    for _ in range(len(lru)):
+    for _ in range(lru.size):
         evicted.append(lru.evict())
-    assert len(lru) == 0
+    assert lru.size == 0
     for e in evicted:
         assert e in l
     if len(evicted) >= 2:

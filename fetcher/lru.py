@@ -61,7 +61,8 @@ class LRU:
 
     __slots__ = ["_storage", "_indexer", "_dummy_cell_count", "_offset"]
 
-    def __len__(self) -> int:
+    @property
+    def size(self) -> int:
         """ Return the logical element number of the LRU container """
 
         # Note the invariant: len(indexer) + dummy_cell_count === len(storage)
@@ -70,7 +71,7 @@ class LRU:
 
     def empty(self) -> bool:
         """ Check if the LRU container is empty """
-        return self.__len__() == 0
+        return self.size == 0
 
     def copy(self) -> LRU:
         """ Return a deep copy of the LRU container """

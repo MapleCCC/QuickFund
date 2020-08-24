@@ -300,7 +300,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
         lru = fund_info_cache_db.get("lru_record", LRU())
         lru.batch_update(fund_codes)
 
-        if len(lru) > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
+        if lru.size > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
             logger.log("检测到缓存较大，清理缓存......")
             to_evict_num = PERSISTENT_CACHE_DB_RECORD_MAX_NUM - len(lru)
             for _ in trange(to_evict_num, unit="条", desc="清理缓存"):
