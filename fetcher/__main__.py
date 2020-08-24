@@ -350,6 +350,11 @@ def main(
             print("检查更新......")
             check_update()
 
+        if not files_or_fund_codes:
+            # FIXME
+            print("Usage: fund-info-fetch <list of fund codes>")
+            exit()
+
         in_filenames = filterfalse(validate_fund_code, files_or_fund_codes)
         out_filename = output
 
