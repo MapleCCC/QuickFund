@@ -10,7 +10,7 @@ import sys
 import threading
 import traceback
 from datetime import date, datetime, time, timedelta
-from functools import lru_cache
+from functools import lru_cache, partial
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
@@ -349,19 +349,13 @@ def main(
 
     colorama.init()
 
-    @atexit.register
-    def pause_wait_enter() -> None:
-        if locale.getdefaultlocale()[0] == "zh_CN":
-            # localization for Simplified Chinese
-            msg = "按回车键以退出"
-        else:
-            # default to English
-            msg = "Press ENTER to exit"
-        # WARNING: colorama doesn't seem to be compatible with the builtin input()
-        # function under some console environment. The workaround here is to transform
-        # from `input("xxx")` to `print("xxx"); input()`.
-        print(bright_blue(msg), end="")
-        input()
+    if locale.getdefaultlocale()[0] == "zh_CN":
+        # localization for Simplified Chinese
+        msg = "按回车键以退出"
+    else:
+        # default to English
+        msg = "Press ENTER to exit"
+    atexit.register(partial(click.pause, info=bright_blue(msg)))
 
     try:
         # TODO Remove update check logic after switching architecture to
