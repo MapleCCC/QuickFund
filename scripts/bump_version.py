@@ -5,6 +5,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
 import click
 
@@ -14,22 +15,27 @@ from fetcher.utils import parse_version_number
 from scripts.release import main as release_main
 
 
-def bump_file___version__(new_version: str) -> None:
-    p = Path("fetcher/__version__.py")
+def bump_file(filename: str, pattern: str, repl: str) -> None:
+    p = Path(filename)
     old_content = p.read_text(encoding="utf-8")
-    pattern = r"__version__\s*=\s*\"(.*)\""
-    repl = f'__version__ = "{new_version}"'
     new_content = re.sub(pattern, repl, old_content)
     p.write_text(new_content, encoding="utf-8")
+
+
+def bump_file___version__(new_version: str) -> None:
+    pattern = r"__version__\s*=\s*\"(.*)\""
+    repl = f'__version__ = "{new_version}"'
+    bump_file("fetcher/__version__.py", pattern, repl)
 
 
 def bump_file_README(new_version: str) -> None:
-    p = Path("README.md")
-    old_content = p.read_text(encoding="utf-8")
     pattern = r"github.com/MapleCCC/Fund-Info-Fetcher/compare/.*\.\.\.master"
     repl = f"github.com/MapleCCC/Fund-Info-Fetcher/compare/{new_version}...master"
-    new_content = re.sub(pattern, repl, old_content)
-    p.write_text(new_content, encoding="utf-8")
+    bump_file("README.md", pattern, repl)
+
+
+def run(cmd: List[str]) -> None:
+    subprocess.run(cmd).check_returncode()
 
 
 @click.command()
@@ -55,23 +61,21 @@ def main(component: str, no_release: bool) -> None:
     print("Bump version-related information in README.md ......")
     bump_file_README(new_version)
 
-    subprocess.run(["git", "add", "fetcher/__version__.py"]).check_returncode()
+    run(["git", "add", "fetcher/__version__.py"])
     # FIXME what if README contains some local changes that we don't
     # want to commit yet?
-    subprocess.run(["git", "add", "README.md"]).check_returncode()
+    run(["git", "add", "README.md"])
 
     print("Committing the special commit for bumping version......")
-    subprocess.run(
-        ["git", "commit", "-m", f"Bump version to {new_version}"]
-    ).check_returncode()
+    run(["git", "commit", "-m", f"Bump version to {new_version}"])
 
     print("Creating tag for new version......")
-    subprocess.run(["git", "tag", new_version]).check_returncode()
+    run(["git", "tag", new_version])
 
     # TODO if we change from using subprocess.run to using PyGithub,
     # will the time cost be shorter?
     print("Pushing tag to remote......")
-    subprocess.run(["git", "push", "origin", new_version]).check_returncode()
+    run(["git", "push", "origin", new_version])
 
     if not no_release:
         release_main(new_version)
