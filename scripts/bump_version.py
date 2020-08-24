@@ -33,6 +33,10 @@ def bump_file_README(new_version: str) -> None:
     repl = f"github.com/MapleCCC/Fund-Info-Fetcher/compare/{new_version}...master"
     bump_file("README.md", pattern, repl)
 
+    pattern = r"git\+https://github\.com/MapleCCC/Fund-Info-Fetcher\.git@.*#egg=Fund-Info-Fetcher"
+    repl = f"git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@{new_version}#egg=Fund-Info-Fetcher"
+    bump_file("README.md", pattern, repl)
+
 
 def run(cmd: List[str]) -> None:
     subprocess.run(cmd).check_returncode()

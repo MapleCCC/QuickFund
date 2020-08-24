@@ -44,10 +44,8 @@ Prerequisites: Python>=3.8, [Git](https://git-scm.com/), [pip](https://pip.pypa.
 
 One-liner installation recipe:
 
-<!-- FIXME specify to only install the latest stable version when installing via git+https protocol -->
-
 ```bash
-$ python -m pip install git+https://github.com/MapleCCC/Fund-Info-Fetcher.git#egg=Fund-Info-Fetcher
+$ python -m pip install git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@v1.3.1#egg=Fund-Info-Fetcher
 ```
 
 If editable mode installation is preferred:
@@ -58,7 +56,7 @@ $ python -m virtualenv .venv
 $ source .venv/Scripts/activate
 
 # Install in editable mode
-$ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git#egg=Fund-Info-Fetcher
+$ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@v1.3.1#egg=Fund-Info-Fetcher
 ```
 
 ## Usage
