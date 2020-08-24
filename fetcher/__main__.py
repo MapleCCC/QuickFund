@@ -11,7 +11,6 @@ import threading
 import traceback
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
-from itertools import filterfalse
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
@@ -47,7 +46,7 @@ ERR_LOG_FILE = "错误日志.txt"
 logger = Logger()
 
 
-def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
+def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: Path) -> None:
     """
     Structuralize a list of fund infos to an Excel document.
 
@@ -94,37 +93,39 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: str) -> None:
         raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
 
 
-def check_args(in_filenames: Iterable[str], out_filename: str) -> None:
+def check_args(in_files: Iterable[Path], out_file: Path) -> None:
     """
     Check validness of command line arguments
     """
 
     # Check in_filenames
-    for f in in_filenames:
-        if not os.path.exists(f):
-            raise FileNotFoundError(f"文件 {f} 不存在")
+    for file in in_files:
+        if not file.exists():
+            raise FileNotFoundError(f"文件 {file} 不存在")
 
     # Check out_filename
-    if os.path.isdir(out_filename):
-        raise RuntimeError(f'同名文件夹已存在，无法新建文件 "{out_filename}"')
+    if out_file.is_dir():
+        raise RuntimeError(f'同名文件夹已存在，无法新建文件 "{out_file}"')
 
-    if os.path.isfile(out_filename):
+    if out_file.is_file():
         # If out_filename already exists, make a backup.
 
         if locale.getdefaultlocale()[0] == "zh_CN":
-            backup_filename = "[备份] " + out_filename
+            backup_filename = Path("[备份] " + out_file.name)
         else:
-            backup_filename = out_filename + ".bak"
+            backup_filename = Path(out_file.name + ".bak")
 
         try:
-            shutil.move(out_filename, backup_filename)
+            # FIXME wait for Python 3.9 lands, and then shutil.move accept Path object
+            # as first argument.
+            shutil.move(str(out_file), backup_filename)
         except PermissionError:
             raise RuntimeError(
                 f"备份 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
-                f'有可能是 "{out_filename}" 已经被 Excel 打开，'
+                f'有可能是 "{out_file}" 已经被 Excel 打开，'
                 "请关闭文件之后重试"
             ) from None
-        logger.log(f'"{out_filename}" 同名文件已存在，备份至 "{backup_filename}"')
+        logger.log(f'"{out_file}" 同名文件已存在，备份至 "{backup_filename}"')
 
 
 def check_update() -> None:
@@ -374,11 +375,11 @@ def main(
             print("Usage: fund-info-fetch <list of fund codes>")
             sys.exit()
 
-        in_filenames = filterfalse(validate_fund_code, fund_codes_or_files)
-        out_filename = output
+        in_files = (Path(f) for f in fund_codes_or_files if not validate_fund_code(f))
+        out_file = Path(output)
 
         logger.log("检查参数......")
-        check_args(in_filenames, out_filename)
+        check_args(in_files, out_file)
 
         logger.log("获取基金代码列表......")
         fund_codes = []
@@ -400,7 +401,7 @@ def main(
         fund_infos = get_fund_infos(fund_codes)
 
         logger.log("将基金相关信息写入 Excel 文件......")
-        write_to_xlsx(fund_infos, out_filename)
+        write_to_xlsx(fund_infos, out_file)
 
         # The emoji takes inspiration from the black (https://github.com/psf/black)
         logger.log("完满结束! ✨ 🍰 ✨")
