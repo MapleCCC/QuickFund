@@ -23,5 +23,5 @@ setuptools.setup(
     ],
     python_requires=">=3.8",
     install_requires=open("requirements/install.txt", "r").read().splitlines(),
-    entry_points={"console_scripts": ["fund-info-fetch=fetcher.__main__:main",]},
+    entry_points={"console_scripts": ["fetcher=fetcher.__main__:main",]},
 )

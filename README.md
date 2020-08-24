@@ -63,7 +63,7 @@ $ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git
 ## Usage
 
 ```bash
-$ fund-info-fetch <list of fund codes>
+$ fetcher <list of fund codes>
 ```
 
 ### Example Output
