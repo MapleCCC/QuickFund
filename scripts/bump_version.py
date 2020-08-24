@@ -34,9 +34,8 @@ def bump_file_README(new_version: str) -> None:
 
 @click.command()
 @click.argument("component")
-# FIXME is_flag=True and default=True together are meaningless
-@click.option("--release", is_flag=True, default=True)
-def main(component: str, release: bool) -> None:
+@click.option("--no-release", is_flag=True)
+def main(component: str, no_release: bool) -> None:
     print("Calculating new version......")
 
     major, minor, patch = parse_version_number(current_version)
@@ -74,7 +73,7 @@ def main(component: str, release: bool) -> None:
     print("Pushing tag to remote......")
     subprocess.run(["git", "push", "origin", new_version]).check_returncode()
 
-    if release:
+    if not no_release:
         release_main(new_version)
 
 
