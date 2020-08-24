@@ -63,7 +63,23 @@ $ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git
 ## Usage
 
 ```bash
-$ fetcher <list of fund codes>
+$ fetcher <list of fund codes or files containing fund codes>
+
+$ fetcher --help
+"""
+Usage: fetcher [OPTIONS] <fund codes or files containing fund codes>
+
+  A script to fetch various fund information from
+  https://fund.eastmoney.com, and structuralize into Excel document
+
+Options:
+  -o, --output TEXT       The output file path.  [default: 基金信息.xlsx]
+  --disable-update-check  Disable update check.
+  --version               Show the version and exit.
+  --help                  Show this message and exit.
+
+  Input file format: one fund code per line.
+"""
 ```
 
 ### Example Output
