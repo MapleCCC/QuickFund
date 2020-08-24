@@ -9,7 +9,7 @@
 [![Semantic release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![LOC](https://sloc.xyz/github/MapleCCC/Fund-Info-Fetcher)](https://sloc.xyz/github/MapleCCC/Fund-Info-Fetcher)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/MapleCCC/Fund-Info-Fetcher/latest?sort=semver)](https://github.com/MapleCCC/Fund-Info-Fetcher/compare/v1.3.1...master)
+[![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/MapleCCC/Fund-Info-Fetcher/latest?sort=semver)](https://github.com/MapleCCC/Fund-Info-Fetcher/compare/v1.4.0...master)
 <!-- TODO which diff method should we use? two dots or three dots? -->
 
 ## TOC
@@ -45,7 +45,7 @@ Prerequisites: Python>=3.8, [Git](https://git-scm.com/), [pip](https://pip.pypa.
 One-liner installation recipe:
 
 ```bash
-$ python -m pip install git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@v1.3.1#egg=Fund-Info-Fetcher
+$ python -m pip install git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@v1.4.0#egg=Fund-Info-Fetcher
 ```
 
 If editable mode installation is preferred:
@@ -56,7 +56,7 @@ $ python -m virtualenv .venv
 $ source .venv/Scripts/activate
 
 # Install in editable mode
-$ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@v1.3.1#egg=Fund-Info-Fetcher
+$ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@v1.4.0#egg=Fund-Info-Fetcher
 ```
 
 ## Usage
