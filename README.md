@@ -72,7 +72,7 @@ Usage: fetcher [OPTIONS] <fund codes or files containing fund codes>
   https://fund.eastmoney.com, and structuralize into Excel document
 
 Options:
-  -o, --output TEXT       The output file path.  [default: 基金信息.xlsx]
+  -o, --output FILENAME   The output file path.  [default: 基金信息.xlsx]
   --disable-update-check  Disable update check.
   --version               Show the version and exit.
   --help                  Show this message and exit.
