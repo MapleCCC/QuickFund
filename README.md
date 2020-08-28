@@ -65,7 +65,9 @@ $ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git
 $ fetcher <list of fund codes or files containing fund codes>
 
 $ fetcher --help
-"""
+```
+
+```
 Usage: fetcher [OPTIONS] <fund codes or files containing fund codes>
 
   A script to fetch various fund information from
@@ -78,7 +80,6 @@ Options:
   --help                  Show this message and exit.
 
   Input file format: one fund code per line.
-"""
 ```
 
 ### Example Output
