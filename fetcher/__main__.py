@@ -361,11 +361,6 @@ def main(
             print("检查更新......")
             check_update()
 
-        if not fund_codes_or_files:
-            # FIXME
-            print("Usage: fund-info-fetch <list of fund codes>")
-            sys.exit()
-
         in_files = (Path(f) for f in fund_codes_or_files if not validate_fund_code(f))
         out_file = Path(output)
 
