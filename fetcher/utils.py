@@ -1,8 +1,9 @@
 import functools
+import inspect
 import locale
 import time
 import traceback
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Type
 
 from colorama import Fore, Style
 from more_itertools import split_at
@@ -14,6 +15,7 @@ __all__ = [
     "print_traceback_digest",
     "Logger",
     "timefunc",
+    "try_catch_raise",
 ]
 
 
@@ -190,3 +192,23 @@ def timefunc(fn: Callable) -> Callable:
 
     wrapper.exe_time_statistics = statistics  # type: ignore
     return wrapper
+
+
+# TODO add argument to control "context, cause, suppress"
+# TODO add argument to control which exceptions to catch
+def try_catch_raise(new_except: Type[Exception], err_msg: str) -> Callable:
+    def decorator(fn: Callable) -> Callable:
+        sig = inspect.signature(fn)
+
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs) -> Any:
+            try:
+                return fn(*args, **kwargs)
+            except Exception as exc:
+                ba = sig.bind(*args, **kwargs)
+                err_msg = err_msg.format_map(ba.arguments)
+                raise new_except(err_msg) from exc
+
+        return wrapper
+
+    return decorator

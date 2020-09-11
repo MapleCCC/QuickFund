@@ -27,7 +27,13 @@ from .github_utils import get_latest_release_version
 from .lru import LRU
 from .schema import FundInfo
 from .tqdm_enhanced import tenumerate, thread_map, tmap, tqdm, trange
-from .utils import Logger, bright_blue, localize, print_traceback_digest
+from .utils import (
+    Logger,
+    bright_blue,
+    localize,
+    print_traceback_digest,
+    try_catch_raise,
+)
 
 # GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
 # from tqdm.gui import tqdm, trange
@@ -46,6 +52,7 @@ ERR_LOG_FILE = "错误日志.txt"
 logger = Logger()
 
 
+@try_catch_raise(RuntimeError, "获取基金信息并写入 Excel 文档的时候发生错误")
 def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: Path) -> None:
     """
     Structuralize a list of fund infos to an Excel document.
@@ -53,44 +60,40 @@ def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: Path) -> None:
     Input: a list of fund infos, and an Excel filename.
     """
 
-    try:
-        # TODO profile to see whether and how much setting constant_memory improves
-        # performance.
-        with xlsxwriter.Workbook(xlsx_filename, {"constant_memory": True}) as workbook:
+    # TODO profile to see whether and how much setting constant_memory improves
+    # performance.
+    with xlsxwriter.Workbook(xlsx_filename, {"constant_memory": True}) as workbook:
 
-            logger.log("新建 Excel 文档......")
-            worksheet = workbook.add_worksheet()
+        logger.log("新建 Excel 文档......")
+        worksheet = workbook.add_worksheet()
 
-            # Widen column
-            for i, field in enumerate(attr.fields(FundInfo)):
-                width = field.metadata.get("width")
-                # FIXME Despite the xlsxwriter doc saying that set_column(i, i, None) doesn't
-                # change the column width, some simple tests show that it does. The source
-                # code of xlsxwriter is too complex that I can't figure out where the
-                # bug originates.
-                worksheet.set_column(i, i, width)
+        # Widen column
+        for i, field in enumerate(attr.fields(FundInfo)):
+            width = field.metadata.get("width")
+            # FIXME Despite the xlsxwriter doc saying that set_column(i, i, None) doesn't
+            # change the column width, some simple tests show that it does. The source
+            # code of xlsxwriter is too complex that I can't figure out where the
+            # bug originates.
+            worksheet.set_column(i, i, width)
 
-            # Write header
-            logger.log("写入文档头......")
-            for i, field in enumerate(attr.fields(FundInfo)):
-                header_format = workbook.add_format(
-                    {"bold": True, "align": "center", "valign": "top", "border": 1}
-                )
-                worksheet.write_string(0, i, field.name, header_format)
+        # Write header
+        logger.log("写入文档头......")
+        for i, field in enumerate(attr.fields(FundInfo)):
+            header_format = workbook.add_format(
+                {"bold": True, "align": "center", "valign": "top", "border": 1}
+            )
+            worksheet.write_string(0, i, field.name, header_format)
 
-            # Write body
-            logger.log("写入文档体......")
-            for row, info in tenumerate(fund_infos, start=1, unit="行", desc="写入基金信息"):
-                for col, field in enumerate(attr.fields(FundInfo)):
-                    # Judging from source code of xlsxwriter, add_format(None) is
-                    # equivalent to default format.
-                    cell_format = workbook.add_format(field.metadata.get("format"))
-                    worksheet.write(row, col, info[col], cell_format)
+        # Write body
+        logger.log("写入文档体......")
+        for row, info in tenumerate(fund_infos, start=1, unit="行", desc="写入基金信息"):
+            for col, field in enumerate(attr.fields(FundInfo)):
+                # Judging from source code of xlsxwriter, add_format(None) is
+                # equivalent to default format.
+                cell_format = workbook.add_format(field.metadata.get("format"))
+                worksheet.write(row, col, info[col], cell_format)
 
-            logger.log("Flush 到硬盘......")
-
-    except Exception as exc:
-        raise RuntimeError(f"获取基金信息并写入 Excel 文档的时候发生错误") from exc
+        logger.log("Flush 到硬盘......")
 
 
 def check_args(in_files: Iterable[Path], out_file: Path) -> None:
