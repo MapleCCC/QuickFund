@@ -353,8 +353,9 @@ def main(
 
     colorama.init()
 
-    @atexit.register
-    def _(): click.pause(info=bright_blue(localize("Press any key to exit ...")))
+    atexit.register(
+        lambda: click.pause(info=bright_blue(localize("Press any key to exit ...")))
+    )
 
     try:
         # TODO Remove update check logic after switching architecture to
