@@ -79,5 +79,5 @@ def get_latest_release_asset(owner: str, repo: str, asset_name: str) -> bytes:
         return download_asset(owner, repo, that_asset_id)
     except Exception as exc:
         raise RuntimeError(
-            "下载 GitHub 仓库 {owner}/{repo} 中 asset 名为 {asset_name} 的 asset 时发生错误"
+            f"下载 GitHub 仓库 {owner}/{repo} 中 asset 名为 {asset_name} 的 asset 时发生错误"
         ) from exc

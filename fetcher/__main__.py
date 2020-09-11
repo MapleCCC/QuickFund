@@ -333,7 +333,7 @@ def validate_fund_code(s: str) -> bool:
 @click.option(
     "-o",
     "--output",
-    metavar = "FILENAME",
+    metavar="FILENAME",
     default="基金信息.xlsx",
     show_default=True,
     help="The output file path.",
