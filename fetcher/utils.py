@@ -194,9 +194,11 @@ def timefunc(fn: Callable) -> Callable:
     return wrapper
 
 
-# TODO add argument to control "context, cause, suppress"
+# FIXME the default value for the ctx parameter should be "context", not "cause"
 # TODO add argument to control which exceptions to catch
-def try_catch_raise(new_except: Type[Exception], err_msg: str) -> Callable:
+def try_catch_raise(
+    new_except: Type[Exception], err_msg: str, ctx: str = "cause"
+) -> Callable[[Callable], Callable]:
     def decorator(fn: Callable) -> Callable:
         sig = inspect.signature(fn)
 
@@ -207,7 +209,17 @@ def try_catch_raise(new_except: Type[Exception], err_msg: str) -> Callable:
             except Exception as exc:
                 ba = sig.bind(*args, **kwargs)
                 err_msg = err_msg.format_map(ba.arguments)
-                raise new_except(err_msg) from exc
+
+                if ctx == "cause":
+                    raise new_except(err_msg) from exc
+                elif ctx == "suppress":
+                    raise new_except(err_msg) from None
+                elif ctx == "context":
+                    raise new_except(err_msg)
+                else:
+                    raise ValueError(
+                        "Valid values for the `ctx` parameter are `cause`, `suppress`, and `context`."
+                    )
 
         return wrapper
 
