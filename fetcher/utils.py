@@ -76,6 +76,22 @@ localization_table = {
 }
 
 
+local_lang = locale.getdefaultlocale()[0]
+if not local_lang or local_lang not in localization_table:
+    # If we can't detect local langauge or we don't have translation
+    # dictionary for the given local language, we can either
+    # 1. raise an exception, or
+    # 2. fall back to English.
+    local_lang = "en_US"
+
+if local_lang.startswith("en"):
+    # English is the default language of CPython, so we don't need
+    # to do anything additionally.
+    translation_dict = {}
+else:
+    translation_dict = localization_table[local_lang]
+
+
 def localize(s: str) -> str:
     """
     Localize a string with a pre-defined translation dictionary.
@@ -84,25 +100,11 @@ def localize(s: str) -> str:
         given local language, we simply fall back to English.
     """
 
-    local_lang = locale.getdefaultlocale()[0]
-    if not local_lang or local_lang not in localization_table:
-        # If we can't detect local langauge or we don't have translation
-        # dictionary for the given local language, we can either
-        # 1. raise an exception, or
-        # 2. fall back to English.
-        local_lang = "en_US"
-
-    if local_lang.startswith("en"):
-        # English is the default language of CPython, so we don't need
-        # to do anything additionally.
-        pass
-    else:
-        translation_dict = localization_table[local_lang]
-        # FIXME what if some translation rules conflict with each other?
-        # i.e., how to handle the situation when the order of applying
-        # translation rules matters?
-        for src, dst in translation_dict.items():
-            s = s.replace(src, dst)
+    # FIXME what if some translation rules conflict with each other?
+    # i.e., how to handle the situation when the order of applying
+    # translation rules matters?
+    for src, dst in translation_dict.items():
+        s = s.replace(src, dst)
 
     return s
 
