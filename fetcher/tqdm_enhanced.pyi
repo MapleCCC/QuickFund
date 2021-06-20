@@ -1,15 +1,11 @@
-from typing import Any, Callable, Iterable, Iterator, Tuple, TypeVar, overload
-
-_T = TypeVar("_T")
-_S = TypeVar("_S")
+from typing import Any, Callable, Iterable, Iterator, Tuple, TypeVar
 
 
-@overload
-def tqdm(iterable: Iterable[_T], *args: Any, **kwargs: Any) -> Iterator[_T]:
-    ...
+T = TypeVar("T")
+S = TypeVar("S")
 
 
-def tqdm(iterable: Iterable, *args: Any, **kwargs: Any) -> Iterator:
+def tqdm(iterable: Iterable[T], *args: Any, **kwargs: Any) -> Iterator[T]:
     ...
 
 
@@ -17,40 +13,19 @@ def trange(n: int, *args: Any, **kwargs: Any) -> Iterator[int]:
     ...
 
 
-@overload
 def tmap(
-    fn: Callable[[_T], _S], iterable: Iterable[_T], *args: Any, **kwargs: Any
-) -> Iterator[_S]:
-    ...
-
-
-def tmap(
-    fn: Callable[..., _S], iterable: Iterable, *args: Any, **kwargs: Any
-) -> Iterator[_S]:
-    ...
-
-
-@overload
-def tenumerate(
-    iterable: Iterable[_T], *args: Any, **kwargs: Any
-) -> Iterator[Tuple[int, _T]]:
+    fn: Callable[[T], S], iterable: Iterable[T], *args: Any, **kwargs: Any
+) -> Iterator[S]:
     ...
 
 
 def tenumerate(
-    iterable: Iterable, *args: Any, **kwargs: Any
-) -> Iterator[Tuple[int, Any]]:
-    ...
-
-
-@overload
-def thread_map(
-    fn: Callable[[_T], _S], iterable: Iterable[_T], *args: Any, **kwargs: Any
-) -> Iterator[_S]:
+    iterable: Iterable[T], *args: Any, **kwargs: Any
+) -> Iterator[Tuple[int, T]]:
     ...
 
 
 def thread_map(
-    fn: Callable[..., _S], iterable: Iterable, *args: Any, **kwargs: Any
-) -> Iterator[_S]:
+    fn: Callable[[T], S], iterable: Iterable[T], *args: Any, **kwargs: Any
+) -> Iterator[S]:
     ...

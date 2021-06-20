@@ -8,6 +8,7 @@ from typing import Any, Callable, Iterator, Type
 from colorama import Fore, Style
 from more_itertools import split_at
 
+
 __all__ = [
     "bright_red",
     "bright_green",
@@ -23,21 +24,21 @@ def bright_red(s: str) -> str:
     """
     Augment a string, so that when printed to console, the string is displayed in bright red color.
     """
-    return Style.BRIGHT + Fore.RED + s + Style.RESET_ALL  # type: ignore
+    return Style.BRIGHT + Fore.RED + s + Style.RESET_ALL
 
 
 def bright_green(s: str) -> str:
     """
     Augment a string, so that when printed to console, the string is displayed in bright green color.
     """
-    return Style.BRIGHT + Fore.GREEN + s + Style.RESET_ALL  # type: ignore
+    return Style.BRIGHT + Fore.GREEN + s + Style.RESET_ALL
 
 
 def bright_blue(s: str) -> str:
     """
     Augment a string, so that when printed to console, the string is displayed in bright blue color.
     """
-    return Style.BRIGHT + Fore.BLUE + s + Style.RESET_ALL  # type: ignore
+    return Style.BRIGHT + Fore.BLUE + s + Style.RESET_ALL
 
 
 def split_paragraphs(s: str) -> Iterator[str]:
@@ -56,11 +57,7 @@ def retrieve_succinct_traceback(tb: str) -> str:
     A utility that retrive succint traceback digest from a complete traceback string.
     """
 
-    paragraphs = split_paragraphs(tb)
-    digest = []
-    for paragraph in paragraphs:
-        digest.append(paragraph.splitlines()[-1])
-    return "\n".join(digest)
+    return "\n".join(pg.splitlines()[-1] for pg in split_paragraphs(tb))
 
 
 localization_table = {

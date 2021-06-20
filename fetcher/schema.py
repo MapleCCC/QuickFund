@@ -3,6 +3,7 @@ from typing import Any
 
 import attr
 
+
 __all__ = ["FundInfo"]
 
 # Use language construct to make sure fieldnames consistent with

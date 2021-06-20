@@ -13,6 +13,7 @@ import astor
 sys.path.append(os.getcwd())
 from fetcher.__version__ import __version__
 
+
 OUTPUT_FILENAME = f"基金信息生成器 {__version__}.pyz"
 ZIPAPP_DISTPATH = "dist"
 INPUT_PACKAGE = "fetcher"

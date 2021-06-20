@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, Iterator, List, Type
 
+
 # from collections import deque
 
 # TODO elaborate on algorithmic analysis and time complexity of all operations

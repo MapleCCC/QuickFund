@@ -12,8 +12,9 @@ import semver
 
 sys.path.append(os.getcwd())
 from fetcher.__version__ import __version__ as current_version
-from scripts.release import release
 from fetcher.utils import Logger
+from scripts.release import release
+
 
 logger = Logger()
 

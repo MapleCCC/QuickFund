@@ -8,6 +8,7 @@ sys.path.append(os.getcwd())
 from fetcher.__version__ import __version__
 from fetcher.config import RELEASE_EXECUTABLE_NAME
 
+
 PYINSTALLER_DISTPATH = "dist"
 
 pyinstaller_flags = [

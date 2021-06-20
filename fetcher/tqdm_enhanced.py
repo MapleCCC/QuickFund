@@ -10,6 +10,7 @@ from tqdm.contrib import tenumerate as std_tenumerate
 from tqdm.contrib import tmap as std_tmap
 from tqdm.contrib.concurrent import thread_map as std_thread_map
 
+
 __all__ = ["tqdm", "trange", "tmap", "tenumerate", "thread_map"]
 
 

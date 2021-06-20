@@ -6,6 +6,7 @@ from more_itertools import windowed
 
 from fetcher.lru import LRU
 
+
 # TODO we need to test on LRU after random sequence of update/evict operations.
 
 

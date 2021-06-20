@@ -35,6 +35,7 @@ from .utils import (
     try_catch_raise,
 )
 
+
 # GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
 # from tqdm.gui import tqdm, trange
 
@@ -156,7 +157,7 @@ def check_update() -> None:
 
 def net_value_date_is_latest(net_value_date: date) -> bool:
     """
-    Check if the net value date is latest.
+    Check if the net value date is the latest.
 
     Take advantage of the knowledge that fund info stays the same
     within 0:00 to 20:00.
@@ -179,7 +180,7 @@ def net_value_date_is_latest(net_value_date: date) -> bool:
 
 def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     """
-    Check if the estimte datetime is latest.
+    Check if the estimate datetime is the latest.
 
     Take advantage of the knowledge that estimate info stays the same
     within 15:00 to next day 15:00.
