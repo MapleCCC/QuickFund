@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from hypothesis import given
 from hypothesis.strategies import from_type, lists
@@ -11,7 +11,7 @@ from fetcher.lru import LRU
 
 
 @given(lists(from_type(type)))
-def test_size(l: List) -> None:
+def test_size(l: list) -> None:
     lru = LRU()
     lru.batch_update(l)
     assert lru.size == len(set(l))
@@ -25,7 +25,7 @@ def test_update_evict(i: Any) -> None:
 
 
 @given(lists(from_type(type)))
-def test_copy(l: List) -> None:
+def test_copy(l: list) -> None:
     lru1 = LRU()
     lru1.batch_update(l)
     lru2 = lru1.copy()
@@ -36,7 +36,7 @@ def test_copy(l: List) -> None:
     assert lru1.size == lru2.size == 0
 
 
-def rfind(l: List, elem: Any) -> int:
+def rfind(l: list, elem: Any) -> int:
     for i in range(len(l) - 1, -1, -1):
         if l[i] == elem:
             return i
@@ -44,7 +44,7 @@ def rfind(l: List, elem: Any) -> int:
 
 
 @given(lists(from_type(type)))
-def test_lru_order(l: List) -> None:
+def test_lru_order(l: list) -> None:
     lru = LRU()
     lru.batch_update(l)
     evicted = []

@@ -8,8 +8,6 @@ import sys
 import zipapp
 from pathlib import Path
 
-import astor
-
 sys.path.append(os.getcwd())
 from fetcher.__version__ import __version__
 
@@ -44,7 +42,7 @@ def transform_relative_imports(p: Path) -> None:
     new_tree = RelativeImportTransformer().visit(tree)
     new_tree = ast.fix_missing_locations(new_tree)
 
-    new_content = astor.to_source(new_tree)
+    new_content = ast.unparse(new_tree)
 
     p.write_text(new_content, encoding="utf-8")
 

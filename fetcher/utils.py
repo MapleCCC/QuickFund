@@ -3,7 +3,8 @@ import inspect
 import locale
 import time
 import traceback
-from typing import Any, Callable, Iterator, Type
+from collections.abc import Callable, Iterator
+from typing import Any
 
 from colorama import Fore, Style
 from more_itertools import split_at
@@ -196,7 +197,7 @@ def timefunc(fn: Callable) -> Callable:
 # FIXME the default value for the ctx parameter should be "context", not "cause"
 # TODO add argument to control which exceptions to catch
 def try_catch_raise(
-    new_except: Type[Exception], err_msg: str, ctx: str = "cause"
+    new_except: type[Exception], err_msg: str, ctx: str = "cause"
 ) -> Callable[[Callable], Callable]:
     def decorator(fn: Callable) -> Callable:
         sig = inspect.signature(fn)

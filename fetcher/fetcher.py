@@ -3,7 +3,7 @@ import random
 import re
 import string
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import Union
 
 import requests
 from requests.packages.urllib3.util.retry import Retry
@@ -40,7 +40,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
     # Add random parameter to the URL to break any cache mechanism of
     # the server or the network or the requests library.
     salt = "".join(random.sample(string.ascii_lowercase, 10))
-    params: Dict[str, Union[str, int]] = {
+    params: dict[str, Union[str, int]] = {
         "type": "lsjz",
         "page": 1,
         "per": 2,
@@ -68,7 +68,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
     # values. The XPath expression will omit empty text, causing erroneous
     # result
     tds = root.xpath("/table/tbody/tr[1]/td")
-    values: List[str] = [td.text for td in tds]
+    values: list[str] = [td.text for td in tds]
     values = list(replace(values, lambda x: x is None, [""]))
 
     if len(keys) != len(values):

@@ -6,7 +6,8 @@ TODO add introduction and elaborated algorithmic details.
 # method.
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Iterator, List, Type
+from collections.abc import Iterable, Iterator
+from typing import Any
 
 
 # from collections import deque
@@ -37,7 +38,7 @@ class DummyCell:
 
     _singleton = None
 
-    def __new__(cls: Type[DummyCell]) -> DummyCell:
+    def __new__(cls: type[DummyCell]) -> DummyCell:
         if cls._singleton is None:
             cls._singleton = object.__new__(cls)
         return cls._singleton
@@ -59,8 +60,8 @@ class LRU:
 
     def __init__(self) -> None:
         # TODO add `maxsize` argument
-        self._storage: List = []
-        self._indexer: Dict[Any, int] = {}
+        self._storage: list = []
+        self._indexer: dict[Any, int] = {}
         self._dummy_cell_count: int = 0
         self._offset: int = 0
 

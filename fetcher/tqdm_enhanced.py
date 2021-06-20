@@ -1,7 +1,8 @@
 import functools
 import os
+from collections.abc import Callable, Iterable, Iterator
 from functools import partial
-from typing import Any, Callable, Iterable, Iterator
+from typing import Any
 
 from colorama import Fore, Style
 from tqdm import tqdm as std_tqdm

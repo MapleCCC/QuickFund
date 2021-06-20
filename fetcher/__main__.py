@@ -9,10 +9,10 @@ import shutil
 import sys
 import threading
 import traceback
+from collections.abc import Iterable
 from datetime import date, datetime, time, timedelta
-from functools import lru_cache, partial
+from functools import cache, partial
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
 
 import attr
 import click
@@ -54,7 +54,7 @@ logger = Logger()
 
 
 @try_catch_raise(RuntimeError, "获取基金信息并写入 Excel 文档的时候发生错误")
-def write_to_xlsx(fund_infos: List[FundInfo], xlsx_filename: Path) -> None:
+def write_to_xlsx(fund_infos: list[FundInfo], xlsx_filename: Path) -> None:
     """
     Structuralize a list of fund infos to an Excel document.
 
@@ -120,9 +120,7 @@ def check_args(in_files: Iterable[Path], out_file: Path) -> None:
             backup_filename = out_file.parent / (out_file.name + ".bak")
 
         try:
-            # FIXME wait for Python 3.9 lands, and then shutil.move accept Path object
-            # as first argument.
-            shutil.move(str(out_file), backup_filename)
+            shutil.move(out_file, backup_filename)
         except PermissionError:
             raise RuntimeError(
                 f"备份 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
@@ -209,7 +207,7 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
         raise RuntimeError("Unreachable")
 
 
-def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
+def get_fund_infos(fund_codes: list[str]) -> list[FundInfo]:
     """
     Input: a list of fund codes
     Output: a list of fund infos corresponding to the fund code
@@ -233,7 +231,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
 
         # Create variable `new_records` to keep track of the fund infos that get refreshed.
         new_records_access_lock = threading.Lock()
-        new_records: Dict[str, FundInfo] = {}
+        new_records: dict[str, FundInfo] = {}
 
         def add_to_new_records(fund_code: str, fund_info: FundInfo) -> None:
             # TIPS: Uncomment following line to profile lock congestion.
@@ -242,7 +240,7 @@ def get_fund_infos(fund_codes: List[str]) -> List[FundInfo]:
             new_records[fund_code] = fund_info
             new_records_access_lock.release()
 
-        @lru_cache(maxsize=None)
+        @cache
         def get_fund_info(fund_code: str) -> FundInfo:
             """
             Input: a fund code
@@ -348,7 +346,7 @@ def validate_fund_code(s: str) -> bool:
 # TODO: @click.option("--update")
 @click.version_option(version=__version__)
 def main(
-    fund_codes_or_files: Tuple[str], output: str, disable_update_check: bool
+    fund_codes_or_files: tuple[str], output: str, disable_update_check: bool
 ) -> None:
     """ Command line entry function """
 

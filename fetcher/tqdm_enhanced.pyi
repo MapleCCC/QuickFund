@@ -1,4 +1,5 @@
-from typing import Any, Callable, Iterable, Iterator, Tuple, TypeVar
+from collections.abc import Callable, Iterable, Iterator
+from typing import Any, TypeVar
 
 
 T = TypeVar("T")
@@ -21,7 +22,7 @@ def tmap(
 
 def tenumerate(
     iterable: Iterable[T], *args: Any, **kwargs: Any
-) -> Iterator[Tuple[int, T]]:
+) -> Iterator[tuple[int, T]]:
     ...
 
 

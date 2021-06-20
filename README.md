@@ -40,7 +40,7 @@ A script to fetch various fund information from `https://fund.eastmoney.com`, an
 
 ## Installation
 
-Prerequisites: Python>=3.8, [Git](https://git-scm.com/), [pip](https://pip.pypa.io/en/stable/).
+Prerequisites: Python 3.9+, [Git](https://git-scm.com/), [pip](https://pip.pypa.io/en/stable/).
 
 One-liner installation recipe:
 
@@ -98,7 +98,7 @@ Go to [Release](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest) p
 
 ## Development
 
-Prerequisites: Git, Python3.8+, `pip`.
+Prerequisites: Git, Python 3.9+, `pip`.
 
 ```bash
 # Clone the repository to local environment

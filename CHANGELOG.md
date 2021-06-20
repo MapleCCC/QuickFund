@@ -51,3 +51,6 @@
 - Issue: color code output is not displayed correctly in some console environment.
 - Add `--help` output to README's "Usage" section.
 - Polish the `--help` generated message.
+- Migrate to Python 3.9
+  - Some attributes in the typing library are deprecated.
+- When CPython 3.9 is released, change `astor.to_source` to `ast.unparse`.

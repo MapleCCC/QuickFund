@@ -5,7 +5,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
 import click
 import semver
@@ -42,7 +41,7 @@ def bump_file_README(new_version: str) -> None:
     bump_file("README.md", pattern, repl)
 
 
-def run(cmd: List[str]) -> None:
+def run(cmd: list[str]) -> None:
     subprocess.run(cmd).check_returncode()
 
 
