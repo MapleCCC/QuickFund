@@ -11,7 +11,7 @@ import threading
 import traceback
 from collections.abc import Iterable
 from datetime import date, datetime, time, timedelta
-from functools import cache, partial
+from functools import cache
 from pathlib import Path
 
 import attr
@@ -181,7 +181,7 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     Check if the estimate datetime is the latest.
 
     Take advantage of the knowledge that estimate info stays the same
-    within 15:00 to next day 15:00.
+    within 15:00 to next day 9:30.
 
     WARNING: it's true that most of time the market is not opened
     in weekends. But we can't use this knowledge in our logic. Because
@@ -189,20 +189,23 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     fall back to use the most robust way to check.
     """
 
-    open_market_time = time(9, 30)
-    close_market_time = time(15)
+    market_open_time = time(9, 30)
+    market_close_time = time(15)
+
     now_time = datetime.now().time()
+
     today = date.today()
     yesterday = today - timedelta(days=1)
-    today_close_market_datetime = datetime.combine(today, close_market_time)
-    yesterday_close_market_datetime = datetime.combine(yesterday, close_market_time)
 
-    if open_market_time <= now_time <= close_market_time:
+    today_market_close_datetime = datetime.combine(today, market_close_time)
+    yesterday_market_close_datetime = datetime.combine(yesterday, market_close_time)
+
+    if market_open_time <= now_time <= market_close_time:
         return False
-    elif time.min <= now_time < open_market_time:
-        return estimate_datetime == yesterday_close_market_datetime
-    elif close_market_time < now_time <= time.max:
-        return estimate_datetime == today_close_market_datetime
+    elif time.min <= now_time < market_open_time:
+        return estimate_datetime == yesterday_market_close_datetime
+    elif market_close_time < now_time <= time.max:
+        return estimate_datetime == today_market_close_datetime
     else:
         raise RuntimeError("Unreachable")
 
@@ -317,7 +320,7 @@ def get_fund_infos(fund_codes: list[str]) -> list[FundInfo]:
 
 
 def validate_fund_code(s: str) -> bool:
-    """ Check if a string represents a valid fund code """
+    """ Check if the string represents a valid fund code """
     return bool(re.fullmatch(r"[0-9]{6}", s))
 
 
@@ -391,7 +394,7 @@ def main(
         logger.log("将基金相关信息写入 Excel 文件......")
         write_to_xlsx(fund_infos, out_file)
 
-        # The emoji takes inspiration from the black (https://github.com/psf/black)
+        # The emoji takes inspiration from the black project (https://github.com/psf/black)
         logger.log("完满结束! ✨ 🍰 ✨")
 
     except Exception:
