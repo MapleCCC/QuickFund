@@ -10,7 +10,7 @@ import sys
 import threading
 import traceback
 from collections.abc import Iterable
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from functools import cache
 from pathlib import Path
 
@@ -153,6 +153,9 @@ def check_update() -> None:
         logger.log("当前已是最新版本")
 
 
+china_timezone = timezone(timedelta(hours=8), name="UTC+8")
+
+
 def net_value_date_is_latest(net_value_date: date) -> bool:
     """
     Check if the net value date is the latest.
@@ -160,14 +163,17 @@ def net_value_date_is_latest(net_value_date: date) -> bool:
     Take advantage of the knowledge that fund info stays the same
     within 0:00 to 20:00.
 
+    `net_value_date` should be of China timezone.
+
     WARNING: it's true that most of time the market is not opened
     in weekends. But we can't use this knowledge in our logic. Because
     sometimes holiday policy will make this irregular. We'd better
     fall back to use the most robust way to check.
     """
 
-    now_time = datetime.now().time()
-    today = date.today()
+    china_now = datetime.now(china_timezone)
+    now_time = china_now.time()
+    today = china_now.date()
     yesterday = today - timedelta(days=1)
 
     if time.min <= now_time < time(20):
@@ -183,6 +189,8 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     Take advantage of the knowledge that estimate info stays the same
     within 15:00 to next day 9:30.
 
+    `estimate_datetime` should be of China timezone.
+
     WARNING: it's true that most of time the market is not opened
     in weekends. But we can't use this knowledge in our logic. Because
     sometimes holiday policy will make this irregular. We'd better
@@ -192,9 +200,10 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     market_open_time = time(9, 30)
     market_close_time = time(15)
 
-    now_time = datetime.now().time()
+    china_now = datetime.now(china_timezone)
+    now_time = china_now.time()
 
-    today = date.today()
+    today = china_now.date()
     yesterday = today - timedelta(days=1)
 
     today_market_close_datetime = datetime.combine(today, market_close_time)
