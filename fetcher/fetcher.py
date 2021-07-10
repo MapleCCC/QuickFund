@@ -58,7 +58,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
     # coming from stranger environment. Better not depend on some
     # strong assumption made about them.
     content = re.match(
-        r"var\s*apidata\s*=\s*{\s*content\s*:\s*\"(?P<content>.*)\"", text
+        r"var\s+apidata\s*=\s*{\s*content\s*:\s*\"(?P<content>.*)\"", text
     ).group("content")
 
     # TODO root = etree.HTML(content)
@@ -90,7 +90,7 @@ def fetch_net_value(fund_code: str) -> FundInfo:
     last_time_values = [td.text for td in last_time_tds]
     last_time_values = list(replace(last_time_values, lambda x: x is None, [""]))
 
-    if len(keys) != len(values):
+    if len(keys) != len(last_time_values):
         raise RuntimeError("解析基金信息时表头和表体的长度不匹配")
 
     last_time_info = dict(zip(keys, last_time_values))
