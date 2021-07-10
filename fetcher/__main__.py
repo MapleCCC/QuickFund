@@ -165,10 +165,9 @@ def net_value_date_is_latest(net_value_date: date) -> bool:
 
     `net_value_date` should be of China timezone.
 
-    WARNING: it's true that most of time the market is not opened
-    in weekends. But we can't use this knowledge in our logic. Because
-    sometimes holiday policy will make this irregular. We'd better
-    fall back to use the most robust way to check.
+    Although it usually doesn't open in weekends, the market may irregularly
+    open/close subject to holiday policies. We should stick with the most
+    robust check.
     """
 
     china_now = datetime.now(china_timezone)
@@ -191,10 +190,9 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
 
     `estimate_datetime` should be of China timezone.
 
-    WARNING: it's true that most of time the market is not opened
-    in weekends. But we can't use this knowledge in our logic. Because
-    sometimes holiday policy will make this irregular. We'd better
-    fall back to use the most robust way to check.
+    Although it usually doesn't open in weekends, the market may irregularly
+    open/close subject to holiday policies. We should stick with the most
+    robust check.
     """
 
     market_open_time = time(9, 30)
