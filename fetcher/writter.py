@@ -38,6 +38,14 @@ def write_to_xlsx(
             {"name": "实时估值", "width": 11, "format": {"bg_color": "B4D6E4"}},
             {"name": "估算增长率", "width": 11, "format": {"num_format": "0.00%"}},
             {"name": "分红送配"},
+            {"name": "近1周同类排名", "width": 13},
+            {"name": "近1月同类排名", "width": 13},
+            {"name": "近3月同类排名", "width": 13},
+            {"name": "近6月同类排名", "width": 13},
+            {"name": "今年来同类排名", "width": 13},
+            {"name": "近1年同类排名", "width": 13},
+            {"name": "近2年同类排名", "width": 13},
+            {"name": "近3年同类排名", "width": 13},
         ]
 
         logger.log("调整列宽......")

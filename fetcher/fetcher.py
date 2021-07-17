@@ -9,9 +9,10 @@ from typing import Any
 import aiohttp
 import pandas
 from aiohttp_retry import ListRetry, RetryClient
+from lxml import etree
 from more_itertools import one
 
-from .models import FundEstimateInfo, FundInfo, FundNetValueInfo
+from .models import FundEstimateInfo, FundInfo, FundNetValueInfo, FundIARBCInfo
 from .utils import on_failure_raises, register_at_loop_close
 
 
@@ -173,12 +174,61 @@ async def fetch_estimate(fund_code: str) -> FundEstimateInfo:
     return estimate_info
 
 
+async def get_fund_info_page_text(fund_code: str) -> str:
+
+    # Add random parameter to the URL to break potential cache mechanism of
+    # the server or the network or the requests library.
+    salt_key = "锟斤铐"
+    salt_value = "".join(random.choices(string.hexdigits, k=10))
+
+    fund_info_page_url = f"http://fund.eastmoney.com/{fund_code}.html"
+    params = {salt_key: salt_value}
+
+    session = _get_client_session()
+    async with session.get(fund_info_page_url, params=params) as response:
+        response.raise_for_status()
+        return await response.text(encoding="utf-8")
+
+
+def parse_fund_info_page_text_and_get_IARBC_data(
+    text: str,
+) -> tuple[str, pandas.DataFrame]:
+    html = etree.HTML(text)
+    cutoff_date = one(html.xpath("//span[@id='jdzfDate']")).text
+
+    table = etree.tostring(one(html.xpath("//li[@id='increaseAmount_stage']")))
+    df = one(pandas.read_html(table, index_col=0))
+
+    return cutoff_date, df
+
+
+async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:
+
+    text = await get_fund_info_page_text(fund_code)
+
+    cutoff_date, data = parse_fund_info_page_text_and_get_IARBC_data(text)
+
+    return FundIARBCInfo(
+        同类排名截止日期=datetime.strptime(cutoff_date, "%Y-%m-%d").date(),
+        近1周同类排名=data.近1周.同类排名,
+        近1月同类排名=data.近1月.同类排名,
+        近3月同类排名=data.近3月.同类排名,
+        近6月同类排名=data.近6月.同类排名,
+        今年来同类排名=data.今年来.同类排名,
+        近1年同类排名=data.近1年.同类排名,
+        近2年同类排名=data.近2年.同类排名,
+        近3年同类排名=data.近3年.同类排名,
+    )  # type: ignore # https://github.com/python-attrs/attrs/issues/795
+
+
 @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关信息时发生错误")
 async def fetch_fund_info(fund_code: str) -> FundInfo:
     """ Fetch the fund info related to the given fund code """
 
     return FundInfo.combine(
-        await fetch_net_value(fund_code), await fetch_estimate(fund_code)
+        await fetch_net_value(fund_code),
+        await fetch_estimate(fund_code),
+        await fetch_IARBC(fund_code),
     )
 
 

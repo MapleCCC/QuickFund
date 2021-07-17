@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import cast
 
 from .__version__ import __version__
-from .fetcher import fetch_estimate, fetch_fund_info, fetch_net_value
+from .fetcher import fetch_IARBC, fetch_estimate, fetch_fund_info, fetch_net_value
 from .models import FundInfo
 from .tqdm import tqdm_asyncio
 
@@ -77,6 +77,12 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
         raise RuntimeError("Unreachable")
 
 
+def IARBC_date_is_latest(d: date) -> bool:
+    china_now = datetime.now(china_timezone)
+    today = china_now.date()
+    return d == today
+
+
 async def update_estimate_info(
     fund_code: str, fund_info_db: dict[str, FundInfo]
 ) -> None:
@@ -95,6 +101,13 @@ async def update_net_value_info(
         fund_info_db[fund_code].replace(net_value_info=net_value_info)
 
 
+async def update_IARBC_info(fund_code: str, fund_info_db: dict[str, FundInfo]) -> None:
+    IARBC_date = fund_info_db[fund_code].同类排名截止日期
+    if not IARBC_date_is_latest(IARBC_date):
+        IARBC_info = await fetch_IARBC(fund_code)
+        fund_info_db[fund_code].replace(IARBC_info=IARBC_info)
+
+
 # TODO use a database library that supports multiple concurrent read/write
 # TODO use a database library that supports asynchronous non-blocking write
 async def update_fund_info(fund_code: str, fund_info_db: dict[str, FundInfo]) -> None:
@@ -102,6 +115,7 @@ async def update_fund_info(fund_code: str, fund_info_db: dict[str, FundInfo]) ->
     if fund_code in fund_info_db:
         await update_net_value_info(fund_code, fund_info_db)
         await update_estimate_info(fund_code, fund_info_db)
+        await update_IARBC_info(fund_code, fund_info_db)
     else:
         fund_info = await fetch_fund_info(fund_code)
         fund_info_db[fund_code] = fund_info
