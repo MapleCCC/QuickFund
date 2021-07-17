@@ -1,133 +1,51 @@
 #!/usr/bin/env python3
 
-import atexit
-import locale
-import os
 import re
-import shelve
 import shutil
 import sys
-import threading
 import traceback
-from collections.abc import Iterable
-from datetime import date, datetime, time, timedelta, timezone
-from functools import cache
 from pathlib import Path
 
-import attr
 import click
 import colorama
 import semver
-import xlsxwriter
 
 from .__version__ import __version__
 from .config import REPO_NAME, REPO_OWNER
-from .fetcher import fetch_estimate, fetch_net_value
+from .getter import get_fund_infos
 from .github_utils import get_latest_release_version
-from .lru import LRU
-from .schema import FundInfo
-from .tqdm_enhanced import tenumerate, thread_map, tmap, tqdm, trange
-from .utils import (
-    Logger,
-    bright_blue,
-    localize,
-    print_traceback_digest,
-    try_catch_raise,
-)
+from .utils import Logger, bright_blue, pause_at_exit, print_traceback_digest
+from .writter import write_to_xlsx
 
 
+# TODO
 # GUI feature of tqdm is experimental. And our application is too fast for the plot to render.
 # from tqdm.gui import tqdm, trange
 
-
-if locale.getdefaultlocale()[0] == "zh_CN":
-    PERSISTENT_CACHE_DB_DIRECTORY = ".缓存"
-else:
-    PERSISTENT_CACHE_DB_DIRECTORY = ".cache"
-# Instead of using full filename, we use basename, because shelve requires so.
-PERSISTENT_CACHE_DB_FILE_BASENAME = "cache"
-PERSISTENT_CACHE_DB_RECORD_MAX_NUM = 2000
 
 ERR_LOG_FILE = "错误日志.txt"
 
 logger = Logger()
 
 
-@try_catch_raise(RuntimeError, "获取基金信息并写入 Excel 文档的时候发生错误")
-def write_to_xlsx(fund_infos: list[FundInfo], xlsx_filename: Path) -> None:
-    """
-    Structuralize a list of fund infos to an Excel document.
+def backup_old_outfile(out_file: Path) -> None:
+    if not out_file.is_file():
+        return
 
-    Input: a list of fund infos, and an Excel filename.
-    """
+    # If out_file already exists, make a backup.
 
-    # TODO profile to see whether and how much setting constant_memory improves
-    # performance.
-    with xlsxwriter.Workbook(xlsx_filename, {"constant_memory": True}) as workbook:
+    backup_filename = out_file.with_name(f"[备份] {out_file.name}")
+    logger.log(f'"{out_file}" 同名文件已存在，备份至 "{backup_filename}"')
 
-        logger.log("新建 Excel 文档......")
-        worksheet = workbook.add_worksheet()
+    try:
+        shutil.move(out_file, backup_filename)
 
-        # Widen column
-        for i, field in enumerate(attr.fields(FundInfo)):
-            width = field.metadata.get("width")
-            # FIXME Despite the xlsxwriter doc saying that set_column(i, i, None) doesn't
-            # change the column width, some simple tests show that it does. The source
-            # code of xlsxwriter is too complex that I can't figure out where the
-            # bug originates.
-            worksheet.set_column(i, i, width)
-
-        # Write header
-        logger.log("写入文档头......")
-        for i, field in enumerate(attr.fields(FundInfo)):
-            header_format = workbook.add_format(
-                {"bold": True, "align": "center", "valign": "top", "border": 1}
-            )
-            worksheet.write_string(0, i, field.name, header_format)
-
-        # Write body
-        logger.log("写入文档体......")
-        for row, info in tenumerate(fund_infos, start=1, unit="行", desc="写入基金信息"):
-            for col, field in enumerate(attr.fields(FundInfo)):
-                # Judging from source code of xlsxwriter, add_format(None) is
-                # equivalent to default format.
-                cell_format = workbook.add_format(field.metadata.get("format"))
-                worksheet.write(row, col, info[col], cell_format)
-
-        logger.log("Flush 到硬盘......")
-
-
-def check_args(in_files: Iterable[Path], out_file: Path) -> None:
-    """
-    Check validness of command line arguments
-    """
-
-    # Check in_filenames
-    for file in in_files:
-        if not file.exists():
-            raise FileNotFoundError(f"文件 {file} 不存在")
-
-    # Check out_filename
-    if out_file.is_dir():
-        raise RuntimeError(f'同名文件夹已存在，无法新建文件 "{out_file}"')
-
-    if out_file.is_file():
-        # If out_filename already exists, make a backup.
-
-        if locale.getdefaultlocale()[0] == "zh_CN":
-            backup_filename = out_file.parent / ("[备份] " + out_file.name)
-        else:
-            backup_filename = out_file.parent / (out_file.name + ".bak")
-
-        try:
-            shutil.move(out_file, backup_filename)
-        except PermissionError:
-            raise RuntimeError(
-                f"备份 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
-                f'有可能是 "{out_file}" 已经被 Excel 打开，'
-                "请关闭文件之后重试"
-            ) from None
-        logger.log(f'"{out_file}" 同名文件已存在，备份至 "{backup_filename}"')
+    except PermissionError:
+        raise RuntimeError(
+            "备份 Excel 文档时发生权限错误，有可能是 Excel 文档已经被其他程序占用，"
+            f'有可能是 "{out_file}" 已经被 Excel 打开，'
+            "请关闭文件之后重试"
+        ) from None
 
 
 def check_update() -> None:
@@ -153,218 +71,59 @@ def check_update() -> None:
         logger.log("当前已是最新版本")
 
 
-china_timezone = timezone(timedelta(hours=8), name="UTC+8")
-
-
-def net_value_date_is_latest(net_value_date: date) -> bool:
-    """
-    Check if the net value date is the latest.
-
-    Take advantage of the knowledge that fund info stays the same
-    within 0:00 to 20:00.
-
-    `net_value_date` should be of China timezone.
-
-    Although it usually doesn't open in weekends, the market may irregularly
-    open/close subject to holiday policies. We should stick with the most
-    robust check.
-    """
-
-    china_now = datetime.now(china_timezone)
-    now_time = china_now.time()
-    today = china_now.date()
-    yesterday = today - timedelta(days=1)
-
-    if time.min <= now_time < time(20):
-        return net_value_date == yesterday
-    else:
-        return net_value_date == today
-
-
-def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
-    """
-    Check if the estimate datetime is the latest.
-
-    Take advantage of the knowledge that estimate info stays the same
-    within 15:00 to next day 9:30.
-
-    `estimate_datetime` should be of China timezone.
-
-    Although it usually doesn't open in weekends, the market may irregularly
-    open/close subject to holiday policies. We should stick with the most
-    robust check.
-    """
-
-    market_open_time = time(9, 30)
-    market_close_time = time(15)
-
-    china_now = datetime.now(china_timezone)
-    now_time = china_now.time()
-
-    today = china_now.date()
-    yesterday = today - timedelta(days=1)
-
-    today_market_close_datetime = datetime.combine(today, market_close_time)
-    yesterday_market_close_datetime = datetime.combine(yesterday, market_close_time)
-
-    if market_open_time <= now_time <= market_close_time:
-        return False
-    elif time.min <= now_time < market_open_time:
-        return estimate_datetime == yesterday_market_close_datetime
-    elif market_close_time < now_time <= time.max:
-        return estimate_datetime == today_market_close_datetime
-    else:
-        raise RuntimeError("Unreachable")
-
-
-def get_fund_infos(fund_codes: list[str]) -> list[FundInfo]:
-    """
-    Input: a list of fund codes
-    Output: a list of fund infos corresponding to the fund code
-    """
-
-    if not os.path.isdir(PERSISTENT_CACHE_DB_DIRECTORY):
-        os.makedirs(PERSISTENT_CACHE_DB_DIRECTORY)
-
-    shelf_path = os.path.join(
-        PERSISTENT_CACHE_DB_DIRECTORY, PERSISTENT_CACHE_DB_FILE_BASENAME
-    )
-
-    with shelve.open(shelf_path) as fund_info_cache_db:
-        # Check protocol version
-        cache_db_protocol_version = fund_info_cache_db.get("protocol_version")
-        if cache_db_protocol_version is None or cache_db_protocol_version < __version__:
-            logger.log("缓存数据库的协议版本过低或信息缺失，更新到新版本，并清空旧协议存储......")
-            fund_info_cache_db.clear()
-
-        fund_info_cache_db["protocol_version"] = __version__
-
-        # Create variable `new_records` to keep track of the fund infos that get refreshed.
-        new_records_access_lock = threading.Lock()
-        new_records: dict[str, FundInfo] = {}
-
-        def add_to_new_records(fund_code: str, fund_info: FundInfo) -> None:
-            # TIPS: Uncomment following line to profile lock congestion.
-            # print(renewed_variable_access_lock.locked())
-            new_records_access_lock.acquire()
-            new_records[fund_code] = fund_info
-            new_records_access_lock.release()
-
-        @cache
-        def get_fund_info(fund_code: str) -> FundInfo:
-            """
-            Input: a fund code
-            Output: fund info related to the fund code
-            """
-
-            need_renew = False
-            fund_info: FundInfo = fund_info_cache_db.get(fund_code, FundInfo())
-
-            net_value_date = fund_info.净值日期
-            if net_value_date is None or not net_value_date_is_latest(net_value_date):
-                need_renew = True
-                data = fetch_net_value(fund_code)
-                fund_info.基金代码 = data.基金代码
-                fund_info.净值日期 = data.净值日期
-                fund_info.单位净值 = data.单位净值
-                fund_info.日增长率 = data.日增长率
-                fund_info.分红送配 = data.分红送配
-                fund_info.上一天净值 = data.上一天净值
-                fund_info.上一天净值日期 = data.上一天净值日期
-
-            estimate_datetime = fund_info.估算日期
-            if estimate_datetime is None or not estimate_datetime_is_latest(
-                estimate_datetime
-            ):
-                need_renew = True
-                data = fetch_estimate(fund_code)
-                fund_info.基金代码 = data.基金代码
-                fund_info.基金名称 = data.基金名称
-                fund_info.估算日期 = data.估算日期
-                fund_info.实时估值 = data.实时估值
-                fund_info.估算增长率 = data.估算增长率
-
-            if need_renew:
-                add_to_new_records(fund_code, fund_info)
-
-            return fund_info
-
-        # FIXME experiment to find a suitable number as threshold between sync and
-        # async code
-        if len(fund_codes) < 3:
-            fund_infos = list(tmap(get_fund_info, fund_codes, unit="个", desc="获取基金信息"))
-        else:
-            fund_infos = list(
-                thread_map(get_fund_info, fund_codes, unit="个", desc="获取基金信息")
-            )
-
-        logger.log("将基金相关信息写入数据库，留备下次使用，加速下次查询......")
-        fund_info_cache_db.update(new_records)
-
-        logger.log("更新缓存 LRU 信息......")
-
-        # TODO remove out-dated cache entries
-
-        # Instead of directly in-place updating the "lru_record" entry in
-        # fund_info_cache_db, we copy it to a new variable and update the
-        # new variable and then copy back. This is because directly in-place
-        # updating shelve dict entry requires opening shelve with the `writeback`
-        # parameter set to True, which could lead to increased memory cost
-        # and IO cost, hence slowing down the program.
-
-        lru = fund_info_cache_db.get("lru_record", LRU())
-        lru.batch_update(fund_codes)
-
-        if lru.size > PERSISTENT_CACHE_DB_RECORD_MAX_NUM:
-            logger.log("检测到缓存较大，清理缓存......")
-            to_evict_num = PERSISTENT_CACHE_DB_RECORD_MAX_NUM - len(lru)
-            for _ in trange(to_evict_num, unit="条", desc="清理缓存"):
-                del fund_info_cache_db[lru.evict()]
-
-        fund_info_cache_db["lru_record"] = lru
-
-        return fund_infos
-
-
-def validate_fund_code(s: str) -> bool:
+def is_fund_code(s: str) -> bool:
     """ Check if the string represents a valid fund code """
     return bool(re.fullmatch(r"[0-9]{6}", s))
 
 
 @click.command(
     name="fund-info-fetcher",
-    help="A script to fetch various fund information from https://fund.eastmoney.com, and structuralize into Excel document",
-    epilog="Input file format: one fund code per line.",
-    no_args_is_help=True,  # type: ignore
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 @click.argument(
-    "fund_codes_or_files",
-    nargs=-1,
-    metavar="<fund codes or files containing fund codes>",
+    "file",
+    nargs=1,
+    metavar="<A file containing fund codes, one code per line>",
+    # TODO how to use path_type argument to convert to pathlib.Path ?
+    type=click.Path(exists=True, dir_okay=False),
 )
 @click.option(
     "-o",
     "--output",
-    metavar="FILENAME",
     default="基金信息.xlsx",
     show_default=True,
+    # TODO how to use path_type argument to convert to pathlib.Path ?
+    type=click.Path(dir_okay=False, writable=True),
     help="The output file path.",
 )
 @click.option("--disable-update-check", is_flag=True, help="Disable update check.")
-# @click.option("--disable-cache", is_flag=True)
-# @click.option("--versbose", is_flag=True)
+@click.option(
+    "--color-off",
+    is_flag=True,
+    help="Turn off the color output. For compatibility with environment without color code support.",
+)
+@click.option("--disable-cache", is_flag=True)
+# @click.option("-v", "--versbose", is_flag=True, help="Increase verboseness")
 # TODO: @click.option("--update")
 @click.version_option(version=__version__)
 def main(
-    fund_codes_or_files: tuple[str], output: str, disable_update_check: bool
+    file: str,
+    output: str,
+    disable_update_check: bool,
+    color_off: bool,
+    disable_cache: bool,
 ) -> None:
-    """ Command line entry function """
+    """
+    A script to fetch various fund information from https://fund.eastmoney.com,
+    and structuralize into Excel document.
 
-    colorama.init()
+    Input file format: one fund code per line.
+    """
 
-    atexit.register(
-        lambda: click.pause(info=bright_blue(localize("Press any key to exit ...")))
-    )
+    colorama.init(convert=not color_off)
+
+    pause_at_exit(info=bright_blue("按任意键以退出 ..."))
 
     try:
         # TODO Remove update check logic after switching architecture to
@@ -373,38 +132,29 @@ def main(
             print("检查更新......")
             check_update()
 
-        in_files = (Path(f) for f in fund_codes_or_files if not validate_fund_code(f))
+        in_file = Path(file)
         out_file = Path(output)
 
-        logger.log("检查参数......")
-        check_args(in_files, out_file)
-
         logger.log("获取基金代码列表......")
-        fund_codes = []
-        for x in fund_codes_or_files:
-            if validate_fund_code(x):
-                # if x is fund code
-                fund_codes.append(x)
-            else:
-                # if x is filename
-                lines = Path(x).read_text(encoding="utf-8").splitlines()
-                cleaned_lines = map(str.strip, lines)
-                fund_codes.extend(filter(validate_fund_code, cleaned_lines))
+        lines = in_file.read_text(encoding="utf-8").splitlines()
+        fund_codes = [line.strip() for line in lines if is_fund_code(line.strip())]
 
         if not fund_codes:
             logger.log("没有发现基金代码")
             sys.exit()
 
         logger.log("获取基金相关信息......")
-        fund_infos = get_fund_infos(fund_codes)
+        fund_infos = get_fund_infos(fund_codes, disable_cache=disable_cache)
 
         logger.log("将基金相关信息写入 Excel 文件......")
-        write_to_xlsx(fund_infos, out_file)
+        backup_old_outfile(out_file)
+        write_to_xlsx(fund_infos, out_file, logger)
 
         # The emoji takes inspiration from the black project (https://github.com/psf/black)
         logger.log("完满结束! ✨ 🍰 ✨")
 
     except Exception:
+
         logger.log("Oops! 程序运行过程中遇到了错误，打印错误信息摘要如下：")
         print_traceback_digest()
 

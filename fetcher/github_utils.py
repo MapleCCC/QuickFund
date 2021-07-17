@@ -1,6 +1,6 @@
 import requests
 
-from .utils import try_catch_raise
+from .utils import on_failure_raises
 
 
 __all__ = ["get_latest_release_version", "get_latest_release_asset"]
@@ -12,7 +12,7 @@ __all__ = ["get_latest_release_version", "get_latest_release_asset"]
 ENDPOINT = "https://api.github.com"
 
 
-@try_catch_raise(RuntimeError, "获取 {owner}/{repo} 最新发布版本时出现错误")
+@on_failure_raises(RuntimeError, "获取 {owner}/{repo} 最新发布版本时出现错误")
 def get_latest_release_version(owner: str, repo: str) -> str:
     """
     Get the latest release version of a repository of the url: https://github.com/<owner>/<repo>
@@ -30,7 +30,7 @@ def get_latest_release_version(owner: str, repo: str) -> str:
     return tag_name
 
 
-@try_catch_raise(
+@on_failure_raises(
     RuntimeError, "下载 GitHub 仓库 {owner}/{repo} 中 asset id 为 {asset_id} 的 asset 时发生错误"
 )
 def download_asset(owner: str, repo: str, asset_id: str) -> bytes:
@@ -47,7 +47,7 @@ def download_asset(owner: str, repo: str, asset_id: str) -> bytes:
     return r.content
 
 
-@try_catch_raise(
+@on_failure_raises(
     RuntimeError, "下载 GitHub 仓库 {owner}/{repo} 中 asset 名为 {asset_name} 的 asset 时发生错误"
 )
 def get_latest_release_asset(owner: str, repo: str, asset_name: str) -> bytes:

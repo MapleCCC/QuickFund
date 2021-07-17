@@ -1,11 +1,18 @@
+from __future__ import annotations
+
+import asyncio
+import atexit
 import functools
 import inspect
 import locale
+import sys
 import time
 import traceback
 from collections.abc import Callable, Iterator
-from typing import Any
+from typing import IO, Any
 
+import aiohttp
+import click
 from colorama import Fore, Style
 from more_itertools import split_at
 
@@ -17,7 +24,10 @@ __all__ = [
     "print_traceback_digest",
     "Logger",
     "timefunc",
-    "try_catch_raise",
+    "on_failure_raises",
+    "pause_at_exit",
+    "register_at_loop_close",
+    "get_running_client_session",
 ]
 
 
@@ -69,7 +79,6 @@ localization_table = {
         "RuntimeError": "运行时错误",
         "KeyboardInterrupt": "来自键盘的中断信号",
         "Server Error": "服务器错误",
-        "Press any key to exit ...": "按任意键以退出 ...",
     }
 }
 
@@ -143,6 +152,10 @@ def print_traceback_digest(
         print(digest)
 
 
+def no_op(*_, **__) -> None:
+    pass
+
+
 class Logger:
     """
     A lightweight logger.
@@ -152,17 +165,21 @@ class Logger:
     """
 
     def __init__(self) -> None:
-        self._count = 1
+        self._index = 1
 
-    __slots__ = "_count"
-
-    def log(self, s: str) -> None:
+    def log(self, s: str, file: IO = sys.stdout) -> None:
         """
         It's just a thin wrapper over the builtin print function, except that it prints
         strings with order numbers prepended.
         """
-        print(bright_green(str(self._count) + ". ") + s)
-        self._count += 1
+        print(bright_green(f"{self._index}. ") + s, file=file)
+        self._index += 1
+
+    @classmethod
+    def null_logger(cls) -> Logger:
+        ret = cls()
+        ret.log = no_op
+        return ret
 
 
 def timefunc(fn: Callable) -> Callable:
@@ -174,53 +191,99 @@ def timefunc(fn: Callable) -> Callable:
 
     statistics = {}
 
+    def format_args(*args, **kwargs) -> str:
+        res = str(args).strip("()")
+        if kwargs:
+            res += ", " + str(kwargs).strip("{}")
+        res = "(" + res + ")"
+        return res
+
     @functools.wraps(fn)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         pre = time.time()
         result = fn(*args, **kwargs)
         post = time.time()
 
-        format_args = str(args).strip("()")
-        if kwargs:
-            format_args += ", " + str(kwargs).strip("{}")
-        format_args = "(" + format_args + ")"
-
-        # print(f"Input is {format_args}, execution duration is {post-pre}")
-        statistics[format_args] = post - pre
+        statistics[format_args(*args, **kwargs)] = post - pre
+        # print(f"Input is {format_args(*args, **kwargs)}, execution duration is {post-pre}")
 
         return result
 
-    wrapper.exe_time_statistics = statistics  # type: ignore
+    wrapper.exe_time_statistics = statistics
     return wrapper
 
 
-# FIXME the default value for the ctx parameter should be "context", not "cause"
-# TODO add argument to control which exceptions to catch
-def try_catch_raise(
-    new_except: type[Exception], err_msg: str, ctx: str = "cause"
-) -> Callable[[Callable], Callable]:
-    def decorator(fn: Callable) -> Callable:
-        sig = inspect.signature(fn)
+def on_failure_raises(
+    etype: type[Exception], error_message: str, suppress_cause: bool = False
+):
+    """
+    Return a decorator. Exception raised by the decorated function is caught
+    and replaced by the new exception specified by the arguments to `on_failure_raises`.
 
-        @functools.wraps(fn)
-        def wrapper(*args, **kwargs) -> Any:
+    `exc_msg` is a format string, whose replacement fields are substituted for arguments
+    to the decorated function.
+
+    The `suppress_cause` flag specifies that the original exception raised by the
+    decorated function should be suppressed. By default it's turned off.
+    """
+
+    def decorator(func):
+        signature = inspect.signature(func)
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
             try:
-                return fn(*args, **kwargs)
-            except Exception as exc:
-                ba = sig.bind(*args, **kwargs)
-                err_msg = err_msg.format_map(ba.arguments)
+                return func(*args, **kwargs)
 
-                if ctx == "cause":
-                    raise new_except(err_msg) from exc
-                elif ctx == "suppress":
-                    raise new_except(err_msg) from None
-                elif ctx == "context":
-                    raise new_except(err_msg)
-                else:
-                    raise ValueError(
-                        "Valid values for the `ctx` parameter are `cause`, `suppress`, and `context`."
-                    )
+            except Exception as exc:
+                arguments = signature.bind(*args, **kwargs).arguments
+                formatted_error_message = error_message.format_map(arguments)
+                cause = None if suppress_cause else exc
+                raise etype(formatted_error_message) from cause
 
         return wrapper
 
     return decorator
+
+
+def pause_at_exit(info: str = "Press any key to exit ...") -> None:
+    atexit.register(lambda: click.pause(info=info))
+
+
+def register_at_loop_close(loop: asyncio.AbstractEventLoop, callback: Callable) -> None:
+    origin_close = loop.close
+
+    @functools.wraps(origin_close)
+    def new_close():
+        callback()
+        origin_close()
+
+    loop.close = new_close
+
+
+def get_running_client_session(session_id: str) -> aiohttp.ClientSession:
+    """
+    "Why is creating a ClientSession outside of an event loop dangerous?
+    Short answer is: life-cycle of all asyncio objects should be shorter than life-cycle of event loop."
+    https://docs.aiohttp.org/en/stable/faq.html#why-is-creating-a-clientsession-outside-of-an-event-loop-dangerous
+
+    Called inside coroutines
+    """
+
+    def graceful_shutdown_client_session(session: aiohttp.ClientSession) -> None:
+        # Ref: https://docs.aiohttp.org/en/stable/client_advanced.html#graceful-shutdown
+        loop.create_task(session.close())
+        loop.create_task(asyncio.sleep(0))
+
+    loop = asyncio.get_running_loop()
+
+    if not hasattr(loop, "_aiohttp_client_sessions"):
+        loop._aiohttp_client_sessions = {}
+
+    try:
+        return loop._aiohttp_client_sessions[session_id]
+    except KeyError:
+        session = aiohttp.ClientSession()
+        loop._aiohttp_client_sessions[session_id] = session
+        register_at_loop_close(loop, lambda: graceful_shutdown_client_session(session))
+        return session
