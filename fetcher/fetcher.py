@@ -3,8 +3,7 @@ import json
 import random
 import re
 import string
-from datetime import datetime
-from typing import Any
+from datetime import date, datetime
 
 import aiohttp
 import pandas
@@ -75,7 +74,7 @@ async def get_net_value_api_response_text(fund_code: str) -> str:
         return await response.text(encoding="utf-8")
 
 
-def parse_net_value_api_response_text(text: str) -> dict[str, Any]:
+def parse_net_value_api_response_text(text: str) -> pandas.DataFrame:
 
     # FIXME pylance doesn't recognize pandas.read_html() ?
 
@@ -88,14 +87,14 @@ def parse_net_value_api_response_text(text: str) -> dict[str, Any]:
     return one(dfs)
 
 
-def pack_into_FundNetValueInfo(data: dict[str, list[str]]) -> FundNetValueInfo:
+def pack_to_FundNetValueInfo(data: pandas.DataFrame) -> FundNetValueInfo:
     net_value_info = FundNetValueInfo(
-        净值日期=data["净值日期"][0].date(),
-        单位净值=data["单位净值"][0],
-        日增长率=float(data["日增长率"][0].rstrip("% ")) * 0.01,
-        分红送配=data["分红送配"][0],
-        上一天净值=data["单位净值"][1],
-        上一天净值日期=data["净值日期"][1].date(),
+        净值日期=data.净值日期[0].date(),
+        单位净值=data.单位净值[0],
+        日增长率=float(data.日增长率[0].rstrip("% ")) * 0.01,
+        分红送配=data.分红送配[0],
+        上一天净值=data.单位净值[1],
+        上一天净值日期=data.净值日期[1].date(),
     )  # type: ignore # https://github.com/python-attrs/attrs/issues/795
 
     return net_value_info
@@ -107,7 +106,7 @@ async def fetch_net_value(fund_code: str) -> FundNetValueInfo:
 
     text = await get_net_value_api_response_text(fund_code)
     data = parse_net_value_api_response_text(text)
-    net_value_info = pack_into_FundNetValueInfo(data)
+    net_value_info = pack_to_FundNetValueInfo(data)
 
     return net_value_info
 
@@ -192,24 +191,20 @@ async def get_fund_info_page_text(fund_code: str) -> str:
 
 def parse_fund_info_page_text_and_get_IARBC_data(
     text: str,
-) -> tuple[str, pandas.DataFrame]:
+) -> tuple[date, pandas.DataFrame]:
+
     html = etree.HTML(text)
-    cutoff_date = one(html.xpath("//span[@id='jdzfDate']")).text
+    cutoff_date_str = one(html.xpath("//span[@id='jdzfDate']")).text
+    cutoff_date = datetime.strptime(cutoff_date_str, "%Y-%m-%d").date()
 
     table = etree.tostring(one(html.xpath("//li[@id='increaseAmount_stage']")))
     df = one(pandas.read_html(table, index_col=0))
 
     return cutoff_date, df
 
-
-async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:
-
-    text = await get_fund_info_page_text(fund_code)
-
-    cutoff_date, data = parse_fund_info_page_text_and_get_IARBC_data(text)
-
+def pack_to_FundIARBCInfo(cutoff_date: date, data: pandas.DataFrame) -> FundIARBCInfo:
     return FundIARBCInfo(
-        同类排名截止日期=datetime.strptime(cutoff_date, "%Y-%m-%d").date(),
+        同类排名截止日期=cutoff_date,
         近1周同类排名=data.近1周.同类排名,
         近1月同类排名=data.近1月.同类排名,
         近3月同类排名=data.近3月.同类排名,
@@ -219,6 +214,16 @@ async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:
         近2年同类排名=data.近2年.同类排名,
         近3年同类排名=data.近3年.同类排名,
     )  # type: ignore # https://github.com/python-attrs/attrs/issues/795
+
+
+
+async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:
+
+    text = await get_fund_info_page_text(fund_code)
+    cutoff_date, data = parse_fund_info_page_text_and_get_IARBC_data(text)
+    IARBC_info = pack_to_FundIARBCInfo(cutoff_date, data)
+
+    return IARBC_info
 
 
 @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关信息时发生错误")
