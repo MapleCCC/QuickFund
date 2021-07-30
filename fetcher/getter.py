@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import cast
 
 from .__version__ import __version__
-from .fetcher import fetch_IARBC, fetch_estimate, fetch_fund_info, fetch_net_value
+from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
 from .models import FundInfo
 from .tqdm import tqdm_asyncio
 

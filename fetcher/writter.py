@@ -57,7 +57,7 @@ def write_to_xlsx(
             worksheet.set_column(col, col, field.get("width"))
 
         header_format = workbook.add_format(
-            {"bold": True, "align": "center", "valign": "top", "border": 1}
+            dict(bold=True, align="center", valign="top", border=1)
         )
 
         logger.log("写入文档头......")

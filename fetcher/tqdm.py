@@ -55,4 +55,5 @@ async def gather(aws: Iterable[Awaitable[T]], **kwargs) -> list[T]:
         return res
 
 
-tqdm_asyncio.gather = gather  # type: ignore # TODO open PR to add type annotation to tqdm_asyncio.gather
+# TODO open PR to add type annotation to tqdm_asyncio.gather
+tqdm_asyncio.gather = gather  # type: ignore

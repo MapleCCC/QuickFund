@@ -11,7 +11,7 @@ from aiohttp_retry import ListRetry, RetryClient
 from lxml import etree
 from more_itertools import one
 
-from .models import FundEstimateInfo, FundInfo, FundNetValueInfo, FundIARBCInfo
+from .models import FundEstimateInfo, FundIARBCInfo, FundInfo, FundNetValueInfo
 from .utils import on_failure_raises, register_at_loop_close
 
 
@@ -102,7 +102,7 @@ def pack_to_FundNetValueInfo(data: pandas.DataFrame) -> FundNetValueInfo:
 
 @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关净值信息时发生错误")
 async def fetch_net_value(fund_code: str) -> FundNetValueInfo:
-    """ Fetch the net value related info related to the given fund code """
+    """Fetch the net value related info related to the given fund code"""
 
     text = await get_net_value_api_response_text(fund_code)
     data = parse_net_value_api_response_text(text)
@@ -162,7 +162,7 @@ def pack_to_FundEstimateInfo(data: dict[str, str]) -> FundEstimateInfo:
 
 @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关估算信息时发生错误")
 async def fetch_estimate(fund_code: str) -> FundEstimateInfo:
-    """ Fetch the estimate info related to the given fund code """
+    """Fetch the estimate info related to the given fund code"""
 
     text = await get_estimate_api_response_text(fund_code)
     data = parse_estimate_api_response_text(text)
@@ -202,6 +202,7 @@ def parse_fund_info_page_text_and_get_IARBC_data(
 
     return cutoff_date, df
 
+
 def pack_to_FundIARBCInfo(cutoff_date: date, data: pandas.DataFrame) -> FundIARBCInfo:
     return FundIARBCInfo(
         同类排名截止日期=cutoff_date,
@@ -216,7 +217,6 @@ def pack_to_FundIARBCInfo(cutoff_date: date, data: pandas.DataFrame) -> FundIARB
     )  # type: ignore # https://github.com/python-attrs/attrs/issues/795
 
 
-
 async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:
 
     text = await get_fund_info_page_text(fund_code)
@@ -228,7 +228,7 @@ async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:
 
 @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关信息时发生错误")
 async def fetch_fund_info(fund_code: str) -> FundInfo:
-    """ Fetch the fund info related to the given fund code """
+    """Fetch the fund info related to the given fund code"""
 
     return FundInfo.combine(
         await fetch_net_value(fund_code),

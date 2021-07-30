@@ -62,7 +62,7 @@ class FundInfo(FundNetValueInfo, FundEstimateInfo, FundIARBCInfo):
         self,
         net_value_info: FundNetValueInfo = None,
         estimate_info: FundEstimateInfo = None,
-        IARBC_info: FundIARBCInfo =None,
+        IARBC_info: FundIARBCInfo = None,
     ) -> None:
 
         if net_value_info is not None:
@@ -76,7 +76,6 @@ class FundInfo(FundNetValueInfo, FundEstimateInfo, FundIARBCInfo):
         if IARBC_info is not None:
             for attribute, value in attr.asdict(IARBC_info).items():
                 setattr(self, attribute, value)
-
 
     @classmethod
     def combine(
