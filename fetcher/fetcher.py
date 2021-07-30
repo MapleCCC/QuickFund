@@ -76,8 +76,6 @@ async def get_net_value_api_response_text(fund_code: str) -> str:
 
 def parse_net_value_api_response_text(text: str) -> pandas.DataFrame:
 
-    # FIXME pylance doesn't recognize pandas.read_html() ?
-
     # TODO pandas.read_html accept url as argument, we can definitely use this feature
     # to simplify the code, if it ever supports async/await syntax in the future.
 
