@@ -4,6 +4,7 @@ import random
 import re
 import string
 from datetime import date, datetime
+from typing import cast
 
 import aiohttp
 import pandas
@@ -200,10 +201,12 @@ def parse_fund_info_page_text_and_get_IARBC_data(
 ) -> tuple[date, pandas.DataFrame]:
 
     html = etree.HTML(text)
-    cutoff_date_str = one(html.xpath("//span[@id='jdzfDate']")).text
+    cutoff_date_str = one(cast(list, html.xpath("//span[@id='jdzfDate']"))).text
     cutoff_date = datetime.strptime(cutoff_date_str, "%Y-%m-%d").date()
 
-    table = etree.tostring(one(html.xpath("//li[@id='increaseAmount_stage']")))
+    table: str = etree.tostring(
+        one(cast(list, html.xpath("//li[@id='increaseAmount_stage']"))), encoding=str
+    )
     df = one(pandas.read_html(table, index_col=0))
 
     return cutoff_date, df
