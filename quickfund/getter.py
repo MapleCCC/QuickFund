@@ -126,7 +126,7 @@ def update_fund_infos(
     fund_codes: Iterable[str], fund_info_db: Shelf[str, FundInfo]
 ) -> None:
     tasks = (update_fund_info(fund_code, fund_info_db) for fund_code in set(fund_codes))
-    asyncio.run(tqdm_asyncio.gather(tasks, unit="个", desc="获取基金信息"))
+    asyncio.run(tqdm_asyncio.gather(*tasks, unit="个", desc="获取基金信息"))
 
 
 def check_db_version(fund_info_db: Shelf[str, FundInfo]) -> None:

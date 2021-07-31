@@ -45,12 +45,10 @@ def tenumerate(
 std_gather = tqdm_asyncio.gather
 
 
-# FIXME tqdm_asyncio.gather takes an iterable of Awaitable, while asyncio.gather
-# takes every Awaitable as a single argument. Open a PR to fix the dismatch.
-async def gather(aws: Iterable[Awaitable[T]], **kwargs) -> list[T]:
+async def gather(*aws: Iterable[Awaitable[T]], **kwargs) -> list[T]:
     with bright_green_context():
         print()
-        res = await std_gather(aws, **kwargs, **tqdm_config)
+        res = await std_gather(*aws, **kwargs, **tqdm_config)
         print()
         return res
 
