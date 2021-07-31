@@ -1,14 +1,15 @@
 import shelve
-from collections.abc import KeysView, ValuesView
-from typing import Generic, Optional, TypeVar, Union, overload
+from collections.abc import Callable, KeysView, ValuesView
+from typing import Generic, Optional, Protocol, TypeVar, Union, overload
 
 
-__all__ = ["Shelf"]
+__all__ = ["Shelf", "IdentityDecorator"]
 
 
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
+FuncT = TypeVar("FuncT", bound=Callable)
 
 
 # TODO the stdlib shelve.Shelf should become a generic type, so we don't
@@ -38,4 +39,9 @@ class Shelf(shelve.Shelf, Generic[K, V]):
         ...
 
     def values(self) -> ValuesView[K]:
+        ...
+
+
+class IdentityDecorator(Protocol):
+    def __call__(self, __func: FuncT) -> FuncT:
         ...

@@ -9,12 +9,14 @@ import sys
 import time
 import traceback
 from collections.abc import Callable, Iterator
-from typing import IO, Any
+from typing import IO, Any, TypeVar, cast
 
 import aiohttp
 import click
 from colorama import Fore, Style
 from more_itertools import split_at
+
+from .typing import IdentityDecorator
 
 
 __all__ = [
@@ -29,6 +31,9 @@ __all__ = [
     "register_at_loop_close",
     "get_running_client_session",
 ]
+
+
+FuncT = TypeVar("FuncT", bound=Callable)
 
 
 def bright_red(s: str) -> str:
@@ -182,7 +187,7 @@ class Logger:
         return ret
 
 
-def timefunc(fn: Callable) -> Callable:
+def timefunc(fn: FuncT) -> FuncT:
     """
     A decorator to collect execution time statistics of the wrapped function.
 
@@ -210,12 +215,12 @@ def timefunc(fn: Callable) -> Callable:
         return result
 
     wrapper.exe_time_statistics = statistics
-    return wrapper
+    return cast(FuncT, wrapper)
 
 
 def on_failure_raises(
     etype: type[Exception], error_message: str, suppress_cause: bool = False
-):
+) -> IdentityDecorator:
     """
     Return a decorator. Exception raised by the decorated function is caught
     and replaced by the new exception specified by the arguments to `on_failure_raises`.
@@ -227,7 +232,7 @@ def on_failure_raises(
     decorated function should be suppressed. By default it's turned off.
     """
 
-    def decorator(func):
+    def decorator(func: FuncT) -> FuncT:
         signature = inspect.signature(func)
 
         @functools.wraps(func)
@@ -241,7 +246,7 @@ def on_failure_raises(
                 cause = None if suppress_cause else exc
                 raise etype(formatted_error_message) from cause
 
-        return wrapper
+        return cast(FuncT, wrapper)
 
     return decorator
 
