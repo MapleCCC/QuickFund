@@ -225,7 +225,7 @@ def on_failure_raises(
     Return a decorator. Exception raised by the decorated function is caught
     and replaced by the new exception specified by the arguments to `on_failure_raises`.
 
-    `exc_msg` is a format string, whose replacement fields are substituted for arguments
+    `error_message` is a format string, whose replacement fields are substituted for arguments
     to the decorated function.
 
     The `suppress_cause` flag specifies that the original exception raised by the

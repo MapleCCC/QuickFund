@@ -2,7 +2,7 @@
 
 SRC_DIR=quickfund
 TEST_DIR=tests
-
+DEPS_FILE=requirements/install.txt
 
 run:
 	scripts/run.py
@@ -28,6 +28,10 @@ lint:
 
 unused-imports:
 	find . -type f -name "*.py" | xargs pylint --disable=all --enable=W0611
+
+reqs:
+	pipreqs --use-local --encoding utf-8 ${SRC_DIR} --savepath ${DEPS_FILE}
+	sort ${DEPS_FILE} -o ${DEPS_FILE}
 
 todo:
 	rg "# TODO|# FIXME" --glob !Makefile
