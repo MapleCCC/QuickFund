@@ -9,12 +9,12 @@ import zipapp
 from pathlib import Path
 
 sys.path.append(os.getcwd())
-from fetcher.__version__ import __version__
+from quickfund.__version__ import __version__
 
 
 OUTPUT_FILENAME = f"基金信息生成器 {__version__}.pyz"
 ZIPAPP_DISTPATH = "dist"
-INPUT_PACKAGE = "fetcher"
+INPUT_PACKAGE = "quickfund"
 
 
 def transform_relative_imports(p: Path) -> None:
@@ -69,7 +69,7 @@ def main() -> None:
     #     os.getcwd(),
     #     "基金信息生成器.pyz",
     #     interpreter="/usr/bin/env python3",
-    #     main="fetcher.__main__:main",
+    #     main="quickfund.__main__:main",
     #     filter=lambda x: os.path.splitext(x)[1] == "py",
     #     compressed=True,
     # )

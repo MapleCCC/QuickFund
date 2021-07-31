@@ -77,7 +77,7 @@ def is_fund_code(s: str) -> bool:
 
 
 @click.command(
-    name="fund-info-fetcher",
+    name="QuickFund",
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
 )

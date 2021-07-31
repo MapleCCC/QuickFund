@@ -8,7 +8,7 @@ import click
 from github import Github
 
 sys.path.append(os.getcwd())
-from fetcher.config import (
+from quickfund.config import (
     RELEASE_ASSET_NAME,
     RELEASE_EXECUTABLE_NAME,
     REPO_NAME,

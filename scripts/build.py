@@ -5,8 +5,8 @@ import subprocess
 import sys
 
 sys.path.append(os.getcwd())
-from fetcher.__version__ import __version__
-from fetcher.config import RELEASE_EXECUTABLE_NAME
+from quickfund.__version__ import __version__
+from quickfund.config import RELEASE_EXECUTABLE_NAME
 
 
 PYINSTALLER_DISTPATH = "dist"

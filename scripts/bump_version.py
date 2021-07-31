@@ -10,8 +10,8 @@ import click
 import semver
 
 sys.path.append(os.getcwd())
-from fetcher.__version__ import __version__ as current_version
-from fetcher.utils import Logger
+from quickfund.__version__ import __version__ as current_version
+from quickfund.utils import Logger
 from scripts.release import release
 
 
@@ -28,16 +28,16 @@ def bump_file(filename: str, pattern: str, repl: str) -> None:
 def bump_file___version__(new_version: str) -> None:
     pattern = r"__version__\s*=\s*\"(.*)\""
     repl = f'__version__ = "{new_version}"'
-    bump_file("fetcher/__version__.py", pattern, repl)
+    bump_file("quickfund/__version__.py", pattern, repl)
 
 
 def bump_file_README(new_version: str) -> None:
-    pattern = r"github.com/MapleCCC/Fund-Info-Fetcher/compare/.*\.\.\.master"
-    repl = f"github.com/MapleCCC/Fund-Info-Fetcher/compare/{new_version}...master"
+    pattern = r"github.com/MapleCCC/QuickFund/compare/.*\.\.\.master"
+    repl = f"github.com/MapleCCC/QuickFund/compare/{new_version}...master"
     bump_file("README.md", pattern, repl)
 
-    pattern = r"git\+https://github\.com/MapleCCC/Fund-Info-Fetcher\.git@.*#egg=Fund-Info-Fetcher"
-    repl = f"git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@{new_version}#egg=Fund-Info-Fetcher"
+    pattern = r"git\+https://github\.com/MapleCCC/QuickFund\.git@.*#egg=QuickFund"
+    repl = f"git+https://github.com/MapleCCC/QuickFund.git@{new_version}#egg=QuickFund"
     bump_file("README.md", pattern, repl)
 
 
@@ -94,7 +94,7 @@ def main(component: str, no_release: bool) -> None:
     logger.log("Bump version-related information in README.md ......")
     bump_file_README(new_version)
 
-    run(["git", "add", "fetcher/__version__.py"])
+    run(["git", "add", "quickfund/__version__.py"])
 
     run(["git", "add", "README.md"])
 

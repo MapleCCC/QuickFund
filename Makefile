@@ -1,6 +1,6 @@
 # MAKEFLAGS+=.silent
 
-SRC_DIR=fetcher
+SRC_DIR=quickfund
 TEST_DIR=tests
 
 

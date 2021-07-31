@@ -11,5 +11,5 @@ import subprocess
 # it is welcome.
 
 
-command_line = 'NUITKA_CLCACHE_BINARY="D:\\Program Files\\Python38\\Scripts\\clcache.exe"; python -m nuitka --show-progress --show-scons --mingw64 --windows-dependency-tool=pefile --follow-imports --standalone fetcher/__main__.py'
+command_line = 'NUITKA_CLCACHE_BINARY="D:\\Program Files\\Python38\\Scripts\\clcache.exe"; python -m nuitka --show-progress --show-scons --mingw64 --windows-dependency-tool=pefile --follow-imports --standalone quickfund/__main__.py'
 subprocess.run(shlex.split(command_line)).check_returncode()

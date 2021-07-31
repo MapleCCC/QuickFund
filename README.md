@@ -3,13 +3,13 @@
 <!-- TODO add badge about code coverage -->
 <!-- TODO add badge about requires.io -->
 <!-- TODO add badge about pylint rating -->
-[![License](https://img.shields.io/github/license/MapleCCC/Fund-Info-Fetcher?color=00BFFF)](LICENSE)
-[![Build Status](https://travis-ci.com/MapleCCC/Fund-Info-Fetcher.svg?branch=master)](https://travis-ci.com/MapleCCC/Fund-Info-Fetcher)
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/MapleCCC/Fund-Info-Fetcher)](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest)
+[![License](https://img.shields.io/github/license/MapleCCC/QuickFund?color=00BFFF)](LICENSE)
+[![Build Status](https://travis-ci.com/MapleCCC/QuickFund.svg?branch=master)](https://travis-ci.com/MapleCCC/QuickFund)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/MapleCCC/QuickFund)](https://github.com/MapleCCC/QuickFund/releases/latest)
 [![Semantic release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
-[![LOC](https://sloc.xyz/github/MapleCCC/Fund-Info-Fetcher)](https://sloc.xyz/github/MapleCCC/Fund-Info-Fetcher)
+[![LOC](https://sloc.xyz/github/MapleCCC/QuickFund)](https://sloc.xyz/github/MapleCCC/QuickFund)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/MapleCCC/Fund-Info-Fetcher/latest?sort=semver)](https://github.com/MapleCCC/Fund-Info-Fetcher/compare/v1.4.0...master)
+[![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/MapleCCC/QuickFund/latest?sort=semver)](https://github.com/MapleCCC/QuickFund/compare/v1.4.0...master)
 <!-- TODO which diff method should we use? two dots or three dots? -->
 
 ## TOC
@@ -36,7 +36,7 @@
 
 A script to fetch various fund information from `https://fund.eastmoney.com`, and structuralize into Excel document.
 
-抓取天天基金信息，生成自定义表格。表头和样式可以在 `fetcher/schema.py` 自定义。
+抓取天天基金信息，生成自定义表格。表头和样式可以在 `quickfund/schema.py` 自定义。
 
 ## Installation
 
@@ -45,7 +45,7 @@ Prerequisites: Python 3.9+, [Git](https://git-scm.com/), [pip](https://pip.pypa.
 One-liner installation recipe:
 
 ```bash
-$ python -m pip install git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@v1.4.0#egg=Fund-Info-Fetcher
+$ python -m pip install git+https://github.com/MapleCCC/QuickFund.git@v1.4.0#egg=QuickFund
 ```
 
 If editable mode installation is preferred:
@@ -56,19 +56,19 @@ $ python -m virtualenv .venv
 $ source .venv/Scripts/activate
 
 # Install in editable mode
-$ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git@v1.4.0#egg=Fund-Info-Fetcher
+$ python -m pip install -e git+https://github.com/MapleCCC/QuickFund.git@v1.4.0#egg=QuickFund
 ```
 
 ## Usage
 
 ```bash
-$ fetcher <list of fund codes or files containing fund codes>
+$ quickfund <list of fund codes or files containing fund codes>
 
-$ fetcher --help
+$ quickfund --help
 ```
 
 ```
-Usage: fetcher [OPTIONS] <fund codes or files containing fund codes>
+Usage: quickfund [OPTIONS] <fund codes or files containing fund codes>
 
   A script to fetch various fund information from
   https://fund.eastmoney.com, and structuralize into Excel document
@@ -94,7 +94,7 @@ Options:
 
 ## Download
 
-Go to [Release](https://github.com/MapleCCC/Fund-Info-Fetcher/releases/latest) page.
+Go to [Release](https://github.com/MapleCCC/QuickFund/releases/latest) page.
 
 ## Development
 
@@ -102,9 +102,9 @@ Prerequisites: Git, Python 3.9+, `pip`.
 
 ```bash
 # Clone the repository to local environment
-$ git clone https://github.com/MapleCCC/Fund-Info-Fetcher.git
+$ git clone https://github.com/MapleCCC/QuickFund.git
 
-$ cd Fund-Info-Fetcher
+$ cd QuickFund
 
 # Optionally create a virtual environment for isolation purpose
 $ python -m virtualenv .venv
@@ -126,7 +126,7 @@ Alternatively, just a one-liner:
 $ python -m virtualenv .venv
 $ source .venv/Scripts/activate
 
-$ python -m pip install -e git+https://github.com/MapleCCC/Fund-Info-Fetcher.git#egg=Fund-Info-Fetcher
+$ python -m pip install -e git+https://github.com/MapleCCC/QuickFund.git#egg=QuickFund
 ```
 
 <!-- TODO: Pre-commit hook -->
@@ -156,7 +156,7 @@ We follow [conventional commit message guideline](https://www.conventionalcommit
 
 ## Contribution
 
-Go to [issues](https://github.com/MapleCCC/Fund-Info-Fetcher/issues) to send issues or feedbacks. Pull requests are welcome.
+Go to [issues](https://github.com/MapleCCC/QuickFund/issues) to send issues or feedbacks. Pull requests are welcome.
 
 ## License
 
