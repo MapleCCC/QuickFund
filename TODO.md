@@ -10,14 +10,12 @@
   - Append content of TODO.md and CHANGELOG.md to README.md
   - Generate TOC for README in pre-commit hook script.
 - Try release candidate version. (e.g. v1.0.0rc1)
-- Search on the internet about existing project that make async possible with requests library.
 
 
 ## Priority Medium
 
 - Use Go to rewrite. Leverage Go language's builtin concurrency support.
 - Read the book "High Performance Python" and deploy some tricks from there. Especially the part about mitigating expensive network IO.
-- Reduce overhead of network IO, which is expensive.
 - Use line profiler to find performance hotspots.
 - Any compression algorithm targeted at binary file instead of text? Try to do some literature review on this research topic.
 - Use lightweight utlity tool to preview content of Excel document. So that we don't have to wait for the heavyweight Excel program to startup everytime we want to test on our program.
@@ -26,6 +24,7 @@
   - click.Path
   - click.version_option()
   - click.context
+  - ...
 - Learn and master Vim movement, jumping, jump back, mark.
 - exit() vs sys.exit() vs quit(). What's the difference? Which should we use?
   - atexit module
@@ -40,7 +39,6 @@
   - When program terminates due to call to exit()/sys.exit()/quit().
 - Adopt `conventional commit` conventions.
 - Find way to quick unit test, integrate test, regression test. No need to stand the startup time overhead of the super heavyweight Excel program anymore.
-- Use requests session feature to leverage connection pool.
 - Use requests body content flow stream. So we can display progress bar when downloading or uploading large files.
   - Incorporate with tqdm.
 - Install to context menu, so that the user only needs to open the context menu of a file and then click our program. The UX is more intuitive and straightforward.
@@ -56,7 +54,7 @@
   - Append to project idea
   - Look into isort library source code. Figure out how isort identifies an import as third-party import.
   - Look into mypy library source code. Figure out how mypy identifies an import as third-party import.
-  - Look into pyright library source code. Figure out how isort identifies an import as third-party import.
+  - Look into pyright library source code. Figure out how pyright identifies an import as third-party import.
 - Consider use "WARN:" to replace "WARNING:" in comments.
 - 调整输出的 Excel 文档的各列列宽
 - Add badges to README.
@@ -76,6 +74,9 @@
   - Requires.io
   - GitHub's Dependabot
 - Some TODO should be FIXME. Change to proper names.
+- Use pipreqs to automatically one-click update requirements*.txt files. Manual update would be tedious.
+- Use pydantic
+- Use Typer
 
 
 ## Priority Low
@@ -136,11 +137,19 @@
 - Consider moving colorama.init/deinit/reinit pair to every colored output. Prevent polluting global space. Also prevent forgetting to colorama.init in different places across the code repository. What's the overhead if we do so?
   - Use timeit to check colorama.init/deinit/reinit overhead.
 - Deploy prompt-toolkit library.
-- Use SortedList in sortedcontainers library to replace self-made LRU implementation. Benchmark to compare performance.
 - Remove "build by PyInstaller" feature, and all related codes.
 - Change all "except:" to "except Exception:". We don't want to catch some exceptions derived from BaseException, like KeyboardInterrupt, SystemExit.
-- Add retry mechanism ot all occurrences of requests.get across the whole repository.
 - Update screenshots in README.
+- Compare implementation choice between dict, user-defined class, dataclass, namedtuple, and attrs library.
+- Thoroughly read through doc of dataclasses module.
+- Thoroughly read through doc of attrs library.
+- Read attrs library doc's section about "Why not...?"
+- See what features attrs has that dataclass doesn't have.
+  - ANSWER: slots, ..., etc.
+- After refactor, use binary diff to check regression.
+  - Turn out that we can't. Because Xlsxwriter create Excel document has different hash digest each time, even if we are writing identical content. A possible reason might be Xlsxwriter create Excel document also contain some time-related information.
+- "from lxml import etree" when lxml is not available (no C extension, or CPython portable zip environment), provide fallback to the builtin "import xml.etree.ElementTree as etree".
+- Do some unit tests, so that we can show CI pass badge and test coverage percentage badge in GitHub README.
 
 
 ## Archive
@@ -150,6 +159,8 @@
   - From requests document, it try to make smart guess of the response's text encoding.
 - Figure out why using pyinstaller with upx will lead to erroneous executable.
 - Try some other executable compression utility tools. Turn out that UPX doesn't give us meaningful compression ratio.
+- Search on the internet about existing project that make async possible with requests library.
+- Use SortedList in sortedcontainers library to replace self-made LRU implementation. Benchmark to compare performance.
 
 
 ## TIL

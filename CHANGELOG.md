@@ -54,3 +54,6 @@
 - Migrate to Python 3.9
   - Some attributes in the typing library are deprecated.
 - When CPython 3.9 is released, change `astor.to_source` to `ast.unparse`.
+- Reduce overhead of network IO, which is expensive.
+- Use requests session feature to leverage connection pool.
+- Add retry mechanism ot all occurrences of requests.get across the whole repository.

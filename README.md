@@ -34,9 +34,9 @@
 
 ## Overview
 
-A script to fetch various fund information from `https://fund.eastmoney.com`, and structuralize into Excel document.
+A script to fetch various fund information from `https://fund.eastmoney.com`, and structuralize into Excel document. It's a non-tech-savvy user oriented tool, not developer-oriented.
 
-抓取天天基金信息，生成自定义表格。表头和样式可以在 `quickfund/schema.py` 自定义。
+抓取天天基金信息，生成自定义表格。表头和样式可以在 `quickfund/writter.py` 自定义。
 
 ## Installation
 

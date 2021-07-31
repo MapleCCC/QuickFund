@@ -65,14 +65,16 @@ def check_update() -> None:
         return
 
     if semver.compare(latest_version.lstrip("v"), __version__.lstrip("v")) > 0:
-        logger.log(f"检测到更新版本 {latest_version}，请手动更新")
+        logger.log(
+            f"检测到更新版本 {latest_version}，请手动至 https://github.com/MapleCCC/QuickFund/releases 下载最新版本"
+        )
         sys.exit()
     else:
         logger.log("当前已是最新版本")
 
 
 def is_fund_code(s: str) -> bool:
-    """ Check if the string represents a valid fund code """
+    """Check if the string represents a valid fund code"""
     return bool(re.fullmatch(r"[0-9]{6}", s))
 
 

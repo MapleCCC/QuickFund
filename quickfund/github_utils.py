@@ -9,6 +9,9 @@ from .utils import on_failure_raises
 __all__ = ["get_latest_release_version", "get_latest_release_asset"]
 
 
+# TODO should we use PyGithub to replace home-made implementations ?
+
+
 # Reference to GitHub official REST API document:
 # https://docs.github.com/en/rest
 

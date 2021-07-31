@@ -79,8 +79,11 @@ def parse_net_value_api_response_text(text: str) -> pandas.DataFrame:
 
     # TODO pandas.read_html accept url as argument, we can definitely use this feature
     # to simplify the code, if it ever supports async/await syntax in the future.
+    # pandas.read_html uses urllib.request.urlopen under the hood and feeds it to etree.html.parse()
 
     # TODO configure pandas.read_html to use the most performant parser backend
+
+    # TODO the type annotation for parse_dates should be more than bool
 
     dfs = pandas.read_html(text, parse_dates=["净值日期"], keep_default_na=False)
     return one(dfs)
