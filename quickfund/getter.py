@@ -11,6 +11,7 @@ from .__version__ import __version__
 from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
 from .models import FundInfo
 from .tqdm import tqdm_asyncio
+from .typing import Shelf
 
 
 china_timezone = timezone(timedelta(hours=8), name="UTC+8")
@@ -84,7 +85,7 @@ def IARBC_date_is_latest(d: date) -> bool:
 
 
 async def update_estimate_info(
-    fund_code: str, fund_info_db: dict[str, FundInfo]
+    fund_code: str, fund_info_db: Shelf[str, FundInfo]
 ) -> None:
     estimate_datetime = fund_info_db[fund_code].估算日期
     if not estimate_datetime_is_latest(estimate_datetime):
@@ -93,7 +94,7 @@ async def update_estimate_info(
 
 
 async def update_net_value_info(
-    fund_code: str, fund_info_db: dict[str, FundInfo]
+    fund_code: str, fund_info_db: Shelf[str, FundInfo]
 ) -> None:
     net_value_date = fund_info_db[fund_code].净值日期
     if not net_value_date_is_latest(net_value_date):
@@ -101,7 +102,7 @@ async def update_net_value_info(
         fund_info_db[fund_code].replace(net_value_info=net_value_info)
 
 
-async def update_IARBC_info(fund_code: str, fund_info_db: dict[str, FundInfo]) -> None:
+async def update_IARBC_info(fund_code: str, fund_info_db: Shelf[str, FundInfo]) -> None:
     IARBC_date = fund_info_db[fund_code].同类排名截止日期
     if not IARBC_date_is_latest(IARBC_date):
         IARBC_info = await fetch_IARBC(fund_code)
@@ -110,7 +111,7 @@ async def update_IARBC_info(fund_code: str, fund_info_db: dict[str, FundInfo]) -
 
 # TODO use a database library that supports multiple concurrent read/write
 # TODO use a database library that supports asynchronous non-blocking write
-async def update_fund_info(fund_code: str, fund_info_db: dict[str, FundInfo]) -> None:
+async def update_fund_info(fund_code: str, fund_info_db: Shelf[str, FundInfo]) -> None:
 
     if fund_code in fund_info_db:
         await update_net_value_info(fund_code, fund_info_db)
@@ -122,13 +123,13 @@ async def update_fund_info(fund_code: str, fund_info_db: dict[str, FundInfo]) ->
 
 
 def update_fund_infos(
-    fund_codes: Iterable[str], fund_info_db: dict[str, FundInfo]
+    fund_codes: Iterable[str], fund_info_db: Shelf[str, FundInfo]
 ) -> None:
     tasks = (update_fund_info(fund_code, fund_info_db) for fund_code in set(fund_codes))
     asyncio.run(tqdm_asyncio.gather(tasks, unit="个", desc="获取基金信息"))
 
 
-def check_db_version(fund_info_db: dict[str, FundInfo]) -> None:
+def check_db_version(fund_info_db: Shelf[str, FundInfo]) -> None:
     if fund_info_db.get("version") != __version__:
         # 缓存数据库的版本不一致或版本信息缺失，清空旧存储, 并重置到当前版本
         fund_info_db.clear()
@@ -158,7 +159,7 @@ def get_fund_infos(
 
         # Shelf is not a generic type, therefore not friendly to type checker
         # TODO there should be a Pull Request making Shelf a generic type
-        fund_info_db = cast(dict[str, FundInfo], fund_info_db)
+        fund_info_db = cast(Shelf[str, FundInfo], fund_info_db)
 
         check_db_version(fund_info_db)
 
