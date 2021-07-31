@@ -1,11 +1,12 @@
 import shelve
 from collections.abc import KeysView, ValuesView
-from typing import Generic, TypeVar
+from typing import Generic, Optional, TypeVar, Union, overload
 
 
 __all__ = ["Shelf"]
 
 
+T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
 
@@ -22,7 +23,15 @@ class Shelf(shelve.Shelf, Generic[K, V]):
     def __delitem__(self, key: K) -> None:
         ...
 
-    def get(self, key: K, default: V = None) -> V:
+    def __contains__(self, key: K) -> bool:
+        ...
+
+    @overload
+    def get(self, key: K) -> Optional[V]:
+        ...
+
+    @overload
+    def get(self, key: K, default: T) -> Union[V, T]:
         ...
 
     def keys(self) -> KeysView[K]:
