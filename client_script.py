@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
+
 from datetime import datetime
 
-import click
 from quickfund import cli_entry
 
 
@@ -16,11 +17,13 @@ def update_quickfund() -> None:
     raise NotImplementedError
 
 
-@click.command()
-@click.argument("file", nargs=1)
-def main(file: str) -> None:
+def main() -> None:
 
     if should_update():
         update_quickfund()
 
-    cli_entry(file)
+    cli_entry()
+
+
+if __name__ == '__main__':
+    main()
