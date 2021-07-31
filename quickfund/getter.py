@@ -7,11 +7,16 @@ from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import cast
 
+from platformdirs import user_cache_dir
+
 from .__version__ import __version__
 from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
 from .models import FundInfo
 from .tqdm import tqdm_asyncio
 from .typing import Shelf
+
+
+PERSISTENT_CACHE_DIR = Path(user_cache_dir(appname="QuickFund", appauthor="MapleCCC", version=__version__))
 
 
 china_timezone = timezone(timedelta(hours=8), name="UTC+8")
@@ -144,16 +149,13 @@ def get_fund_infos(
     Output: a list of fund infos corresponding to the fund codes
     """
 
-    # TODO use appdirs to determine cache location, see what the black tool does
-    # TODO put a README into cache folder, elaborating on what the cache folder is for.
-    PERSISTENT_CACHE_PATH = Path(__file__).parent / ".cache" / "cache"
-    PERSISTENT_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    shelve_config = {"protocol": pickle.HIGHEST_PROTOCOL, "writeback": True}
+    FUND_INFO_CACHE_DB_PATH = PERSISTENT_CACHE_DIR / "fund-infos"
 
     if disable_cache:
         cm = nullcontext(enter_result={})
     else:
-        cm = shelve.open(str(PERSISTENT_CACHE_PATH), **shelve_config)
+        shelve_config = {"protocol": pickle.HIGHEST_PROTOCOL, "writeback": True}
+        cm = shelve.open(str(FUND_INFO_CACHE_DB_PATH), **shelve_config)
 
     with cm as fund_info_db:
 
