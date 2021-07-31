@@ -15,8 +15,9 @@ from quickfund.config import (
     REPO_OWNER,
 )
 from scripts._local_credentials import github_account_access_token
-from scripts.build import PYINSTALLER_DISTPATH
-from scripts.build import main as build_main
+
+
+# TODO upload source tar ball, not executable
 
 
 def release(new_version: str, upload_executable: bool = False) -> None:

@@ -8,12 +8,9 @@ from pathlib import Path
 
 import click
 import colorama
-import semver
 
 from .__version__ import __version__
-from .config import REPO_NAME, REPO_OWNER
 from .getter import get_fund_infos
-from .github_utils import get_latest_release_version
 from .utils import Logger, bright_blue, pause_at_exit, print_traceback_digest
 from .writter import write_to_xlsx
 
@@ -49,31 +46,6 @@ def backup_old_outfile(out_file: Path) -> None:
             f'有可能是 "{out_file}" 已经被 Excel 打开，'
             "请关闭文件之后重试"
         ) from None
-
-
-def check_update() -> None:
-    """
-    Check if update to the program is available.
-    """
-
-    logger.log("获取最新分发版本号......")
-    # TODO Handle the case when the latest release's tag name is not semantic
-    # version.
-    # TODO Handle the case when the latest release's tag name is semantic version but
-    # with additional suffix, like rc (release candidate), build, etc.
-    try:
-        latest_version = get_latest_release_version(REPO_OWNER, REPO_NAME)
-    except:
-        logger.log("获取最新分发版本号的时候发生错误，暂时跳过。可以通过 --update 命令来手动触发更新检查")
-        return
-
-    if semver.compare(latest_version.lstrip("v"), __version__.lstrip("v")) > 0:
-        logger.log(
-            f"检测到更新版本 {latest_version}，请手动至 https://github.com/MapleCCC/QuickFund/releases 下载最新版本"
-        )
-        sys.exit()
-    else:
-        logger.log("当前已是最新版本")
 
 
 def is_fund_code(s: str) -> bool:
@@ -131,12 +103,6 @@ def main(
     pause_at_exit(info=bright_blue("按任意键以退出 ..."))
 
     try:
-        # TODO Remove update check logic after switching architecture to
-        # server/client model
-        if not disable_update_check:
-            print("检查更新......")
-            check_update()
-
         in_file = Path(file)
         out_file = Path(output)
 
