@@ -2,7 +2,6 @@
 
 import re
 import shutil
-import sys
 import traceback
 from pathlib import Path
 
@@ -74,21 +73,18 @@ def is_fund_code(s: str) -> bool:
     type=click.Path(dir_okay=False, writable=True),
     help="The output file path.",
 )
-@click.option("--disable-update-check", is_flag=True, help="Disable update check.")
 @click.option(
-    "--color-off",
+    "--no-color",
     is_flag=True,
     help="Turn off the color output. For compatibility with environment without color code support.",
 )
 @click.option("--disable-cache", is_flag=True)
 # @click.option("-v", "--versbose", is_flag=True, help="Increase verboseness")
-# TODO: @click.option("--update")
 @click.version_option(version=__version__)
 def main(
     file: str,
     output: str,
-    disable_update_check: bool,
-    color_off: bool,
+    no_color: bool,
     disable_cache: bool,
 ) -> None:
     """
@@ -98,7 +94,7 @@ def main(
     Input file format: one fund code per line.
     """
 
-    colorama.init(convert=not color_off)
+    colorama.init(convert=not no_color)
 
     pause_at_exit(info=bright_blue("按任意键以退出 ..."))
 
@@ -112,7 +108,7 @@ def main(
 
         if not fund_codes:
             logger.log("没有发现基金代码")
-            sys.exit()
+            return
 
         logger.log("获取基金相关信息......")
         fund_infos = get_fund_infos(fund_codes, disable_cache=disable_cache)

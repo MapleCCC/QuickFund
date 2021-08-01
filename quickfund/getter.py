@@ -16,7 +16,9 @@ from .tqdm import tqdm_asyncio
 from .typing import Shelf
 
 
-PERSISTENT_CACHE_DIR = Path(user_cache_dir(appname="QuickFund", appauthor="MapleCCC", version=__version__))
+PERSISTENT_CACHE_DIR = Path(
+    user_cache_dir(appname="QuickFund", appauthor="MapleCCC", version=__version__)
+)
 
 
 china_timezone = timezone(timedelta(hours=8), name="UTC+8")
@@ -152,7 +154,8 @@ def get_fund_infos(
     FUND_INFO_CACHE_DB_PATH = PERSISTENT_CACHE_DIR / "fund-infos"
 
     if disable_cache:
-        cm = nullcontext(enter_result={})
+        null_shelf = cast(Shelf[str, FundInfo], {})
+        cm = nullcontext(enter_result=null_shelf)
     else:
         shelve_config = {"protocol": pickle.HIGHEST_PROTOCOL, "writeback": True}
         cm = shelve.open(str(FUND_INFO_CACHE_DB_PATH), **shelve_config)

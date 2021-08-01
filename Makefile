@@ -5,7 +5,8 @@ TEST_DIR=tests
 DEPS_FILE=requirements/install.txt
 
 run:
-	scripts/run.py
+	# FIXME why chinese characters in Makefile passed to command in 乱码，fix it！
+	python -m quickfund 样例基金代码2.txt
 
 test:
 	pytest ${TEST_DIR}

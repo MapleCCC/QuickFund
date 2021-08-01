@@ -8,12 +8,6 @@ import click
 from github import Github
 
 sys.path.append(os.getcwd())
-from quickfund.config import (
-    RELEASE_ASSET_NAME,
-    RELEASE_EXECUTABLE_NAME,
-    REPO_NAME,
-    REPO_OWNER,
-)
 from scripts._local_credentials import github_account_access_token
 
 
@@ -28,7 +22,7 @@ def release(new_version: str, upload_executable: bool = False) -> None:
 
     # Create release in GitHub. Upload the zip archive as release asset.
     g = Github(github_account_access_token)
-    repo = g.get_repo(f"{REPO_OWNER}/{REPO_NAME}")
+    repo = g.get_repo(f"MapleCCC/QuickFund")
     git_release = repo.create_git_release(
         tag=new_version,
         name=new_version,
