@@ -45,7 +45,7 @@ def tenumerate(
 std_gather = tqdm_asyncio.gather
 
 
-async def gather(*aws: Iterable[Awaitable[T]], **kwargs) -> list[T]:
+async def gather(*aws: Awaitable[T], **kwargs) -> list[T]:
     with bright_green_context():
         print()
         res = await std_gather(*aws, **kwargs, **tqdm_config)
