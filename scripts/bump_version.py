@@ -15,6 +15,9 @@ from quickfund.utils import Logger
 from scripts.release import release
 
 
+# TODO use PyGithub instead of naive subprocess.run
+
+
 logger = Logger()
 
 

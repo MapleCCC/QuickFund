@@ -1,6 +1,6 @@
-__all__ = ["__version__", "version_info"]
+__all__ = ["__version__", "__version_info__"]
 
 
 __version__ = "v1.4.0"
 
-version_info = __version__.lstrip("V").split(".")
+__version_info__ = __version__.lstrip("V").split(".")

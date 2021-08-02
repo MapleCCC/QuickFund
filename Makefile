@@ -38,6 +38,6 @@ todo:
 	rg "# TODO|# FIXME" --glob !Makefile
 
 clean:
-	rm -rf build/ dist/ __pycache__/ *.spec .cache/
+	echo "No clean job"
 
-.PHONY: run test release format type-check lint unused-imports todo clean
+.PHONY: run test release format type-check lint unused-imports reqs todo clean

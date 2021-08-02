@@ -79,6 +79,7 @@ def is_fund_code(s: str) -> bool:
     help="Turn off the color output. For compatibility with environment without color code support.",
 )
 @click.option("--disable-cache", is_flag=True)
+# @click.option("-q", "--quiet", is_flag=True, help="Suppress output except the error channel")
 # @click.option("-v", "--versbose", is_flag=True, help="Increase verboseness")
 @click.version_option(version=__version__)
 def main(

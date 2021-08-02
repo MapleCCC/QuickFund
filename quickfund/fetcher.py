@@ -139,12 +139,15 @@ def parse_estimate_api_response_text(text: str) -> dict[str, str]:
     # data coming from stranger environment. Better not depend on
     # some strong assumption made about them.
 
+    # TODO the most rubost approach is to use a JavaScript parser to parse the text
+    # argument.
+
     pattern = r"jsonpgz\((?P<json>.*)\);"
     m = re.fullmatch(pattern, text)
 
     if not m:
         raise ValueError(
-            f"regex pattern {pattern} doesn't match estimate API response text {text}"
+            f'regex pattern "{pattern}" doesn\'t match estimate API response text "{text}"'
         )
 
     json_text = m.group("json")
