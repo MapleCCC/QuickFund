@@ -142,7 +142,7 @@ def print_traceback_digest(
     if localized:
         digest = localize(digest)
 
-    if numbered:
+    if numbered and len(digest.splitlines()) > 1:
         numbered_lines = []
         for i, line in enumerate(digest.splitlines(), start=1):
             numbered_lines.append(f"{i}. {line}")
