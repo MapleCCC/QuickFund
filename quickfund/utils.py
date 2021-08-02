@@ -13,8 +13,8 @@ from typing import IO, Any, TypeVar, cast
 
 import aiohttp
 import click
+import regex
 from colorama import Fore, Style
-from more_itertools import split_at
 
 from .typing import IdentityDecorator
 
@@ -57,15 +57,11 @@ def bright_blue(s: str) -> str:
     return Style.BRIGHT + Fore.BLUE + s + Style.RESET_ALL
 
 
-def split_paragraphs(s: str) -> Iterator[str]:
+def split_paragraphs(text: str) -> list[str]:
     """
     Similar to splitlines(), except it splits paragraphs, not lines.
     """
-
-    lines = s.splitlines()
-    splits = split_at(lines, lambda line: line == "")
-    for split in splits:
-        yield "\n".join(split)
+    return regex.split(r"\n{2,}", text)
 
 
 def retrieve_succinct_traceback() -> str:
