@@ -19,6 +19,7 @@ from .typing import Shelf
 PERSISTENT_CACHE_DIR = Path(
     user_cache_dir(appname="QuickFund", appauthor="MapleCCC", version=__version__)
 )
+PERSISTENT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 china_timezone = timezone(timedelta(hours=8), name="UTC+8")
