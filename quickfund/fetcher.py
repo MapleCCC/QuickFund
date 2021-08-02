@@ -1,13 +1,13 @@
 import asyncio
 import json
 import random
-import re
 import string
 from datetime import date, datetime
 from typing import cast
 
 import aiohttp
 import pandas
+import regex
 from aiohttp_retry import ListRetry, RetryClient
 from lxml import etree
 from more_itertools import one
@@ -97,7 +97,7 @@ def pack_to_FundNetValueInfo(data: pandas.DataFrame) -> FundNetValueInfo:
         分红送配=data.分红送配[0],
         上一天净值=data.单位净值[1],
         上一天净值日期=data.净值日期[1].date(),
-    )  # type: ignore # https://github.com/python-attrs/attrs/issues/795
+    )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
 
     return net_value_info
 
@@ -143,7 +143,7 @@ def parse_estimate_api_response_text(text: str) -> dict[str, str]:
     # argument.
 
     pattern = r"jsonpgz\((?P<json>.*)\);"
-    m = re.fullmatch(pattern, text)
+    m = regex.fullmatch(pattern, text)
 
     if not m:
         raise ValueError(
@@ -163,7 +163,7 @@ def pack_to_FundEstimateInfo(data: dict[str, str]) -> FundEstimateInfo:
         # The estimate growth rate from API is itself a percentage number (despite
         # that it doesn't come with a % mark), so we need to multiply it by 0.01.
         估算增长率=float(data["gszzl"]) * 0.01,
-    )  # type: ignore # https://github.com/python-attrs/attrs/issues/795
+    )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
 
     # TODO what's the range of 估算增长率? Can we give it a bound and use the
     # bound to conduct sanity check?
@@ -229,7 +229,7 @@ def pack_to_FundIARBCInfo(cutoff_date: date, data: pandas.DataFrame) -> FundIARB
         近1年同类排名=data.近1年.同类排名,
         近2年同类排名=data.近2年.同类排名,
         近3年同类排名=data.近3年.同类排名,
-    )  # type: ignore # https://github.com/python-attrs/attrs/issues/795
+    )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
 
 
 async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:

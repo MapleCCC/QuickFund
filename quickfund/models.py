@@ -88,4 +88,4 @@ class FundInfo(FundNetValueInfo, FundEstimateInfo, FundIARBCInfo):
             **attr.asdict(net_value_info),
             **attr.asdict(estimate_info),
             **attr.asdict(IARBC_info)
-        )  # type: ignore # https://github.com/python-attrs/attrs/issues/795
+        )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
