@@ -219,16 +219,25 @@ def parse_fund_info_page_text_and_get_IARBC_data(
 
 
 def pack_to_FundIARBCInfo(cutoff_date: date, data: pandas.DataFrame) -> FundIARBCInfo:
+    def reformat_IARBC(IARBC: str) -> str:
+        m = regex.fullmatch(r"(?P<rank>\d+) \| (?P<total>\d+)", IARBC)
+
+        if not m:
+            raise ValueError("invalid IARBC format")
+
+        rank, total = m.group("rank", "total")
+        return rank + "/" + total
+
     return FundIARBCInfo(
         同类排名截止日期=cutoff_date,
-        近1周同类排名=data.近1周.同类排名,
-        近1月同类排名=data.近1月.同类排名,
-        近3月同类排名=data.近3月.同类排名,
-        近6月同类排名=data.近6月.同类排名,
-        今年来同类排名=data.今年来.同类排名,
-        近1年同类排名=data.近1年.同类排名,
-        近2年同类排名=data.近2年.同类排名,
-        近3年同类排名=data.近3年.同类排名,
+        近1周同类排名=reformat_IARBC(data.近1周.同类排名),
+        近1月同类排名=reformat_IARBC(data.近1月.同类排名),
+        近3月同类排名=reformat_IARBC(data.近3月.同类排名),
+        近6月同类排名=reformat_IARBC(data.近6月.同类排名),
+        今年来同类排名=reformat_IARBC(data.今年来.同类排名),
+        近1年同类排名=reformat_IARBC(data.近1年.同类排名),
+        近2年同类排名=reformat_IARBC(data.近2年.同类排名),
+        近3年同类排名=reformat_IARBC(data.近3年.同类排名),
     )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
 
 
