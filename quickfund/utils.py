@@ -68,11 +68,12 @@ def split_paragraphs(s: str) -> Iterator[str]:
         yield "\n".join(split)
 
 
-def retrieve_succinct_traceback(tb: str) -> str:
+def retrieve_succinct_traceback() -> str:
     """
     A utility that retrive succint traceback digest from a complete traceback string.
     """
 
+    tb = traceback.format_exc()
     return "\n".join(pg.splitlines()[-1] for pg in split_paragraphs(tb))
 
 
@@ -136,25 +137,28 @@ def print_traceback_digest(
     `localized`: A flag to control whether should localize the traceback digest.
     """
 
-    tb = traceback.format_exc()
-    digest = retrieve_succinct_traceback(tb)
+    digest = retrieve_succinct_traceback()
 
     if localized:
         digest = localize(digest)
 
-    if numbered and len(digest.splitlines()) > 1:
-        numbered_lines = []
-        for i, line in enumerate(digest.splitlines(), start=1):
-            numbered_lines.append(f"{i}. {line}")
-        digest = "\n".join(numbered_lines)
-
-    if indented:
-        digest = "\n".join("    " + line for line in digest.splitlines())
-
     if colored:
-        print(bright_red(digest))
-    else:
-        print(digest)
+        digest = bright_red(digest)
+
+    lines = digest.splitlines()
+
+    for i, line in enumerate(lines):
+
+        if numbered and len(lines) > 1:
+            lineno = i + 1
+            lines[i] = str(lineno) + ". " + line
+
+        if indented:
+            lines[i] = "    " + line
+
+    digest = "\n".join(lines)
+
+    print(digest)
 
 
 def no_op(*_, **__) -> None:
