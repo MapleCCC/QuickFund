@@ -1,13 +1,16 @@
 from collections.abc import Callable
 from typing import Protocol, TypeVar
 
+from typing_extensions import ParamSpec
+
 
 __all__ = ["IdentityDecorator"]
 
 
-FuncT = TypeVar("FuncT", bound=Callable)
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 class IdentityDecorator(Protocol):
-    def __call__(self, __func: FuncT) -> FuncT:
+    def __call__(self, __func: Callable[P, R]) -> Callable[P, R]:
         ...

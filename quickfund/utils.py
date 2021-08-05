@@ -15,6 +15,7 @@ import aiohttp
 import click
 import regex
 from colorama import Fore, Style
+from typing_extensions import ParamSpec
 
 from .typing import IdentityDecorator
 
@@ -33,7 +34,8 @@ __all__ = [
 ]
 
 
-FuncT = TypeVar("FuncT", bound=Callable)
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 def bright_red(s: str) -> str:
@@ -187,7 +189,7 @@ class Logger:
         return ret
 
 
-def timefunc(fn: FuncT) -> FuncT:
+def timefunc(fn: Callable[P, R]) -> Callable[P, R]:
     """
     A decorator to collect execution time statistics of the wrapped function.
 
@@ -196,7 +198,7 @@ def timefunc(fn: FuncT) -> FuncT:
 
     statistics = {}
 
-    def format_args(*args, **kwargs) -> str:
+    def format_args(*args: P.args, **kwargs: P.kwargs) -> str:
         res = str(args).strip("()")
         if kwargs:
             res += ", " + str(kwargs).strip("{}")
@@ -204,7 +206,7 @@ def timefunc(fn: FuncT) -> FuncT:
         return res
 
     @functools.wraps(fn)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         pre = time.time()
         result = fn(*args, **kwargs)
         post = time.time()
@@ -215,7 +217,7 @@ def timefunc(fn: FuncT) -> FuncT:
         return result
 
     wrapper.exe_time_statistics = statistics
-    return cast(FuncT, wrapper)
+    return wrapper
 
 
 def on_failure_raises(
@@ -232,11 +234,11 @@ def on_failure_raises(
     decorated function should be suppressed. By default it's turned off.
     """
 
-    def decorator(func: FuncT) -> FuncT:
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
         signature = inspect.signature(func)
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             try:
                 return func(*args, **kwargs)
 
@@ -246,7 +248,7 @@ def on_failure_raises(
                 cause = None if suppress_cause else exc
                 raise etype(formatted_error_message) from cause
 
-        return cast(FuncT, wrapper)
+        return wrapper
 
     return decorator
 
