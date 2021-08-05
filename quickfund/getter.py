@@ -163,8 +163,8 @@ def get_fund_infos(
 
     with cm as fund_info_db:
 
-        # Shelf is not a generic type, therefore not friendly to type checker
-        # TODO there should be a Pull Request making Shelf a generic type
+        # TODO wait for typeshed change to downstream to pylance
+        # TODO Add reference link to the commit when removing the cast
         fund_info_db = cast(Shelf[str, FundInfo], fund_info_db)
 
         check_db_version(fund_info_db)
