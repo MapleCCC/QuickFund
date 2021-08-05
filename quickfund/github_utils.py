@@ -22,7 +22,7 @@ ENDPOINT = "https://api.github.com"
 retry_strategy = Retry(
     total=3,
     backoff_factor=0.3,
-    raise_on_status=False,  # type: ignore # TODO open a PR to fix the typestub bundled with pylance
+    raise_on_status=False,
 )
 adapter = HTTPAdapter(max_retries=retry_strategy)
 sess = requests.session()
