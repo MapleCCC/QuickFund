@@ -16,6 +16,9 @@ from .models import FundInfo
 from .tqdm import tqdm_asyncio
 
 
+__all__ = ["get_fund_infos"]
+
+
 PERSISTENT_CACHE_DIR = Path(
     user_cache_dir(appname="QuickFund", appauthor="MapleCCC", version=__version__)
 )

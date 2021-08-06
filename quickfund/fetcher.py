@@ -2,6 +2,7 @@ import asyncio
 import json
 import random
 import string
+from asyncio.events import AbstractEventLoop
 from datetime import date, datetime
 from typing import cast
 
@@ -40,29 +41,25 @@ def _construct_client_session() -> ClientSession:
     return cast(ClientSession, session)
 
 
+_mapping_loop_to_client_session: dict[AbstractEventLoop, ClientSession] = {}
+
+
 def _get_running_client_session() -> ClientSession:
     """
-    "Why is creating a ClientSession outside of an event loop dangerous?
-    Short answer is: life-cycle of all asyncio objects should be shorter than life-cycle of event loop."
-    https://docs.aiohttp.org/en/stable/faq.html#why-is-creating-a-clientsession-outside-of-an-event-loop-dangerous
-
     Called inside coroutines
     """
 
+    # Ref: https://docs.aiohttp.org/en/stable/faq.html#why-is-creating-a-clientsession-outside-of-an-event-loop-dangerous
+    # Quote: "Why is creating a ClientSession outside of an event loop dangerous? Short answer is: life-cycle of all asyncio objects should be shorter than life-cycle of event loop."
+
     loop = asyncio.get_running_loop()
 
-    # TODO how to inform the type checker that loop has an attribute ?
-
-    try:
-        return loop._aiohttp_client_session
-
-    except AttributeError:
-
+    if loop not in _mapping_loop_to_client_session:
         session = _construct_client_session()
-        loop._aiohttp_client_session = session
+        _mapping_loop_to_client_session[loop] = session
         schedule_at_loop_close(graceful_shutdown_client_session(session))
 
-        return session
+    return _mapping_loop_to_client_session[loop]
 
 
 async def get_net_value_api_response_text(fund_code: str) -> str:

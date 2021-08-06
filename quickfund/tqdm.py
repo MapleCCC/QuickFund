@@ -20,7 +20,8 @@ if os.name == "nt":
     tqdm_config = {"ascii": True}
 
 
-# FIXME tqdm supports a `colour` argument, there is no need for wrapping in bright green context?
+# FIXME this function can be removed once the PR is merged that fixes a bug in colorama
+# that makes passing colour="#a6e22e" to tqdm malfunctioning.
 # https://github.com/tartley/colorama/issues/217
 # https://github.com/tartley/colorama/pull/222
 @contextlib.contextmanager

@@ -7,6 +7,9 @@ from .tqdm import tenumerate
 from .utils import Logger, on_failure_raises
 
 
+__all__ = ["write_to_xlsx"]
+
+
 @on_failure_raises(RuntimeError, "获取基金信息并写入 Excel 文档 {xlsx_filename} 的时候发生错误")
 def write_to_xlsx(
     fund_infos: list[FundInfo],

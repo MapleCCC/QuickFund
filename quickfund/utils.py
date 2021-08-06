@@ -12,9 +12,9 @@ from collections.abc import Awaitable, Callable
 from types import MethodType
 from typing import IO, TypeVar
 
-import aiohttp
 import click
 import regex
+from aiohttp import ClientSession
 from colorama import Fore, Style
 from typing_extensions import ParamSpec
 
@@ -32,7 +32,6 @@ __all__ = [
     "pause_at_exit",
     "schedule_at_loop_close",
     "graceful_shutdown_client_session",
-    "get_running_client_session",
 ]
 
 
@@ -271,31 +270,10 @@ def schedule_at_loop_close(aw: Awaitable[None]) -> None:
     loop.shutdown_asyncgens = MethodType(shutdown_asyncgens, loop)
 
 
-async def graceful_shutdown_client_session(session: aiohttp.ClientSession) -> None:
+# TODO we don't need this workaround anymore after the release of aiohttp 4.0.0 https://github.com/aio-libs/aiohttp/issues/1925#issuecomment-715977247
+async def graceful_shutdown_client_session(session: ClientSession) -> None:
+
     # Ref: https://docs.aiohttp.org/en/stable/client_advanced.html#graceful-shutdown
+
     await session.close()
-    print(dir(session))
     await asyncio.sleep(0.250)
-
-
-def get_running_client_session(session_id: str) -> aiohttp.ClientSession:
-    """
-    "Why is creating a ClientSession outside of an event loop dangerous?
-    Short answer is: life-cycle of all asyncio objects should be shorter than life-cycle of event loop."
-    https://docs.aiohttp.org/en/stable/faq.html#why-is-creating-a-clientsession-outside-of-an-event-loop-dangerous
-
-    Called inside coroutines
-    """
-
-    loop = asyncio.get_running_loop()
-
-    if not hasattr(loop, "_aiohttp_client_sessions"):
-        loop._aiohttp_client_sessions = {}
-
-    try:
-        return loop._aiohttp_client_sessions[session_id]
-    except KeyError:
-        session = aiohttp.ClientSession()
-        loop._aiohttp_client_sessions[session_id] = session
-        schedule_at_loop_close(graceful_shutdown_client_session(session))
-        return session
