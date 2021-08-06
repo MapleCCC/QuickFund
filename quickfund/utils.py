@@ -8,7 +8,8 @@ import locale
 import sys
 import time
 import traceback
-from collections.abc import Callable, Iterator
+from collections.abc import Awaitable, Callable, Iterator
+from types import MethodType
 from typing import IO, Any, TypeVar, cast
 
 import aiohttp
@@ -29,7 +30,8 @@ __all__ = [
     "timefunc",
     "on_failure_raises",
     "pause_at_exit",
-    "register_at_loop_close",
+    "schedule_at_loop_close",
+    "graceful_shutdown_client_session",
     "get_running_client_session",
 ]
 
@@ -257,15 +259,23 @@ def pause_at_exit(info: str = "Press any key to exit ...") -> None:
     atexit.register(lambda: click.pause(info=info))
 
 
-def register_at_loop_close(loop: asyncio.AbstractEventLoop, callback: Callable) -> None:
-    origin_close = loop.close
+def schedule_at_loop_close(aw: Awaitable[None]) -> None:
+    loop = asyncio.get_running_loop()
 
-    @functools.wraps(origin_close)
-    def new_close():
-        callback()
-        origin_close()
+    origin_shutdown_asyncgens = loop.shutdown_asyncgens
 
-    loop.close = new_close
+    async def shutdown_asyncgens(self) -> None:
+        await aw
+        await origin_shutdown_asyncgens()
+
+    loop.shutdown_asyncgens = MethodType(shutdown_asyncgens, loop)
+
+
+async def graceful_shutdown_client_session(session: aiohttp.ClientSession) -> None:
+    # Ref: https://docs.aiohttp.org/en/stable/client_advanced.html#graceful-shutdown
+    await session.close()
+    print(dir(session))
+    await asyncio.sleep(0.250)
 
 
 def get_running_client_session(session_id: str) -> aiohttp.ClientSession:
@@ -277,11 +287,6 @@ def get_running_client_session(session_id: str) -> aiohttp.ClientSession:
     Called inside coroutines
     """
 
-    def graceful_shutdown_client_session(session: aiohttp.ClientSession) -> None:
-        # Ref: https://docs.aiohttp.org/en/stable/client_advanced.html#graceful-shutdown
-        loop.create_task(session.close())
-        loop.create_task(asyncio.sleep(0))
-
     loop = asyncio.get_running_loop()
 
     if not hasattr(loop, "_aiohttp_client_sessions"):
@@ -292,5 +297,5 @@ def get_running_client_session(session_id: str) -> aiohttp.ClientSession:
     except KeyError:
         session = aiohttp.ClientSession()
         loop._aiohttp_client_sessions[session_id] = session
-        register_at_loop_close(loop, lambda: graceful_shutdown_client_session(session))
+        schedule_at_loop_close(graceful_shutdown_client_session(session))
         return session

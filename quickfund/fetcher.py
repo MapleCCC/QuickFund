@@ -13,7 +13,11 @@ from lxml import etree
 from more_itertools import one
 
 from .models import FundEstimateInfo, FundIARBCInfo, FundInfo, FundNetValueInfo
-from .utils import on_failure_raises, register_at_loop_close
+from .utils import (
+    graceful_shutdown_client_session,
+    on_failure_raises,
+    schedule_at_loop_close,
+)
 
 
 __all__ = ["fetch_net_value", "fetch_estimate", "fetch_IARBC", "fetch_fund_info"]
@@ -42,11 +46,6 @@ def _get_running_client_session() -> RetryClient:
     Called inside coroutines
     """
 
-    def graceful_shutdown_client_session(session: RetryClient) -> None:
-        # Ref: https://docs.aiohttp.org/en/stable/client_advanced.html#graceful-shutdown
-        loop.create_task(session.close())
-        loop.create_task(asyncio.sleep(0))
-
     loop = asyncio.get_running_loop()
 
     # TODO how to inform the type checker that loop has an attribute ?
@@ -58,8 +57,7 @@ def _get_running_client_session() -> RetryClient:
 
         session = _construct_client_session()
         loop._aiohttp_client_session = session
-        # FIXME shutting down client session is still buggy
-        register_at_loop_close(loop, lambda: graceful_shutdown_client_session(session))
+        schedule_at_loop_close(graceful_shutdown_client_session(session))
 
         return session
 
