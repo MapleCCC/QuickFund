@@ -16,10 +16,24 @@ from .models import FundEstimateInfo, FundIARBCInfo, FundInfo, FundNetValueInfo
 from .utils import on_failure_raises, register_at_loop_close
 
 
-__all__ = ["fetch_net_value", "fetch_estimate", "fetch_fund_info"]
+__all__ = ["fetch_net_value", "fetch_estimate", "fetch_IARBC", "fetch_fund_info"]
 
 
-def _get_client_session() -> RetryClient:
+# TODO make RetryClient a subclass of aiohttp.ClientSession, so that we don't need to
+# expose underlying detail in type annotations.
+def _construct_client_session() -> RetryClient:
+
+    # Restrict the size of the connection pool for scraping ethic
+    conn = aiohttp.TCPConnector(limit_per_host=30)
+    retry_options = ListRetry(
+        timeouts=[0, 0, 0.6, 1.2], statuses={500, 502, 503, 504, 514}
+    )
+    session = RetryClient(connector=conn, retry_options=retry_options)
+
+    return session
+
+
+def _get_running_client_session() -> RetryClient:
     """
     "Why is creating a ClientSession outside of an event loop dangerous?
     Short answer is: life-cycle of all asyncio objects should be shorter than life-cycle of event loop."
@@ -35,19 +49,16 @@ def _get_client_session() -> RetryClient:
 
     loop = asyncio.get_running_loop()
 
+    # TODO how to inform the type checker that loop has an attribute ?
+
     try:
         return loop._aiohttp_client_session
 
     except AttributeError:
 
-        # Restrict the size of the connection pool for scraping ethic
-        conn = aiohttp.TCPConnector(limit_per_host=30)
-        retry_options = ListRetry(
-            timeouts=[0, 0, 0.6, 1.2], statuses={500, 502, 503, 504, 514}
-        )
-        session = RetryClient(connector=conn, retry_options=retry_options)
-
+        session = _construct_client_session()
         loop._aiohttp_client_session = session
+        # FIXME shutting down client session is still buggy
         register_at_loop_close(loop, lambda: graceful_shutdown_client_session(session))
 
         return session
@@ -69,7 +80,7 @@ async def get_net_value_api_response_text(fund_code: str) -> str:
         salt_key: salt_value,
     }
 
-    session = _get_client_session()
+    session = _get_running_client_session()
     async with session.get(net_value_api, params=params) as response:
         response.raise_for_status()
         return await response.text(encoding="utf-8")
@@ -123,7 +134,7 @@ async def get_estimate_api_response_text(fund_code: str) -> str:
     estimate_api = f"http://fundgz.1234567.com.cn/js/{fund_code}.js"
     params = {salt_key: salt_value}
 
-    session = _get_client_session()
+    session = _get_running_client_session()
     async with session.get(estimate_api, params=params) as response:
         response.raise_for_status()
         return await response.text(encoding="utf-8")
@@ -196,7 +207,7 @@ async def get_fund_info_page_text(fund_code: str) -> str:
     fund_info_page_url = f"http://fund.eastmoney.com/{fund_code}.html"
     params = {salt_key: salt_value}
 
-    session = _get_client_session()
+    session = _get_running_client_session()
     async with session.get(fund_info_page_url, params=params) as response:
         response.raise_for_status()
         return await response.text(encoding="utf-8")
@@ -262,4 +273,4 @@ async def fetch_fund_info(fund_code: str) -> FundInfo:
 
 
 if __name__ == "__main__":
-    print(asyncio.run(fetch_net_value("000478")))
+    print(asyncio.run(fetch_fund_info("000478")))
