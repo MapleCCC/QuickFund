@@ -8,9 +8,9 @@ import locale
 import sys
 import time
 import traceback
-from collections.abc import Awaitable, Callable, Iterator
+from collections.abc import Awaitable, Callable
 from types import MethodType
-from typing import IO, Any, TypeVar, cast
+from typing import IO, TypeVar
 
 import aiohttp
 import click

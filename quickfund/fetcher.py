@@ -8,6 +8,7 @@ from typing import cast
 import aiohttp
 import pandas
 import regex
+from aiohttp import ClientSession
 from aiohttp_retry import ListRetry, RetryClient
 from lxml import etree
 from more_itertools import one
@@ -23,9 +24,7 @@ from .utils import (
 __all__ = ["fetch_net_value", "fetch_estimate", "fetch_IARBC", "fetch_fund_info"]
 
 
-# TODO make RetryClient a subclass of aiohttp.ClientSession, so that we don't need to
-# expose underlying detail in type annotations.
-def _construct_client_session() -> RetryClient:
+def _construct_client_session() -> ClientSession:
 
     # Restrict the size of the connection pool for scraping ethic
     conn = aiohttp.TCPConnector(limit_per_host=30)
@@ -34,10 +33,14 @@ def _construct_client_session() -> RetryClient:
     )
     session = RetryClient(connector=conn, retry_options=retry_options)
 
-    return session
+    # TODO we should inform the type checker that RetryClient has the same interface
+    # with that of ClientSession. We can either do it statically by making RetryClient a
+    # subclass of ClientSession, or do it dynamically by duck typing / structural typing
+    # / typing.Protocol etc.
+    return cast(ClientSession, session)
 
 
-def _get_running_client_session() -> RetryClient:
+def _get_running_client_session() -> ClientSession:
     """
     "Why is creating a ClientSession outside of an event loop dangerous?
     Short answer is: life-cycle of all asyncio objects should be shorter than life-cycle of event loop."

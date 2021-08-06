@@ -9,7 +9,7 @@ UPDATE_PERIOD = 4
 
 
 def should_update() -> bool:
-    return datetime.now().date().toordinal() % UPDATE_PERIOD == 0
+    return datetime.now().toordinal() % UPDATE_PERIOD == 0
 
 
 def update_quickfund() -> None:
@@ -20,6 +20,7 @@ def update_quickfund() -> None:
 def main() -> None:
 
     if should_update():
+        # TODO skip update if timeout
         update_quickfund()
 
     cli_entry()
