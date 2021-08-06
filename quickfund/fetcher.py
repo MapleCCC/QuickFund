@@ -131,7 +131,7 @@ async def get_estimate_api_response_text(fund_code: str) -> str:
     salt_key = "锟斤铐"
     salt_value = "".join(random.choices(string.hexdigits, k=10))
 
-    estimate_api = f"http://fundgz.1234567.com.cn/js/{fund_code}.js"
+    estimate_api = f"https://fundgz.1234567.com.cn/js/{fund_code}.js"
     params = {salt_key: salt_value}
 
     session = _get_running_client_session()
@@ -204,7 +204,7 @@ async def get_fund_info_page_text(fund_code: str) -> str:
     salt_key = "锟斤铐"
     salt_value = "".join(random.choices(string.hexdigits, k=10))
 
-    fund_info_page_url = f"http://fund.eastmoney.com/{fund_code}.html"
+    fund_info_page_url = f"https://fund.eastmoney.com/{fund_code}.html"
     params = {salt_key: salt_value}
 
     session = _get_running_client_session()
