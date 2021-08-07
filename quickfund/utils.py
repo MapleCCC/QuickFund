@@ -8,6 +8,7 @@ import locale
 import sys
 import time
 import traceback
+from asyncio import AbstractEventLoop
 from collections.abc import Awaitable, Callable
 from types import MethodType
 from typing import IO, TypeVar
@@ -270,8 +271,9 @@ def pause_at_exit(info: str = "Press any key to exit ...") -> None:
     atexit.register(lambda: click.pause(info=info))
 
 
-def schedule_at_loop_close(aw: Awaitable[None]) -> None:
-    loop = asyncio.get_running_loop()
+def schedule_at_loop_close(aw: Awaitable[None], loop: AbstractEventLoop = None) -> None:
+
+    loop = loop or asyncio.get_running_loop()
 
     origin_shutdown_asyncgens = loop.shutdown_asyncgens
 
