@@ -62,9 +62,21 @@ def bright_blue(s: str) -> str:
 
 def split_paragraphs(text: str) -> list[str]:
     """
-    Similar to splitlines(), except it splits paragraphs, not lines.
+    Similar to str.splitlines(), except it splits paragraphs, not lines.
+
+    Returns empty list for empty string.
+    A terminal paragraph boundary doesn't result in an extra paragraph.
     """
-    return regex.split(r"\n{2,}", text)
+
+    if not text:
+        return []
+
+    paras = regex.split(r"\n{2,}", text)
+
+    if len(paras) > 1 and paras[-1] == "":
+        paras.pop()
+
+    return paras
 
 
 def retrieve_succinct_traceback() -> str:
