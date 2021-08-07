@@ -6,7 +6,6 @@ import functools
 import inspect
 import locale
 import sys
-import time
 import traceback
 from asyncio import AbstractEventLoop
 from collections.abc import Awaitable, Callable
@@ -28,7 +27,6 @@ __all__ = [
     "bright_blue",
     "print_traceback_digest",
     "Logger",
-    "timefunc",
     "on_failure_raises",
     "pause_at_exit",
     "schedule_at_loop_close",
@@ -201,37 +199,6 @@ class Logger:
         ret = cls()
         ret.log = no_op
         return ret
-
-
-def timefunc(fn: Callable[P, R]) -> Callable[P, R]:
-    """
-    A decorator to collect execution time statistics of the wrapped function.
-
-    Statistics is stored in the `exe_time_statistics` attribute of the wrapped function.
-    """
-
-    statistics = {}
-
-    def format_args(*args: P.args, **kwargs: P.kwargs) -> str:
-        res = str(args).strip("()")
-        if kwargs:
-            res += ", " + str(kwargs).strip("{}")
-        res = "(" + res + ")"
-        return res
-
-    @functools.wraps(fn)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-        pre = time.time()
-        result = fn(*args, **kwargs)
-        post = time.time()
-
-        statistics[format_args(*args, **kwargs)] = post - pre
-        # print(f"Input is {format_args(*args, **kwargs)}, execution duration is {post-pre}")
-
-        return result
-
-    wrapper.exe_time_statistics = statistics
-    return wrapper
 
 
 def on_failure_raises(
