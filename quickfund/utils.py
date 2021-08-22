@@ -240,8 +240,15 @@ def pause_at_exit(info: str = "Press any key to exit ...") -> None:
 
 
 def schedule_at_loop_close(aw: Awaitable[None], loop: AbstractEventLoop = None) -> None:
+    """
+    If the `loop` parameter is not specified, and no loop is running at the time, a
+    `RuntimeError` is raised.
+    """
 
-    loop = loop or asyncio.get_running_loop()
+    try:
+        loop = loop or asyncio.get_running_loop()
+    except RuntimeError:
+        raise RuntimeError("no loop is running") from None
 
     origin_shutdown_asyncgens = loop.shutdown_asyncgens
 
