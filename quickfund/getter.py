@@ -89,10 +89,19 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
         raise RuntimeError("Unreachable")
 
 
-def IARBC_date_is_latest(d: date) -> bool:
+def IARBC_date_is_latest(IARBC_date: date) -> bool:
+    """
+    Check if the IARBC date is the latest.
+
+    `IARBC_date` should be of China timezone.
+    """
+
+    # TODO what's the update pattern of IARBC info? Currently only a naive approach,
+    # not efficient enough.
+
     china_now = datetime.now(china_timezone)
     today = china_now.date()
-    return d == today
+    return IARBC_date == today
 
 
 async def update_estimate_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:

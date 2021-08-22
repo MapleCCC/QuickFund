@@ -250,7 +250,9 @@ def pack_to_FundIARBCInfo(cutoff_date: date, data: pandas.DataFrame) -> FundIARB
     )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
 
 
+@on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关同类排名信息时发生错误")
 async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:
+    """Fetch the IARBC info related to the given fund code"""
 
     text = await get_fund_info_page_text(fund_code)
     cutoff_date, data = parse_fund_info_page_text_and_get_IARBC_data(text)

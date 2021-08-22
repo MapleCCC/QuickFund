@@ -152,6 +152,7 @@ def print_traceback_digest(
     if localized:
         digest = localize(digest)
 
+    # Line numbers are intentionally not colored, for readability.
     if colored:
         digest = bright_red(digest)
 
