@@ -1,15 +1,12 @@
-# MAKEFLAGS+=.silent
-
-SRC_DIR=quickfund
-TEST_DIR=tests
-DEPS_FILE=requirements/install.txt
+SRC_DIR := quickfund
+TEST_DIR := tests
+DEPS_FILE := requirements/install.txt
 
 run:
-	# FIXME why chinese characters in Makefile passed to command in 乱码，fix it！
 	python -m quickfund 样例基金代码2.txt
 
 test:
-	pytest ${TEST_DIR}
+	pytest {{TEST_DIR}}
 
 release:
 	scripts/release.py
@@ -31,13 +28,11 @@ unused-imports:
 	find . -type f -name "*.py" | xargs pylint --disable=all --enable=W0611
 
 reqs:
-	pipreqs --use-local --encoding utf-8 ${SRC_DIR} --savepath ${DEPS_FILE}
-	sort ${DEPS_FILE} -o ${DEPS_FILE}
+	pipreqs --use-local --encoding utf-8 {{SRC_DIR}} --savepath {{DEPS_FILE}}
+	sort {{DEPS_FILE}} -o {{DEPS_FILE}}
 
 todo:
 	rg "# TODO|# FIXME" --glob !Makefile
 
 clean:
 	echo "No clean job"
-
-.PHONY: run test release format type-check lint unused-imports reqs todo clean
