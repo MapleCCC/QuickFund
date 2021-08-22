@@ -65,7 +65,7 @@ def _get_running_client_session() -> ClientSession:
 async def get_net_value_api_response_text(fund_code: str) -> str:
 
     # Add random parameter to the URL to break any cache mechanism of
-    # the server or the network or the requests library.
+    # the server or the network or the aiohttp library.
     salt_key = "锟斤铐"
     salt_value = "".join(random.choices(string.hexdigits, k=10))
 
@@ -125,7 +125,7 @@ async def fetch_net_value(fund_code: str) -> FundNetValueInfo:
 async def get_estimate_api_response_text(fund_code: str) -> str:
 
     # Add random parameter to the URL to break potential cache mechanism of
-    # the server or the network or the requests library.
+    # the server or the network or the aiohttp library.
     salt_key = "锟斤铐"
     salt_value = "".join(random.choices(string.hexdigits, k=10))
 
@@ -198,7 +198,7 @@ async def fetch_estimate(fund_code: str) -> FundEstimateInfo:
 async def get_fund_info_page_text(fund_code: str) -> str:
 
     # Add random parameter to the URL to break potential cache mechanism of
-    # the server or the network or the requests library.
+    # the server or the network or the aiohttp library.
     salt_key = "锟斤铐"
     salt_value = "".join(random.choices(string.hexdigits, k=10))
 
