@@ -1,38 +1,38 @@
-SRC_DIR := quickfund
-TEST_DIR := tests
-DEPS_FILE := requirements/install.txt
+src_dir := quickfund
+test_dir := tests
+deps_file := requirements/install.txt
 
 run:
-	python -m quickfund 样例基金代码2.txt
+    python -m quickfund 样例基金代码2.txt
 
 test:
-	pytest {{TEST_DIR}}
+    pytest {{test_dir}}
 
 release:
-	scripts/release.py
+    scripts/release.py
 
 format:
-	autopep8 --in-place --recursive --aggressive --aggressive --select E501 --max-line-length 88 .
-	isort .
-	black .
+    # autopep8 --in-place --recursive --aggressive --aggressive --select E501 --max-line-length 88 .
+    isort .
+    black .
 
 type-check:
-	mypy .
-	pyright
-	# TODO pytype, pyre-check
+    mypy .
+    pyright
+    # TODO pytype, pyre-check
 
 lint:
-	find . -type f -name "*.py" | xargs pylint
+    find . -type f -name "*.py" | xargs pylint
 
 unused-imports:
-	find . -type f -name "*.py" | xargs pylint --disable=all --enable=W0611
+    pycln --diff {{src_dir}} {{test_dir}}
 
 reqs:
-	pipreqs --use-local --encoding utf-8 {{SRC_DIR}} --savepath {{DEPS_FILE}}
-	sort {{DEPS_FILE}} -o {{DEPS_FILE}}
+    pipreqs --use-local --encoding utf-8 {{src_dir}} --savepath {{deps_file}}
+    sort {{deps_file}} -o {{deps_file}}
 
 todo:
-	rg "# TODO|# FIXME" --glob !Makefile
+    rg "# TODO|# FIXME" --glob !justfile
 
 clean:
-	echo "No clean job"
+    echo "No clean job"
