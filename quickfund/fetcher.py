@@ -35,8 +35,8 @@ def _construct_client_session() -> ClientSession:
     session = RetryClient(connector=conn, retry_options=retry_options)
 
     # TODO we should inform the type checker that RetryClient has the same interface
-    # with that of ClientSession. We can either do it statically by making RetryClient a
-    # subclass of ClientSession, or do it dynamically by duck typing / structural typing
+    # with that of ClientSession. We can either do it nominally by making RetryClient a
+    # subclass of ClientSession, or do it structurally by duck typing / structural typing
     # / typing.Protocol etc.
     return cast(ClientSession, session)
 
@@ -67,6 +67,7 @@ async def get_net_value_api_response_text(fund_code: str) -> str:
     # Add random parameter to the URL to break any cache mechanism of
     # the server or the network or the aiohttp library.
     salt_key = "锟斤铐"
+    # TODO can we just use random bytes as salt_value?
     salt_value = "".join(random.choices(string.hexdigits, k=10))
 
     net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
@@ -92,7 +93,7 @@ def parse_net_value_api_response_text(text: str) -> pandas.DataFrame:
 
     # TODO configure pandas.read_html to use the most performant parser backend
 
-    # TODO the type annotation for parse_dates should be more than bool
+    # TODO wait for upstream PR to land https://github.com/microsoft/python-type-stubs/pull/85
 
     dfs = pandas.read_html(text, parse_dates=["净值日期"], keep_default_na=False)
     return one(dfs)

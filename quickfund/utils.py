@@ -172,7 +172,7 @@ def print_traceback_digest(
     print(digest)
 
 
-def no_op(*_, **__) -> None:
+def noop(*_, **__) -> None:
     pass
 
 
@@ -198,7 +198,7 @@ class Logger:
     @classmethod
     def null_logger(cls) -> Logger:
         ret = cls()
-        ret.log = no_op
+        ret.log = noop
         return ret
 
 

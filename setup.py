@@ -11,7 +11,7 @@ setuptools.setup(
     author="MapleCCC",
     author_email="littlelittlemaple@gmail.com",
     description="A script to fetch various fund information from "
-    "fund.eastmoney.com, and structuralize into Excel document.",
+    "https://fund.eastmoney.com/, and structuralize into Excel document.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/MapleCCC/QuickFund",

@@ -34,7 +34,7 @@
 
 ## Overview
 
-A script to fetch various fund information from `https://fund.eastmoney.com`, and structuralize into Excel document. It's a non-tech-savvy user oriented tool, not developer-oriented.
+A script to fetch various fund information from `https://fund.eastmoney.com/`, and structuralize into Excel document. It's a non-tech-savvy user oriented tool, not developer-oriented.
 
 抓取天天基金信息，生成自定义表格。表头和样式可以在 `quickfund/writter.py` 自定义。
 
@@ -62,24 +62,27 @@ $ python -m pip install -e git+https://github.com/MapleCCC/QuickFund.git@v1.4.0#
 ## Usage
 
 ```bash
-$ quickfund <list of fund codes or files containing fund codes>
+$ quickfund <A file containing a sequence of newline separated fund codes>
 
 $ quickfund --help
 ```
 
 ```
-Usage: quickfund [OPTIONS] <fund codes or files containing fund codes>
+Usage: quickfund [OPTIONS] <A file containing a sequence of newline
+                           separated fund codes>
 
-  A script to fetch various fund information from
-  https://fund.eastmoney.com, and structuralize into Excel document
-
-Options:
-  -o, --output FILENAME   The output file path.  [default: 基金信息.xlsx]
-  --disable-update-check  Disable update check.
-  --version               Show the version and exit.
-  --help                  Show this message and exit.
+  A script to fetch various fund information from https://fund.eastmoney.com/,
+  and structuralize into Excel document.
 
   Input file format: one fund code per line.
+
+Options:
+  -o, --output FILE  The output file path.  [default: 基金信息.xlsx]
+  --no-color         Turn off the color output. For compatibility with
+                     environment without color code support.
+  --disable-cache
+  --version          Show the version and exit.
+  -h, --help         Show this message and exit.
 ```
 
 ### Example Output

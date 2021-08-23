@@ -60,7 +60,7 @@ def is_fund_code(s: str) -> bool:
 @click.argument(
     "file",
     nargs=1,
-    metavar="<A file containing fund codes, one code per line>",
+    metavar="<A file containing a sequence of newline separated fund codes>",
     # TODO how to use path_type argument to convert to pathlib.Path ?
     type=click.Path(exists=True, dir_okay=False),
 )
@@ -89,7 +89,7 @@ def main(
     disable_cache: bool,
 ) -> None:
     """
-    A script to fetch various fund information from https://fund.eastmoney.com,
+    A script to fetch various fund information from https://fund.eastmoney.com/,
     and structuralize into Excel document.
 
     Input file format: one fund code per line.
