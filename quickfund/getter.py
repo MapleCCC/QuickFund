@@ -77,7 +77,6 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     False negative is allowed while false positivie is not allowed.
     """
 
-    market_open_time = time(9, 30)
     market_close_time = time(15)
 
     china_now = datetime.now(china_timezone)
@@ -94,11 +93,15 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
             last_friday(today), market_close_time
         )
 
-    if time.min <= now_time < market_open_time:
+    if time.min <= now_time < time(9, 30):
         return estimate_datetime == yesterday_market_close_datetime
-    elif market_open_time <= now_time <= market_close_time:
+    elif time(9, 30) <= now_time <= time(11, 30):
         return False
-    elif market_close_time < now_time <= time.max:
+    elif time(11, 30) < now_time < time(13):
+        return estimate_datetime == datetime.combine(today, time(11, 30))
+    elif time(13) <= now_time <= time(15):
+        return False
+    elif time(15) < now_time <= time.max:
         return estimate_datetime == today_market_close_datetime
 
 
