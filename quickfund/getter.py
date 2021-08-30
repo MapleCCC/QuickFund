@@ -28,24 +28,36 @@ PERSISTENT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 china_timezone = timezone(timedelta(hours=8), name="UTC+8")
 
 
+def is_weekend(_date: date = None) -> bool:
+    _date = _date or datetime.now().date()
+    return _date.weekday() in {5, 6}
+
+
+def last_friday(_date: date = None) -> date:
+    _date = _date or datetime.now().date()
+    delta = timedelta(days=-(_date.weekday() + 3) % 7)
+    return _date + delta
+
+
 def net_value_date_is_latest(net_value_date: date) -> bool:
     """
     Check if the net value date is the latest.
 
-    Take advantage of the knowledge that fund info stays the same
+    Take advantage of the knowledge that fund net value info stays the same
     within 0:00 to 20:00.
 
     `net_value_date` should be of China timezone.
 
-    Although it usually doesn't open in weekends, the market may irregularly
-    open/close subject to holiday policies. We should stick with the most
-    robust check.
+    False negative is allowed while false positivie is not allowed.
     """
 
     china_now = datetime.now(china_timezone)
     now_time = china_now.time()
     today = china_now.date()
     yesterday = today - timedelta(days=1)
+
+    if is_weekend(today):
+        return net_value_date == last_friday(today)
 
     if time.min <= now_time < time(20):
         return net_value_date == yesterday
@@ -62,9 +74,7 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
 
     `estimate_datetime` should be of China timezone.
 
-    Although it usually doesn't open in weekends, the market may irregularly
-    open/close subject to holiday policies. We should stick with the most
-    robust check.
+    False negative is allowed while false positivie is not allowed.
     """
 
     market_open_time = time(9, 30)
@@ -79,14 +89,17 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     today_market_close_datetime = datetime.combine(today, market_close_time)
     yesterday_market_close_datetime = datetime.combine(yesterday, market_close_time)
 
-    if market_open_time <= now_time <= market_close_time:
-        return False
-    elif time.min <= now_time < market_open_time:
+    if is_weekend(today):
+        return estimate_datetime == datetime.combine(
+            last_friday(today), market_close_time
+        )
+
+    if time.min <= now_time < market_open_time:
         return estimate_datetime == yesterday_market_close_datetime
+    elif market_open_time <= now_time <= market_close_time:
+        return False
     elif market_close_time < now_time <= time.max:
         return estimate_datetime == today_market_close_datetime
-    else:
-        raise RuntimeError("Unreachable")
 
 
 def IARBC_date_is_latest(IARBC_date: date) -> bool:
