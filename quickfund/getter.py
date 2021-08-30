@@ -3,7 +3,7 @@ import pickle
 import shelve
 from collections.abc import Iterable
 from contextlib import nullcontext
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from shelve import Shelf
 from typing import cast
@@ -11,6 +11,7 @@ from typing import cast
 from platformdirs import user_cache_dir
 
 from .__version__ import __version__
+from .datetime import china_now, is_weekend, last_friday
 from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
 from .models import FundInfo
 from .tqdm import tqdm_asyncio
@@ -25,20 +26,6 @@ PERSISTENT_CACHE_DIR = Path(
 PERSISTENT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-china_timezone = timezone(timedelta(hours=8), name="UTC+8")
-
-
-def is_weekend(_date: date = None) -> bool:
-    _date = _date or datetime.now().date()
-    return _date.weekday() in {5, 6}
-
-
-def last_friday(_date: date = None) -> date:
-    _date = _date or datetime.now().date()
-    delta = timedelta(days=-(_date.weekday() + 3) % 7)
-    return _date + delta
-
-
 def net_value_date_is_latest(net_value_date: date) -> bool:
     """
     Check if the net value date is the latest.
@@ -51,8 +38,8 @@ def net_value_date_is_latest(net_value_date: date) -> bool:
     False negative is allowed while false positivie is not allowed.
     """
 
-    china_now = datetime.now(china_timezone)
-    now_time = china_now.time()
+    now = china_now()
+    now_time = now.time()
     today = china_now.date()
     yesterday = today - timedelta(days=1)
 
@@ -101,12 +88,12 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     False negative is allowed while false positivie is not allowed.
     """
 
-    china_now = datetime.now(china_timezone)
+    now = china_now()
 
-    if is_market_opening(china_now.time()):
+    if is_market_opening(now.time()):
         return False
     else:
-        return estimate_datetime == last_market_close_datetime(china_now)
+        return estimate_datetime == last_market_close_datetime(now)
 
 
 def IARBC_date_is_latest(IARBC_date: date) -> bool:
