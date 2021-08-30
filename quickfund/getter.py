@@ -65,6 +65,30 @@ def net_value_date_is_latest(net_value_date: date) -> bool:
         return net_value_date == today
 
 
+def is_market_opening(_time: time = None) -> bool:
+    _time = _time or datetime.now().time()
+    return time(9, 30) <= _time <= time(11, 30) or time(13) <= _time <= time(15)
+
+
+def last_market_close_datetime(_datetime: datetime = None) -> datetime:
+
+    _datetime = _datetime or datetime.now()
+    _date, _time = _datetime.date(), _datetime.time()
+
+    if is_weekend(_date):
+        return datetime.combine(last_friday(_date), time(15))
+
+    if time.min <= _time < time(11, 30):
+        yesterday = _date - timedelta(days=1)
+        return datetime.combine(yesterday, time(15))
+
+    elif time(11, 30) <= _time < time(15):
+        return datetime.combine(_date, time(11, 30))
+
+    else:
+        return datetime.combine(_date, time(15))
+
+
 def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     """
     Check if the estimate datetime is the latest.
@@ -77,32 +101,12 @@ def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
     False negative is allowed while false positivie is not allowed.
     """
 
-    market_close_time = time(15)
-
     china_now = datetime.now(china_timezone)
-    now_time = china_now.time()
 
-    today = china_now.date()
-    yesterday = today - timedelta(days=1)
-
-    today_market_close_datetime = datetime.combine(today, market_close_time)
-    yesterday_market_close_datetime = datetime.combine(yesterday, market_close_time)
-
-    if is_weekend(today):
-        return estimate_datetime == datetime.combine(
-            last_friday(today), market_close_time
-        )
-
-    if time.min <= now_time < time(9, 30):
-        return estimate_datetime == yesterday_market_close_datetime
-    elif time(9, 30) <= now_time <= time(11, 30):
+    if is_market_opening(china_now.time()):
         return False
-    elif time(11, 30) < now_time < time(13):
-        return estimate_datetime == datetime.combine(today, time(11, 30))
-    elif time(13) <= now_time <= time(15):
-        return False
-    elif time(15) < now_time <= time.max:
-        return estimate_datetime == today_market_close_datetime
+    else:
+        return estimate_datetime == last_market_close_datetime(china_now)
 
 
 def IARBC_date_is_latest(IARBC_date: date) -> bool:
