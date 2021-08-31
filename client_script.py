@@ -3,7 +3,7 @@
 import subprocess
 import sys
 from datetime import datetime
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError, TimeoutExpired
 
 
 UPDATE_PERIOD = 4  # days
@@ -38,7 +38,7 @@ def update_quickfund() -> None:
         # TODO display progress bar
         subprocess.check_call(UPDATE_COMMAND, timeout=UPDATE_TIMEOUT)
 
-    except (CalledProcessError, TimeoutError):
+    except (CalledProcessError, TimeoutExpired):
         print("更新失败，下次运行时将再次尝试更新")
 
     else:
