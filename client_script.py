@@ -2,8 +2,6 @@
 
 from datetime import datetime
 
-from quickfund import cli_entry
-
 
 UPDATE_PERIOD = 4
 
@@ -22,6 +20,10 @@ def main() -> None:
     if should_update():
         # TODO skip update if timeout
         update_quickfund()
+
+    # Import quickfund after it's updated
+    # Don't import quickfund library before it's updated, due to import cache mechanism
+    from quickfund import cli_entry
 
     cli_entry()
 
