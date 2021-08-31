@@ -1,15 +1,15 @@
-aiohttp_retry==2.4.0
-aiohttp==3.7.4.post0
-attrs==21.2.0
-click==8.0.1
-colorama==0.4.4
-lxml==4.6.5
-more_itertools==8.8.0
-pandas==1.3.1
-platformdirs==2.2.0
-regex==2021.7.6
-tqdm==4.62.0
-typing-extensions==3.10.0.0
-XlsxWriter==1.4.5
+aiohttp_retry~=2.4.5
+aiohttp~=3.7.4.post0
+attrs~=21.2.0
+click~=8.0.1
+colorama~=0.4.4
+lxml~=4.6.5
+more_itertools~=8.8.0
+pandas~=1.3.2
+platformdirs~=2.3.0
+regex~=2021.8.28
+tqdm~=4.62.2
+typing-extensions~=3.10.0.0
+XlsxWriter~=3.0.1
 # TODO How to make sure I don't miss dependencies?
 # TODO How to make sure I don't forget to remove unused dependencies?
