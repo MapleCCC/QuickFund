@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 try:
     from tqdm import trange
-except ImportError:
+except ModuleNotFoundError:
 
     def trange_shim(n: int) -> Iterator[int]:
         for i in range(n):
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 else:
     try:
         from typing_extensions import ParamSpec
-    except ImportError:
+    except ModuleNotFoundError:
         ParamSpec = TypeVar
 
 
@@ -91,7 +91,7 @@ def run_command_with_timeout_bar(command: Sequence[str], timeout: int) -> None:
 def is_quickfund_installed() -> bool:
     try:
         import quickfund  # type: ignore
-    except ImportError:
+    except ModuleNotFoundError:
         return False
     else:
         return True
