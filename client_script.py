@@ -117,6 +117,35 @@ def should_update() -> bool:
     return datetime.now().toordinal() % UPDATE_PERIOD == 0
 
 
+def invalidate_import_cache(module_name: str) -> None:
+
+    if module_name not in sys.modules:
+        return
+
+    del sys.modules[module_name]
+
+    # Handle alias
+    module = sys.modules[module_name]
+    if module.__name__ != module_name:
+        del sys.modules[module.__name__]
+
+    # Handle submodules
+    submodules = []
+    for mod in sys.modules.keys():
+        if mod.startswith(module_name + "."):
+            submodules.append(mod)
+    for mod in submodules:
+        del sys.modules[mod]
+
+    # Handle ascendants
+    ascendants = []
+    for mod in sys.modules.keys():
+        if module_name.startswith(mod + "."):
+            ascendants.append(mod)
+    for mod in ascendants:
+        del sys.modules[mod]
+
+
 def update_quickfund() -> None:
 
     if not should_update():
@@ -134,9 +163,7 @@ def update_quickfund() -> None:
 
     else:
 
-        # TODO do we need to also invalidate import cache of submodules ?
-        # Invalidate import cache
-        del sys.modules["quickfund"]
+        invalidate_import_cache("quickfund")
 
         from quickfund import __version__ as new_version
 
