@@ -1,12 +1,45 @@
 #!/usr/bin/env python3
 
+import asyncio
+import atexit
+import functools
 import subprocess
 import sys
+from collections.abc import Callable, Iterator, Sequence
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from subprocess import CalledProcessError, TimeoutExpired
+from typing import TYPE_CHECKING, TypeVar
 
 
-UPDATE_PERIOD = 4  # days
+try:
+    from tqdm import trange
+except ImportError:
+
+    def trange_shim(n: int) -> Iterator[int]:
+        for i in range(n):
+            yield i
+            # TODO
+            raise NotImplementedError
+
+    trange = trange_shim
+
+if TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+else:
+    try:
+        from typing_extensions import ParamSpec
+    except ImportError:
+        ParamSpec = TypeVar
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+INSTALL_TIMEOUT = 60  # seconds
+
+UPDATE_PERIOD = 5  # days
 UPDATE_TIMEOUT = 20  # seconds
 
 
@@ -21,39 +54,38 @@ INSTALL_COMMAND = UPDATE_COMMAND = [
 ]
 
 
-def should_update() -> bool:
-    return datetime.now().toordinal() % UPDATE_PERIOD == 0
+process_pool_executor = ProcessPoolExecutor()
+atexit.register(process_pool_executor.shutdown)
 
 
-def update_quickfund() -> None:
+async def asyncio_to_process(
+    func: Callable[P, R], /, *args: P.args, **kwargs: P.kwargs
+) -> R:
+    """
+    Asynchronously run function `func` in a separate process.
+    Process version of the stdlib `asyncio.to_thread()`.
+    """
 
-    if not should_update():
-        return
+    loop = asyncio.get_running_loop()
+    pfunc = functools.partial(func, *args, **kwargs)
 
-    print("检查更新（这个过程大概执行十至二十秒）......")
+    return await loop.run_in_executor(process_pool_executor, pfunc)
 
-    from quickfund import __version_info__ as old_version_info
 
-    try:
-        # TODO display progress bar
-        subprocess.check_call(UPDATE_COMMAND, timeout=UPDATE_TIMEOUT)
+def run_command_with_timeout_bar(command: Sequence[str], timeout: int) -> None:
+    """Run command as subprocess, while displaying progressbar showing elapse of timeout count"""
 
-    except (CalledProcessError, TimeoutExpired):
-        print("更新失败，下次运行时将再次尝试更新")
+    async def async_run_command(command: Sequence[str]) -> None:
+        await asyncio_to_process(subprocess.check_call, command)
 
-    else:
+    async def display_timeout_bar(timeout: int) -> None:
+        for second in trange(timeout):
+            await asyncio.sleep(1)
 
-        # Invalidate import cache
-        del sys.modules["quickfund"]
+    async def main() -> None:
+        asyncio.gather(async_run_command(command), display_timeout_bar(timeout))
 
-        from quickfund import __version__, __version_info__ as new_version_info
-
-        if new_version_info == old_version_info:
-            print("当前已是最新版本")
-        elif new_version_info > old_version_info:
-            print(f"更新完毕：QuickFund 库已更新至最新版本 {__version__}")
-        else:
-            raise RuntimeError("出现错误：竟不正确地更新至较低版本！")
+    asyncio.run(main())
 
 
 def is_quickfund_installed() -> bool:
@@ -66,16 +98,52 @@ def is_quickfund_installed() -> bool:
 
 
 def install_quickfund() -> None:
-    try:
-        subprocess.check_call(UPDATE_COMMAND)
 
-    except CalledProcessError:
+    print("安装 QuickFund 库（这个过程大概执行十至六十秒）......")
+
+    try:
+        run_command_with_timeout_bar(UPDATE_COMMAND, INSTALL_TIMEOUT)
+
+    except (CalledProcessError, TimeoutExpired):
         raise RuntimeError("安装 QuickFund 库失败，请重试")
 
     else:
         from quickfund import __version__
 
         print(f"成功安装 QuickFund 库最新版本 {__version__}")
+
+
+def should_update() -> bool:
+    return datetime.now().toordinal() % UPDATE_PERIOD == 0
+
+
+def update_quickfund() -> None:
+
+    if not should_update():
+        return
+
+    print("检查更新（这个过程大概执行十至二十秒）......")
+
+    from quickfund import __version__ as old_version
+
+    try:
+        run_command_with_timeout_bar(UPDATE_COMMAND, UPDATE_TIMEOUT)
+
+    except (CalledProcessError, TimeoutExpired):
+        print("更新失败，下次运行时将再次尝试更新")
+
+    else:
+
+        # TODO do we need to also invalidate import cache of submodules ?
+        # Invalidate import cache
+        del sys.modules["quickfund"]
+
+        from quickfund import __version__ as new_version
+
+        if new_version == old_version:
+            print("当前已是最新版本")
+        else:
+            print(f"更新完毕：QuickFund 库已更新至最新版本 {new_version}")
 
 
 def main() -> None:
