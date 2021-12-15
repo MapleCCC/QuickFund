@@ -11,10 +11,7 @@ from platformdirs import user_cache_dir
 
 from .__version__ import __version__
 from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
-from .models import (
-    FundInfo,
-    IARBC_date_is_latest,
-)
+from .models import FundInfo
 from .utils.tqdm import tqdm_asyncio
 
 
@@ -40,8 +37,7 @@ async def update_net_value_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -
 
 
 async def update_IARBC_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
-    IARBC_date = fund_info_db[fund_code].同类排名截止日期
-    if not IARBC_date_is_latest(IARBC_date):
+    if not fund_info_db[fund_code].is_latest():
         IARBC_info = await fetch_IARBC(fund_code)
         fund_info_db[fund_code].replace(IARBC_info=IARBC_info)
 

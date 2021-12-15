@@ -97,6 +97,19 @@ class FundIARBCInfo:
     近2年同类排名: str
     近3年同类排名: str
 
+    def is_latest(self) -> bool:
+        """
+        Check if the fund IARBC info is the latest.
+
+        IARBC date should be of China timezone.
+        """
+
+        # TODO what's the update pattern of IARBC info? Currently only a naive approach,
+        # not efficient enough.
+
+        today = china_now().date()
+        return self.同类排名截止日期 == today
+
 
 @attr.s
 class FundInfo(FundNetValueInfo, FundEstimateInfo, FundIARBCInfo):
@@ -159,17 +172,3 @@ def last_market_close_datetime(_datetime: datetime = None) -> datetime:
 
     else:
         return datetime.combine(_date, time(15))
-
-
-def IARBC_date_is_latest(IARBC_date: date) -> bool:
-    """
-    Check if the IARBC date is the latest.
-
-    `IARBC_date` should be of China timezone.
-    """
-
-    # TODO what's the update pattern of IARBC info? Currently only a naive approach,
-    # not efficient enough.
-
-    today = china_now().date()
-    return IARBC_date == today
