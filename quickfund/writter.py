@@ -3,7 +3,7 @@ from pathlib import Path
 import xlsxwriter
 
 from .models import FundInfo
-from .tqdm import tenumerate
+from .utils.tqdm import tenumerate
 from .utils import Logger, on_failure_raises
 
 

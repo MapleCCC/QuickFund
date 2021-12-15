@@ -14,7 +14,7 @@ from .__version__ import __version__
 from .utils.datetime import china_now, is_weekend, last_friday
 from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
 from .models import FundInfo
-from .tqdm import tqdm_asyncio
+from .utils.tqdm import tqdm_asyncio
 
 
 __all__ = ["get_fund_infos"]
