@@ -18,7 +18,7 @@ from aiohttp import ClientSession
 from colorama import Fore, Style
 from typing_extensions import ParamSpec
 
-from .typing import IdentityDecorator
+from .utils.typing import IdentityDecorator
 
 
 __all__ = [
