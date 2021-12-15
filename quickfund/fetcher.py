@@ -266,11 +266,13 @@ async def fetch_IARBC(fund_code: str) -> FundIARBCInfo:
 async def fetch_fund_info(fund_code: str) -> FundInfo:
     """Fetch the fund info related to the given fund code"""
 
-    return FundInfo.combine(
-        await fetch_net_value(fund_code),
-        await fetch_estimate(fund_code),
-        await fetch_IARBC(fund_code),
+    net_value_info, estimate_info, IARBC_info = await asyncio.gather(
+        fetch_net_value(fund_code),
+        fetch_estimate(fund_code),
+        fetch_IARBC(fund_code),
     )
+
+    return FundInfo.combine(net_value_info, estimate_info, IARBC_info)
 
 
 if __name__ == "__main__":
