@@ -106,8 +106,7 @@ def IARBC_date_is_latest(IARBC_date: date) -> bool:
     # TODO what's the update pattern of IARBC info? Currently only a naive approach,
     # not efficient enough.
 
-    china_now = datetime.now(china_timezone)
-    today = china_now.date()
+    today = china_now().date()
     return IARBC_date == today
 
 
