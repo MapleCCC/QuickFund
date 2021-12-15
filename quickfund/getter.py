@@ -59,7 +59,7 @@ async def update_fund_info(
         await update_estimate_info(fund_code, fund_info_db, fund_info_fetcher)
         await update_IARBC_info(fund_code, fund_info_db, fund_info_fetcher)
     else:
-        fund_info = await fund_info_fetcher.fetch_fund_info(fund_code)
+        fund_info = await fund_info_fetcher.fetch(fund_code)
         fund_info_db[fund_code] = fund_info
 
 

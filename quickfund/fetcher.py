@@ -258,7 +258,7 @@ class FundInfoFetcher:
         return IARBC_info
 
     @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关信息时发生错误")
-    async def fetch_fund_info(self, fund_code: str) -> FundInfo:
+    async def fetch(self, fund_code: str) -> FundInfo:
         """Fetch the fund info related to the given fund code"""
 
         net_value_info, estimate_info, IARBC_info = await asyncio.gather(
@@ -271,4 +271,4 @@ class FundInfoFetcher:
 
 
 if __name__ == "__main__":
-    print(asyncio.run(FundInfoFetcher().fetch_fund_info("000478")))
+    print(asyncio.run(FundInfoFetcher().fetch("000478")))
