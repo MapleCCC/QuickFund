@@ -1,20 +1,16 @@
 from __future__ import annotations
 
-import asyncio
 import atexit
 import functools
 import inspect
 import locale
 import sys
 import traceback
-from asyncio import AbstractEventLoop
-from collections.abc import Awaitable, Callable
-from types import MethodType
+from collections.abc import Callable
 from typing import IO, TypeVar
 
 import click
 import regex
-from aiohttp import ClientSession
 from colorama import Fore, Style
 from typing_extensions import ParamSpec
 
@@ -29,8 +25,6 @@ __all__ = [
     "Logger",
     "on_failure_raises",
     "pause_at_exit",
-    "schedule_at_loop_close",
-    "graceful_shutdown_client_session",
 ]
 
 
@@ -237,32 +231,3 @@ def on_failure_raises(
 
 def pause_at_exit(info: str = "Press any key to exit ...") -> None:
     atexit.register(lambda: click.pause(info=info))
-
-
-def schedule_at_loop_close(aw: Awaitable[None], loop: AbstractEventLoop = None) -> None:
-    """
-    If the `loop` parameter is not specified, and no loop is running at the time, a
-    `RuntimeError` is raised.
-    """
-
-    try:
-        loop = loop or asyncio.get_running_loop()
-    except RuntimeError:
-        raise RuntimeError("no loop is running") from None
-
-    origin_shutdown_asyncgens = loop.shutdown_asyncgens
-
-    async def shutdown_asyncgens(self) -> None:
-        await aw
-        await origin_shutdown_asyncgens()
-
-    loop.shutdown_asyncgens = MethodType(shutdown_asyncgens, loop)
-
-
-# TODO we don't need this workaround anymore after the release of aiohttp 4.0.0 https://github.com/aio-libs/aiohttp/issues/1925#issuecomment-715977247
-async def graceful_shutdown_client_session(session: ClientSession) -> None:
-
-    # Ref: https://docs.aiohttp.org/en/stable/client_advanced.html#graceful-shutdown
-
-    await session.close()
-    await asyncio.sleep(0.250)

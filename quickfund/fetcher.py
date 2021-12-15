@@ -2,7 +2,6 @@ import asyncio
 import json
 import random
 import string
-from asyncio.events import AbstractEventLoop
 from datetime import date, datetime
 from typing import cast
 
@@ -15,55 +14,41 @@ from lxml import etree
 from more_itertools import one
 
 from .models import FundEstimateInfo, FundIARBCInfo, FundInfo, FundNetValueInfo
-from .utils import (
-    graceful_shutdown_client_session,
-    on_failure_raises,
-    schedule_at_loop_close,
-)
+from .utils import on_failure_raises
 
 
 __all__ = ["FundInfoFetcher"]
 
 
-def _construct_client_session() -> ClientSession:
-
-    # Restrict the size of the connection pool for scraping ethic
-    conn = aiohttp.TCPConnector(limit_per_host=30)
-    retry_options = ListRetry(
-        timeouts=[0, 0, 0.6, 1.2], statuses={500, 502, 503, 504, 514}
-    )
-    session = RetryClient(connector=conn, retry_options=retry_options)
-
-    # TODO we should inform the type checker that RetryClient has the same interface
-    # with that of ClientSession. We can either do it nominally by making RetryClient a
-    # subclass of ClientSession, or do it structurally by duck typing / structural typing
-    # / typing.Protocol etc.
-    return cast(ClientSession, session)
-
-
-_mapping_loop_to_client_session: dict[AbstractEventLoop, ClientSession] = {}
-
-
-def _get_running_client_session() -> ClientSession:
-    """
-    Called inside coroutines
-    """
-
-    # Ref: https://docs.aiohttp.org/en/stable/faq.html#why-is-creating-a-clientsession-outside-of-an-event-loop-dangerous
-    # Quote: "Why is creating a ClientSession outside of an event loop dangerous? Short answer is: life-cycle of all asyncio objects should be shorter than life-cycle of event loop."
-
-    loop = asyncio.get_running_loop()
-
-    if loop not in _mapping_loop_to_client_session:
-        session = _construct_client_session()
-        _mapping_loop_to_client_session[loop] = session
-        schedule_at_loop_close(graceful_shutdown_client_session(session))
-
-    return _mapping_loop_to_client_session[loop]
-
-
 class FundInfoFetcher:
-    """A fetcher that handles fetching fund infos"""
+    """
+    A fetcher that handles fetching fund infos.
+
+    A `FundInfoFetcher` must be created and used inside of an event loop. Creating or
+    using a `FundInfoFetcher` outside of an event loop is forbidden. Specifically, a
+    fetcher's life-cycle should be shorter than the life-cyle of the event loop within
+    which it is created.
+
+    Ref: https://docs.aiohttp.org/en/stable/faq.html#why-is-creating-a-clientsession-outside-of-an-event-loop-dangerous
+    Quote: "Why is creating a ClientSession outside of an event loop dangerous? Short answer is: life-cycle of all asyncio objects should be shorter than life-cycle of event loop."
+    """
+
+    def __init__(self) -> None:
+
+        # Restrict the size of the connection pool for scraping ethic
+        conn = aiohttp.TCPConnector(limit_per_host=30)
+        retry_options = ListRetry(
+            timeouts=[0, 0, 0.6, 1.2], statuses={500, 502, 503, 504, 514}
+        )
+        retry_client = RetryClient(connector=conn, retry_options=retry_options)
+
+        # TODO we should inform the type checker that RetryClient has the same interface
+        # with that of ClientSession. We can either do it nominally by making
+        # RetryClient a subclass of ClientSession, or do it structurally by duck typing
+        # / structural typing / typing.Protocol, etc.
+        self._session: ClientSession = cast(ClientSession, retry_client)
+
+    __slots__ = ["_session"]
 
     async def get_net_value_api_response_text(self, fund_code: str) -> str:
 
@@ -82,8 +67,7 @@ class FundInfoFetcher:
             salt_key: salt_value,
         }
 
-        session = _get_running_client_session()
-        async with session.get(net_value_api, params=params) as response:
+        async with self._session.get(net_value_api, params=params) as response:
             response.raise_for_status()
             return await response.text(encoding="utf-8")
 
@@ -132,8 +116,7 @@ class FundInfoFetcher:
         estimate_api = f"https://fundgz.1234567.com.cn/js/{fund_code}.js"
         params = {salt_key: salt_value}
 
-        session = _get_running_client_session()
-        async with session.get(estimate_api, params=params) as response:
+        async with self._session.get(estimate_api, params=params) as response:
             response.raise_for_status()
             return await response.text(encoding="utf-8")
 
@@ -201,8 +184,7 @@ class FundInfoFetcher:
         fund_info_page_url = f"https://fund.eastmoney.com/{fund_code}.html"
         params = {salt_key: salt_value}
 
-        session = _get_running_client_session()
-        async with session.get(fund_info_page_url, params=params) as response:
+        async with self._session.get(fund_info_page_url, params=params) as response:
             response.raise_for_status()
             return await response.text(encoding="utf-8")
 
