@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta
 
 import attr
+
+from .utils.datetime import china_now, is_weekend, last_friday
 
 
 __all__ = ["FundNetValueInfo", "FundEstimateInfo", "FundInfo"]
@@ -89,3 +91,87 @@ class FundInfo(FundNetValueInfo, FundEstimateInfo, FundIARBCInfo):
             **attr.asdict(estimate_info),
             **attr.asdict(IARBC_info)
         )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
+
+
+def net_value_date_is_latest(net_value_date: date) -> bool:
+    """
+    Check if the net value date is the latest.
+
+    Take advantage of the knowledge that fund net value info stays the same
+    within 0:00 to 20:00.
+
+    `net_value_date` should be of China timezone.
+
+    False negative is allowed while false positivie is not allowed.
+    """
+
+    now = china_now()
+    now_time = now.time()
+    today = china_now.date()
+    yesterday = today - timedelta(days=1)
+
+    if is_weekend(today):
+        return net_value_date == last_friday(today)
+
+    if time.min <= now_time < time(20):
+        return net_value_date == yesterday
+    else:
+        return net_value_date == today
+
+
+def is_market_opening(_time: time = None) -> bool:
+    _time = _time or datetime.now().time()
+    return time(9, 30) <= _time <= time(11, 30) or time(13) <= _time <= time(15)
+
+
+def last_market_close_datetime(_datetime: datetime = None) -> datetime:
+
+    _datetime = _datetime or datetime.now()
+    _date, _time = _datetime.date(), _datetime.time()
+
+    if is_weekend(_date):
+        return datetime.combine(last_friday(_date), time(15))
+
+    if time.min <= _time < time(11, 30):
+        yesterday = _date - timedelta(days=1)
+        return datetime.combine(yesterday, time(15))
+
+    elif time(11, 30) <= _time < time(15):
+        return datetime.combine(_date, time(11, 30))
+
+    else:
+        return datetime.combine(_date, time(15))
+
+
+def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
+    """
+    Check if the estimate datetime is the latest.
+
+    Take advantage of the knowledge that estimate info stays the same
+    within 15:00 to next day 9:30.
+
+    `estimate_datetime` should be of China timezone.
+
+    False negative is allowed while false positivie is not allowed.
+    """
+
+    now = china_now()
+
+    if is_market_opening(now.time()):
+        return False
+    else:
+        return estimate_datetime == last_market_close_datetime(now)
+
+
+def IARBC_date_is_latest(IARBC_date: date) -> bool:
+    """
+    Check if the IARBC date is the latest.
+
+    `IARBC_date` should be of China timezone.
+    """
+
+    # TODO what's the update pattern of IARBC info? Currently only a naive approach,
+    # not efficient enough.
+
+    today = china_now().date()
+    return IARBC_date == today
