@@ -10,7 +10,7 @@ from typing import cast
 from platformdirs import user_cache_dir
 
 from .__version__ import __version__
-from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
+from .fetcher import FundInfoFetcher
 from .models import FundEstimateInfo, FundIARBCInfo, FundInfo, FundNetValueInfo
 from .utils.tqdm import tqdm_asyncio
 
@@ -24,39 +24,51 @@ PERSISTENT_CACHE_DIR = Path(
 PERSISTENT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-async def update_estimate_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
+async def update_estimate_info(
+    fund_code: str, fund_info_db: Shelf[FundInfo], fund_info_fetcher: FundInfoFetcher
+) -> None:
     if not FundEstimateInfo.is_latest(fund_info_db[fund_code]):
-        estimate_info = await fetch_estimate(fund_code)
+        estimate_info = await fund_info_fetcher.fetch_estimate(fund_code)
         fund_info_db[fund_code].replace(estimate_info=estimate_info)
 
 
-async def update_net_value_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
+async def update_net_value_info(
+    fund_code: str, fund_info_db: Shelf[FundInfo], fund_info_fetcher: FundInfoFetcher
+) -> None:
     if not FundNetValueInfo.is_latest(fund_info_db[fund_code]):
-        net_value_info = await fetch_net_value(fund_code)
+        net_value_info = await fund_info_fetcher.fetch_net_value(fund_code)
         fund_info_db[fund_code].replace(net_value_info=net_value_info)
 
 
-async def update_IARBC_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
+async def update_IARBC_info(
+    fund_code: str, fund_info_db: Shelf[FundInfo], fund_info_fetcher: FundInfoFetcher
+) -> None:
     if not FundIARBCInfo.is_latest(fund_info_db[fund_code]):
-        IARBC_info = await fetch_IARBC(fund_code)
+        IARBC_info = await fund_info_fetcher.fetch_IARBC(fund_code)
         fund_info_db[fund_code].replace(IARBC_info=IARBC_info)
 
 
 # TODO use a database library that supports multiple concurrent read/write
 # TODO use a database library that supports asynchronous non-blocking write
-async def update_fund_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
+async def update_fund_info(
+    fund_code: str, fund_info_db: Shelf[FundInfo], fund_info_fetcher: FundInfoFetcher
+) -> None:
 
     if fund_code in fund_info_db:
-        await update_net_value_info(fund_code, fund_info_db)
-        await update_estimate_info(fund_code, fund_info_db)
-        await update_IARBC_info(fund_code, fund_info_db)
+        await update_net_value_info(fund_code, fund_info_db, fund_info_fetcher)
+        await update_estimate_info(fund_code, fund_info_db, fund_info_fetcher)
+        await update_IARBC_info(fund_code, fund_info_db, fund_info_fetcher)
     else:
-        fund_info = await fetch_fund_info(fund_code)
+        fund_info = await fund_info_fetcher.fetch_fund_info(fund_code)
         fund_info_db[fund_code] = fund_info
 
 
 def update_fund_infos(fund_codes: Iterable[str], fund_info_db: Shelf[FundInfo]) -> None:
-    tasks = (update_fund_info(fund_code, fund_info_db) for fund_code in set(fund_codes))
+    fund_info_fetcher = FundInfoFetcher()
+    tasks = (
+        update_fund_info(fund_code, fund_info_db, fund_info_fetcher)
+        for fund_code in set(fund_codes)
+    )
     asyncio.run(tqdm_asyncio.gather(*tasks, unit="个", desc="获取基金信息"))
 
 
