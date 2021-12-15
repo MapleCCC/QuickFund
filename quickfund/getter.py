@@ -11,7 +11,7 @@ from typing import cast
 from platformdirs import user_cache_dir
 
 from .__version__ import __version__
-from .datetime import china_now, is_weekend, last_friday
+from .utils.datetime import china_now, is_weekend, last_friday
 from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
 from .models import FundInfo
 from .tqdm import tqdm_asyncio
