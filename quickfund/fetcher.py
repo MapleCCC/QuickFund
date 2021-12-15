@@ -3,6 +3,7 @@ import json
 import random
 import string
 from datetime import date, datetime
+from types import MethodType
 from typing import cast
 
 import aiohttp
@@ -46,26 +47,34 @@ class FundInfoFetcher:
         # with that of ClientSession. We can either do it nominally by making
         # RetryClient a subclass of ClientSession, or do it structurally by duck typing
         # / structural typing / typing.Protocol, etc.
-        self._session: ClientSession = cast(ClientSession, retry_client)
+        session = cast(ClientSession, retry_client)
+
+        origin_get = session.get
+
+        def patched_get(self, *args, **kwargs):
+
+            # Add random parameter to the URL to break potential cache mechanism of
+            # the server or the network or the aiohttp library.
+            salt_key = "锟斤铐"
+            # TODO can we just use random bytes as salt_value?
+            salt_value = "".join(random.choices(string.hexdigits, k=10))
+
+            params = kwargs.setdefault("params", {})
+            params[salt_key] = salt_value
+
+            return origin_get(*args, **kwargs)
+
+        session.get = MethodType(patched_get, session)
+
+        self._session = session
 
     __slots__ = ["_session"]
 
     async def get_net_value_api_response_text(self, fund_code: str) -> str:
 
-        # Add random parameter to the URL to break any cache mechanism of
-        # the server or the network or the aiohttp library.
-        salt_key = "锟斤铐"
-        # TODO can we just use random bytes as salt_value?
-        salt_value = "".join(random.choices(string.hexdigits, k=10))
-
         net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
-        params = {
-            "type": "lsjz",  # 历史净值
-            "page": 1,
-            "per": 2,
-            "code": fund_code,
-            salt_key: salt_value,
-        }
+        # The word "lsjz" is an abbreviation of the pinyin of the word "历史净值"
+        params = {"type": "lsjz", "page": 1, "per": 2, "code": fund_code}
 
         async with self._session.get(net_value_api, params=params) as response:
             response.raise_for_status()
@@ -108,15 +117,9 @@ class FundInfoFetcher:
 
     async def get_estimate_api_response_text(self, fund_code: str) -> str:
 
-        # Add random parameter to the URL to break potential cache mechanism of
-        # the server or the network or the aiohttp library.
-        salt_key = "锟斤铐"
-        salt_value = "".join(random.choices(string.hexdigits, k=10))
-
         estimate_api = f"https://fundgz.1234567.com.cn/js/{fund_code}.js"
-        params = {salt_key: salt_value}
 
-        async with self._session.get(estimate_api, params=params) as response:
+        async with self._session.get(estimate_api) as response:
             response.raise_for_status()
             return await response.text(encoding="utf-8")
 
@@ -176,15 +179,9 @@ class FundInfoFetcher:
 
     async def get_fund_info_page_text(self, fund_code: str) -> str:
 
-        # Add random parameter to the URL to break potential cache mechanism of
-        # the server or the network or the aiohttp library.
-        salt_key = "锟斤铐"
-        salt_value = "".join(random.choices(string.hexdigits, k=10))
-
         fund_info_page_url = f"https://fund.eastmoney.com/{fund_code}.html"
-        params = {salt_key: salt_value}
 
-        async with self._session.get(fund_info_page_url, params=params) as response:
+        async with self._session.get(fund_info_page_url) as response:
             response.raise_for_status()
             return await response.text(encoding="utf-8")
 
