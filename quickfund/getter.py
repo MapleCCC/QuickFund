@@ -15,7 +15,6 @@ from .models import (
     FundInfo,
     IARBC_date_is_latest,
     estimate_datetime_is_latest,
-    net_value_date_is_latest,
 )
 from .utils.tqdm import tqdm_asyncio
 
@@ -37,8 +36,7 @@ async def update_estimate_info(fund_code: str, fund_info_db: Shelf[FundInfo]) ->
 
 
 async def update_net_value_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
-    net_value_date = fund_info_db[fund_code].净值日期
-    if not net_value_date_is_latest(net_value_date):
+    if not fund_info_db[fund_code].is_latest():
         net_value_info = await fetch_net_value(fund_code)
         fund_info_db[fund_code].replace(net_value_info=net_value_info)
 

@@ -23,6 +23,31 @@ class FundNetValueInfo:
     上一天净值: float
     上一天净值日期: date
 
+    def is_latest(self) -> bool:
+        """
+        Check if the fund net value info is the latest.
+
+        Take advantage of the knowledge that fund net value info stays the same
+        within 0:00 to 20:00.
+
+        Net value date should be of China timezone.
+
+        False negative is allowed while false positivie is not allowed.
+        """
+
+        now = china_now()
+        now_time = now.time()
+        today = china_now.date()
+        yesterday = today - timedelta(days=1)
+
+        if is_weekend(today):
+            return self.净值日期 == last_friday(today)
+
+        if time.min <= now_time < time(20):
+            return self.净值日期 == yesterday
+        else:
+            return self.净值日期 == today
+
 
 @attr.s(auto_attribs=True)
 class FundEstimateInfo:
@@ -91,32 +116,6 @@ class FundInfo(FundNetValueInfo, FundEstimateInfo, FundIARBCInfo):
             **attr.asdict(estimate_info),
             **attr.asdict(IARBC_info)
         )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
-
-
-def net_value_date_is_latest(net_value_date: date) -> bool:
-    """
-    Check if the net value date is the latest.
-
-    Take advantage of the knowledge that fund net value info stays the same
-    within 0:00 to 20:00.
-
-    `net_value_date` should be of China timezone.
-
-    False negative is allowed while false positivie is not allowed.
-    """
-
-    now = china_now()
-    now_time = now.time()
-    today = china_now.date()
-    yesterday = today - timedelta(days=1)
-
-    if is_weekend(today):
-        return net_value_date == last_friday(today)
-
-    if time.min <= now_time < time(20):
-        return net_value_date == yesterday
-    else:
-        return net_value_date == today
 
 
 def is_market_opening(_time: time = None) -> bool:
