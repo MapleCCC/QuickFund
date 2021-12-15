@@ -61,6 +61,25 @@ class FundEstimateInfo:
     实时估值: float
     估算增长率: float
 
+    def is_latest(self) -> bool:
+        """
+        Check if the fund estimate info is the latest.
+
+        Take advantage of the knowledge that estimate info stays the same
+        within 15:00 to next day 9:30.
+
+        Estimate datetime should be of China timezone.
+
+        False negative is allowed while false positivie is not allowed.
+        """
+
+        now = china_now()
+
+        if is_market_opening(now.time()):
+            return False
+        else:
+            return self.估算日期 == last_market_close_datetime(now)
+
 
 @attr.s(auto_attribs=True)
 class FundIARBCInfo:
@@ -140,26 +159,6 @@ def last_market_close_datetime(_datetime: datetime = None) -> datetime:
 
     else:
         return datetime.combine(_date, time(15))
-
-
-def estimate_datetime_is_latest(estimate_datetime: datetime) -> bool:
-    """
-    Check if the estimate datetime is the latest.
-
-    Take advantage of the knowledge that estimate info stays the same
-    within 15:00 to next day 9:30.
-
-    `estimate_datetime` should be of China timezone.
-
-    False negative is allowed while false positivie is not allowed.
-    """
-
-    now = china_now()
-
-    if is_market_opening(now.time()):
-        return False
-    else:
-        return estimate_datetime == last_market_close_datetime(now)
 
 
 def IARBC_date_is_latest(IARBC_date: date) -> bool:

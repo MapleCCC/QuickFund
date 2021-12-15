@@ -14,7 +14,6 @@ from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_val
 from .models import (
     FundInfo,
     IARBC_date_is_latest,
-    estimate_datetime_is_latest,
 )
 from .utils.tqdm import tqdm_asyncio
 
@@ -29,8 +28,7 @@ PERSISTENT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 async def update_estimate_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
-    estimate_datetime = fund_info_db[fund_code].估算日期
-    if not estimate_datetime_is_latest(estimate_datetime):
+    if not fund_info_db[fund_code].is_latest():
         estimate_info = await fetch_estimate(fund_code)
         fund_info_db[fund_code].replace(estimate_info=estimate_info)
 
