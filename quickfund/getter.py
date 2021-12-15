@@ -11,7 +11,7 @@ from platformdirs import user_cache_dir
 
 from .__version__ import __version__
 from .fetcher import fetch_estimate, fetch_fund_info, fetch_IARBC, fetch_net_value
-from .models import FundInfo
+from .models import FundEstimateInfo, FundIARBCInfo, FundInfo, FundNetValueInfo
 from .utils.tqdm import tqdm_asyncio
 
 
@@ -25,19 +25,19 @@ PERSISTENT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 async def update_estimate_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
-    if not fund_info_db[fund_code].is_latest():
+    if not FundEstimateInfo.is_latest(fund_info_db[fund_code]):
         estimate_info = await fetch_estimate(fund_code)
         fund_info_db[fund_code].replace(estimate_info=estimate_info)
 
 
 async def update_net_value_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
-    if not fund_info_db[fund_code].is_latest():
+    if not FundNetValueInfo.is_latest(fund_info_db[fund_code]):
         net_value_info = await fetch_net_value(fund_code)
         fund_info_db[fund_code].replace(net_value_info=net_value_info)
 
 
 async def update_IARBC_info(fund_code: str, fund_info_db: Shelf[FundInfo]) -> None:
-    if not fund_info_db[fund_code].is_latest():
+    if not FundIARBCInfo.is_latest(fund_info_db[fund_code]):
         IARBC_info = await fetch_IARBC(fund_code)
         fund_info_db[fund_code].replace(IARBC_info=IARBC_info)
 
