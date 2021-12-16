@@ -82,7 +82,7 @@ class FundInfoFetcher:
         successful response. Raise `ClientResponseError` otherwise.
         """
 
-        async with self._session.get(url, params=params) as response:
+        async with self._session.get(url, params=params or {}) as response:
             response.raise_for_status()
             return await response.text(encoding="utf-8")
 
