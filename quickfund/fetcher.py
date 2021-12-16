@@ -2,9 +2,10 @@ import asyncio
 import json
 import random
 import string
+from collections.abc import Mapping
 from datetime import date, datetime
 from types import MethodType
-from typing import cast
+from typing import Union, cast
 
 import aiohttp
 import pandas
@@ -35,6 +36,11 @@ class FundInfoFetcher:
     """
 
     def __init__(self) -> None:
+        self._session: ClientSession = self.initialize_session()
+
+    __slots__ = ["_session"]
+
+    def initialize_session(self) -> ClientSession:
 
         # Restrict the size of the connection pool for scraping ethic
         conn = aiohttp.TCPConnector(limit_per_host=30)
@@ -66,9 +72,19 @@ class FundInfoFetcher:
 
         session.get = MethodType(patched_get, session)
 
-        self._session = session
+        return session
 
-    __slots__ = ["_session"]
+    async def GET_text(
+        self, url: str, *, params: Mapping[str, Union[str, int, float]] = None
+    ) -> str:
+        """
+        Asynchronously send a GET request, and return the textual content of the
+        successful response. Raise `ClientResponseError` otherwise.
+        """
+
+        async with self._session.get(url, params=params) as response:
+            response.raise_for_status()
+            return await response.text(encoding="utf-8")
 
     async def get_net_value_api_response_text(self, fund_code: str) -> str:
 
@@ -76,9 +92,7 @@ class FundInfoFetcher:
         # The word "lsjz" is an abbreviation of the pinyin of the word "历史净值"
         params = {"type": "lsjz", "page": 1, "per": 2, "code": fund_code}
 
-        async with self._session.get(net_value_api, params=params) as response:
-            response.raise_for_status()
-            return await response.text(encoding="utf-8")
+        return await self.GET_text(net_value_api, params=params)
 
     def parse_net_value_api_response_text(self, text: str) -> pandas.DataFrame:
 
@@ -118,10 +132,7 @@ class FundInfoFetcher:
     async def get_estimate_api_response_text(self, fund_code: str) -> str:
 
         estimate_api = f"https://fundgz.1234567.com.cn/js/{fund_code}.js"
-
-        async with self._session.get(estimate_api) as response:
-            response.raise_for_status()
-            return await response.text(encoding="utf-8")
+        return await self.GET_text(estimate_api)
 
     def parse_estimate_api_response_text(self, text: str) -> dict[str, str]:
 
@@ -180,10 +191,7 @@ class FundInfoFetcher:
     async def get_fund_info_page_text(self, fund_code: str) -> str:
 
         fund_info_page_url = f"https://fund.eastmoney.com/{fund_code}.html"
-
-        async with self._session.get(fund_info_page_url) as response:
-            response.raise_for_status()
-            return await response.text(encoding="utf-8")
+        return await self.GET_text(fund_info_page_url)
 
     def parse_fund_info_page_text_and_get_IARBC_data(
         self,
