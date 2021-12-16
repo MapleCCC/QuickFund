@@ -14,7 +14,7 @@ import regex
 from colorama import Fore, Style
 from typing_extensions import ParamSpec
 
-from .utils.typing import IdentityDecorator
+from .typing import IdentityDecorator
 
 
 __all__ = [

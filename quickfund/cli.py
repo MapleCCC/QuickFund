@@ -10,7 +10,7 @@ import colorama
 
 from .__version__ import __version__
 from .getter import get_fund_infos
-from .utils import Logger, bright_blue, pause_at_exit, print_traceback_digest
+from .utils.misc import Logger, bright_blue, pause_at_exit, print_traceback_digest
 from .writter import write_to_xlsx
 
 

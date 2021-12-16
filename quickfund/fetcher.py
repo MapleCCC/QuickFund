@@ -16,7 +16,7 @@ from lxml import etree
 from more_itertools import one
 
 from .models import FundEstimateInfo, FundIARBCInfo, FundInfo, FundNetValueInfo
-from .utils import on_failure_raises
+from .utils.misc import on_failure_raises
 
 
 __all__ = ["FundInfoFetcher"]

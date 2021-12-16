@@ -4,7 +4,7 @@ import xlsxwriter
 
 from .models import FundInfo
 from .utils.tqdm import tenumerate
-from .utils import Logger, on_failure_raises
+from .utils.misc import Logger, on_failure_raises
 
 
 __all__ = ["write_to_xlsx"]
