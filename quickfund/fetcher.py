@@ -3,7 +3,7 @@ import json
 import random
 import string
 from collections.abc import Mapping
-from datetime import date, datetime
+from datetime import datetime
 from types import MethodType
 from typing import Union, cast
 
@@ -86,15 +86,15 @@ class FundInfoFetcher:
             response.raise_for_status()
             return await response.text(encoding="utf-8")
 
-    async def get_net_value_api_response_text(self, fund_code: str) -> str:
+    @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关净值信息时发生错误")
+    async def fetch_net_value(self, fund_code: str) -> FundNetValueInfo:
+        """Fetch the net value related info related to the given fund code"""
 
         net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
         # The word "lsjz" is an abbreviation of the pinyin of the word "历史净值"
         params = {"type": "lsjz", "page": 1, "per": 2, "code": fund_code}
 
-        return await self.GET_text(net_value_api, params=params)
-
-    def parse_net_value_api_response_text(self, text: str) -> pandas.DataFrame:
+        text = await self.GET_text(net_value_api, params=params)
 
         # TODO pandas.read_html accept url as argument, we can definitely use this feature
         # to simplify the code, if it ever supports async/await syntax in the future.
@@ -105,9 +105,8 @@ class FundInfoFetcher:
         # TODO wait for upstream PR to land https://github.com/microsoft/python-type-stubs/pull/85
 
         dfs = pandas.read_html(text, parse_dates=["净值日期"], keep_default_na=False)
-        return one(dfs)
+        data = one(dfs)
 
-    def pack_to_FundNetValueInfo(self, data: pandas.DataFrame) -> FundNetValueInfo:
         net_value_info = FundNetValueInfo(
             净值日期=data.净值日期[0].date(),
             单位净值=data.单位净值[0],
@@ -119,22 +118,12 @@ class FundInfoFetcher:
 
         return net_value_info
 
-    @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关净值信息时发生错误")
-    async def fetch_net_value(self, fund_code: str) -> FundNetValueInfo:
-        """Fetch the net value related info related to the given fund code"""
-
-        text = await self.get_net_value_api_response_text(fund_code)
-        data = self.parse_net_value_api_response_text(text)
-        net_value_info = self.pack_to_FundNetValueInfo(data)
-
-        return net_value_info
-
-    async def get_estimate_api_response_text(self, fund_code: str) -> str:
+    @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关估算信息时发生错误")
+    async def fetch_estimate(self, fund_code: str) -> FundEstimateInfo:
+        """Fetch the estimate info related to the given fund code"""
 
         estimate_api = f"https://fundgz.1234567.com.cn/js/{fund_code}.js"
-        return await self.GET_text(estimate_api)
-
-    def parse_estimate_api_response_text(self, text: str) -> dict[str, str]:
+        text = await self.GET_text(estimate_api)
 
         # TODO it would greatly simplify the code if json.loads has the same level of input
         # tolerance with that of pandas.read_html
@@ -156,9 +145,8 @@ class FundInfoFetcher:
             )
 
         json_text = m.group("json")
-        return json.loads(json_text)
+        data = json.loads(json_text)
 
-    def pack_to_FundEstimateInfo(self, data: dict[str, str]) -> FundEstimateInfo:
         estimate_info = FundEstimateInfo(
             基金代码=data["fundcode"],
             基金名称=data["name"],
@@ -174,29 +162,16 @@ class FundInfoFetcher:
         # if not (0 <= estimate_growth_rate <= 1):
         #     raise NotImplementedError
 
-        return estimate_info
-
-    @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关估算信息时发生错误")
-    async def fetch_estimate(self, fund_code: str) -> FundEstimateInfo:
-        """Fetch the estimate info related to the given fund code"""
-
-        text = await self.get_estimate_api_response_text(fund_code)
-        data = self.parse_estimate_api_response_text(text)
-        estimate_info = self.pack_to_FundEstimateInfo(data)
-
         assert data["fundcode"] == fund_code, f"爬取基金代码为 {fund_code} 的基金相关估算信息时发现基金代码不匹配"
 
         return estimate_info
 
-    async def get_fund_info_page_text(self, fund_code: str) -> str:
+    @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关同类排名信息时发生错误")
+    async def fetch_IARBC(self, fund_code: str) -> FundIARBCInfo:
+        """Fetch the IARBC info related to the given fund code"""
 
         fund_info_page_url = f"https://fund.eastmoney.com/{fund_code}.html"
-        return await self.GET_text(fund_info_page_url)
-
-    def parse_fund_info_page_text_and_get_IARBC_data(
-        self,
-        text: str,
-    ) -> tuple[date, pandas.DataFrame]:
+        text = await self.GET_text(fund_info_page_url)
 
         html = etree.HTML(text)
         cutoff_date_str = one(cast(list, html.xpath("//span[@id='jdzfDate']"))).text
@@ -208,11 +183,6 @@ class FundInfoFetcher:
         )
         df = one(pandas.read_html(table, index_col=0))
 
-        return cutoff_date, df
-
-    def pack_to_FundIARBCInfo(
-        self, cutoff_date: date, data: pandas.DataFrame
-    ) -> FundIARBCInfo:
         def reformat_IARBC(IARBC: str) -> str:
             m = regex.fullmatch(r"(?P<rank>\d+) \| (?P<total>\d+)", IARBC)
 
@@ -222,25 +192,17 @@ class FundInfoFetcher:
             rank, total = m.group("rank", "total")
             return rank + "/" + total
 
-        return FundIARBCInfo(
+        IARBC_info = FundIARBCInfo(
             同类排名截止日期=cutoff_date,
-            近1周同类排名=reformat_IARBC(data.近1周.同类排名),
-            近1月同类排名=reformat_IARBC(data.近1月.同类排名),
-            近3月同类排名=reformat_IARBC(data.近3月.同类排名),
-            近6月同类排名=reformat_IARBC(data.近6月.同类排名),
-            今年来同类排名=reformat_IARBC(data.今年来.同类排名),
-            近1年同类排名=reformat_IARBC(data.近1年.同类排名),
-            近2年同类排名=reformat_IARBC(data.近2年.同类排名),
-            近3年同类排名=reformat_IARBC(data.近3年.同类排名),
+            近1周同类排名=reformat_IARBC(df.近1周.同类排名),
+            近1月同类排名=reformat_IARBC(df.近1月.同类排名),
+            近3月同类排名=reformat_IARBC(df.近3月.同类排名),
+            近6月同类排名=reformat_IARBC(df.近6月.同类排名),
+            今年来同类排名=reformat_IARBC(df.今年来.同类排名),
+            近1年同类排名=reformat_IARBC(df.近1年.同类排名),
+            近2年同类排名=reformat_IARBC(df.近2年.同类排名),
+            近3年同类排名=reformat_IARBC(df.近3年.同类排名),
         )  # type: ignore # FIXME https://github.com/python-attrs/attrs/issues/795
-
-    @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关同类排名信息时发生错误")
-    async def fetch_IARBC(self, fund_code: str) -> FundIARBCInfo:
-        """Fetch the IARBC info related to the given fund code"""
-
-        text = await self.get_fund_info_page_text(fund_code)
-        cutoff_date, data = self.parse_fund_info_page_text_and_get_IARBC_data(text)
-        IARBC_info = self.pack_to_FundIARBCInfo(cutoff_date, data)
 
         return IARBC_info
 
