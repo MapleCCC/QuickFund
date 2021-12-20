@@ -92,17 +92,19 @@ class FundInfoFetcher:
 
         net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
         # The word "lsjz" is an abbreviation of the pinyin of the word "历史净值"
-        params = {"type": "lsjz", "per": 2, "code": fund_code}
+        params = {"code": fund_code, "type": "lsjz", "per": 2}
 
         text = await self.GET_text(net_value_api, params=params)
 
         # TODO pandas.read_html accept url as argument, we can definitely use this feature
         # to simplify the code, if it ever supports async/await syntax in the future.
         # pandas.read_html uses urllib.request.urlopen under the hood and feeds it to etree.html.parse()
+        # For now, pandas.read_html doesn't support HTTPS
 
         # TODO configure pandas.read_html to use the most performant parser backend
 
         # TODO wait for upstream PR to land https://github.com/microsoft/python-type-stubs/pull/85
+        # TODO open a PR on pandas repo about type annotation of `read_html(parse_dates=)`
 
         dfs = pandas.read_html(text, parse_dates=["净值日期"], keep_default_na=False)
         data = one(dfs)
@@ -147,6 +149,9 @@ class FundInfoFetcher:
         json_text = m.group("json")
         data = json.loads(json_text)
 
+        # sanity check
+        assert data["fundcode"] == fund_code
+
         estimate_info = FundEstimateInfo(
             基金代码=data["fundcode"],
             基金名称=data["name"],
@@ -162,8 +167,6 @@ class FundInfoFetcher:
         # if not (0 <= estimate_growth_rate <= 1):
         #     raise NotImplementedError
 
-        assert data["fundcode"] == fund_code, f"爬取基金代码为 {fund_code} 的基金相关估算信息时发现基金代码不匹配"
-
         return estimate_info
 
     @on_failure_raises(RuntimeError, "获取基金代码为 {fund_code} 的基金相关同类排名信息时发生错误")
@@ -174,13 +177,13 @@ class FundInfoFetcher:
         text = await self.GET_text(fund_info_page_url)
 
         html = etree.HTML(text)
-        cutoff_date_str = one(cast(list, html.xpath("//span[@id='jdzfDate']"))).text
+
+        matches = cast(list, html.xpath("//span[@id='jdzfDate']"))
+        cutoff_date_str = one(matches).text
         cutoff_date = datetime.strptime(cutoff_date_str, "%Y-%m-%d").date()
 
-        table: str = etree.tostring(
-            one(cast(list, html.xpath("//li[@id='increaseAmount_stage']"))),
-            encoding=str,
-        )
+        matches = cast(list, html.xpath("//li[@id='increaseAmount_stage']"))
+        table = etree.tostring(one(matches), encoding=str)
         df = one(pandas.read_html(table, index_col=0))
 
         def reformat_IARBC(IARBC: str) -> str:
@@ -220,4 +223,9 @@ class FundInfoFetcher:
 
 
 if __name__ == "__main__":
-    print(asyncio.run(FundInfoFetcher().fetch("000478")))
+
+    async def main() -> None:
+        async with FundInfoFetcher() as fetcher:
+            print(await fetcher.fetch("000478"))
+
+    asyncio.run(main())
