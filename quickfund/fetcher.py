@@ -92,7 +92,7 @@ class FundInfoFetcher:
 
         net_value_api = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
         # The word "lsjz" is an abbreviation of the pinyin of the word "历史净值"
-        params = {"type": "lsjz", "page": 1, "per": 2, "code": fund_code}
+        params = {"type": "lsjz", "per": 2, "code": fund_code}
 
         text = await self.GET_text(net_value_api, params=params)
 
