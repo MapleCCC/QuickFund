@@ -139,15 +139,7 @@ class FundInfoFetcher:
         # argument.
 
         pattern = r"jsonpgz\((?P<json>.*)\);"
-        m = regex.fullmatch(pattern, text)
-
-        if not m:
-            raise ValueError(
-                f'regex pattern "{pattern}" doesn\'t match estimate API response text "{text}"'
-            )
-
-        json_text = m.group("json")
-        data = json.loads(json_text)
+        data = json.loads(regex.fullmatch(pattern, text).group("json"))
 
         # sanity check
         assert data["fundcode"] == fund_code
@@ -188,10 +180,6 @@ class FundInfoFetcher:
 
         def reformat_IARBC(IARBC: str) -> str:
             m = regex.fullmatch(r"(?P<rank>\d+) \| (?P<total>\d+)", IARBC)
-
-            if not m:
-                raise ValueError("invalid IARBC format")
-
             rank, total = m.group("rank", "total")
             return rank + "/" + total
 
